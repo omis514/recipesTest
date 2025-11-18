@@ -1,12 +1,12 @@
-# Team *enter team name here* Small Group project
+# Team BRONZE-6 Small Group project
 
 ## Team members
 The members of the team are:
-- *enter full name 1 here*
-- *enter full name 2 here*
-- *enter full name 3 here*
-- *enter full name 4 here*
-- *enter full name 5 here (or delete if not applicable)*
+- Aleksandr Babarika (K23115226)
+- Ashwin Singh (k23168701)
+- Fraser Shimmins (K23163980)
+- Muhammed Alshaikhi (k23058934)
+- Xirui Dong (k23037057)
 
 ## Project structure
 The project is called `recipify`.  It currently consists of a single app `recipes`.
@@ -53,3 +53,4 @@ $ python3 manage.py test
 The packages used by this application are specified in `requirements.txt`
 
 *Declare are other sources here, and remove this line*
+# bronze-6

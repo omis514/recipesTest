@@ -14,4 +14,4 @@ def dashboard(request):
     """
 
     current_user = request.user
-    return render(request, 'dashboard.html', {'user': current_user})
+    return render(request, "dashboard.html", {"user": current_user})

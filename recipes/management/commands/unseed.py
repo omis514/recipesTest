@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from recipes.models import User
 
+
 class Command(BaseCommand):
     """
     Management command to remove (unseed) user data from the database.
@@ -13,8 +14,8 @@ class Command(BaseCommand):
         help (str): Short description displayed when running
             `python manage.py help unseed`.
     """
-    
-    help = 'Seeds the database with sample data'
+
+    help = "Seeds the database with sample data"
 
     def handle(self, *args, **options):
         """

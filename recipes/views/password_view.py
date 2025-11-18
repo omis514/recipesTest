@@ -15,7 +15,7 @@ class PasswordView(LoginRequiredMixin, FormView):
     password update, the user is re-authenticated to maintain their session.
     """
 
-    template_name = 'password.html'
+    template_name = "password.html"
     form_class = PasswordForm
 
     def get_form_kwargs(self, **kwargs):
@@ -28,7 +28,7 @@ class PasswordView(LoginRequiredMixin, FormView):
         """
 
         kwargs = super().get_form_kwargs(**kwargs)
-        kwargs.update({'user': self.request.user})
+        kwargs.update({"user": self.request.user})
         return kwargs
 
     def form_valid(self, form):
@@ -53,4 +53,4 @@ class PasswordView(LoginRequiredMixin, FormView):
         """
 
         messages.add_message(self.request, messages.SUCCESS, "Password updated!")
-        return reverse('dashboard')
+        return reverse("dashboard")

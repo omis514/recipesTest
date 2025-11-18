@@ -22,12 +22,13 @@ def login_prohibited(view_function):
     Raises:
         ImproperlyConfigured: If `settings.REDIRECT_URL_WHEN_LOGGED_IN` is not defined.
     """
-    
+
     def modified_view_function(request):
         if request.user.is_authenticated:
             return redirect(settings.REDIRECT_URL_WHEN_LOGGED_IN)
         else:
             return view_function(request)
+
     return modified_view_function
 
 
