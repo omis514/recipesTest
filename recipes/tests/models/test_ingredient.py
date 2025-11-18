@@ -11,7 +11,7 @@ class IngredientModelTestCase(TestCase):
     def setUp(self):
         self.author = User.objects.get(username="@johndoe")
         self.recipe = Recipe.objects.create(
-            author=self.author, title="Test Recipe", instructions="Test Instructions"
+            author=self.author, title="Test Recipe",
         )
         self.ingredient = Ingredient.objects.create(
             recipe=self.recipe, name="Rice", quantity=1, unit="cup"

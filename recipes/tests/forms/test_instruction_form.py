@@ -16,7 +16,6 @@ class InstructionFormTestCase(TestCase):
         self.recipe = Recipe.objects.create(
             author=self.author,
             title="Test Recipe",
-            instructions="Test Instructions",
         )
         self.form_input = {
             "step": 1,

@@ -20,7 +20,6 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
             "title": "Test Recipe",
             "description": "A test recipe description",
             "difficulty": Recipe.Difficulty.EASY,
-            "instructions": "1. First step\n2. Second step",
             "ingredients-TOTAL_FORMS": "1",
             "ingredients-INITIAL_FORMS": "0",
             "ingredients-MIN_NUM_FORMS": "1",

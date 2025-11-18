@@ -16,6 +16,7 @@ class RecipeModelTestCase(TestCase):
             title="Test Title",
             description="Test Description",
             difficulty=Recipe.Difficulty.EASY,
+            time=45
         )
 
     def test_valid_recipe(self):
@@ -97,6 +98,34 @@ class RecipeModelTestCase(TestCase):
         ingredient_list = self.recipe.ingredients.all()
         self.assertEqual(str(ingredient_list[0]), "1 cup Rice")
         self.assertEqual(str(ingredient_list[1]), "1 Chicken Breast")
+
+    def test_time_cannot_be_null(self):
+        self.recipe.time = None
+        self._assert_recipe_is_invalid()
+
+    def test_time_can_be_zero(self):
+        self.recipe.time = 0
+        self._assert_recipe_is_valid()
+
+    def test_time_display_under_60(self):
+        self.recipe.time = 30
+        self.assertEqual(self.recipe.get_time(), "30 mins")
+
+    def test_time_display_at_zero(self):
+        self.recipe.time = 0
+        self.assertEqual(self.recipe.get_time(), "0 mins")
+
+    def test_time_display_above_60(self):
+        self.recipe.time = 90
+        self.assertEqual(self.recipe.get_time(), "1.5 hrs")
+
+    def test_time_display_at_60(self):
+        self.recipe.time = 60
+        self.assertEqual(self.recipe.get_time(), "1.0 hrs")
+
+    def test_time_display_complex_decimal(self):
+        self.recipe.time = 73
+        self.assertEqual(self.recipe.get_time(), "1.2 hrs")
 
     def test_created_at_is_set(self):
         self.assertIsNotNone(self.recipe.created_at)

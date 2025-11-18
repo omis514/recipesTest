@@ -27,6 +27,11 @@ class Recipe(models.Model):
         null=True,
         help_text="An optional image for the recipe"
     )
+    time = models.IntegerField(
+        blank=False,
+        default=30,
+        help_text="Time taken to complete the recipe (in minutes)"
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -38,3 +43,20 @@ class Recipe(models.Model):
     def __str__(self):
         """Return the recipe title."""
         return self.title
+
+    def get_time(self):
+        minutes = self.time
+
+        if minutes is None or minutes < 0:
+            return "N/A"
+        if minutes == 0:
+            return "0 mins"
+
+        if minutes < 60:
+            return f"{minutes} mins"
+
+        hours = minutes/60
+        return f"{hours:.1f} hrs"
+
+
+

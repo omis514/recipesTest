@@ -15,7 +15,6 @@ class InstructionModelTestCase(TestCase):
         self.recipe = Recipe.objects.create(
             author=self.author,
             title="Test Recipe",
-            instructions="Test Instructions",
         )
         self.instruction = Instruction.objects.create(
             recipe=self.recipe,
