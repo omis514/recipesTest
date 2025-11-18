@@ -1,0 +1,576 @@
+{% extends 'base_content.html' %}
+{% load widget_tweaks %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h2 class="mb-0">
+            <i class="bi bi-plus-circle me-2"></i>Create New Recipe
+          </h2>
+        </div>
+        <div class="card-body p-4">
+          <form action="{% url 'recipe_create' %}" method="post" novalidate>
+            {% csrf_token %}
+            <div class="row mb-4">
+              <!-- Basic Information Card -->
+              <div class="col-md-6 mb-3 mb-md-0">
+                <div class="card h-100 shadow-sm">
+                  <div class="card-header bg-light">
+                    <h5 class="mb-0 text-muted">
+                      <i class="bi bi-info-circle me-2"></i>Basic Information
+                    </h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <!-- Title Field -->
+                      <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">
+                        Recipe Title <span class="text-danger">*</span>
+                      </label>
+                      {% if form.title.errors %}
+                      {% render_field form.title class="form-control is-invalid" %}
+                      <div class="invalid-feedback">
+                        {{ form.title.errors }}
+                      </div>
+                      {% else %}
+                      {% render_field form.title class="form-control" %}
+                      {% endif %}
+                      {% if form.title.help_text %}
+                      <small class="form-text text-muted">{{ form.title.help_text }}</small>
+                      {% endif %}
+                    </div>
+                    <!-- Description Field -->
+                    <div class="mb-3">
+                      <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
+                        Description
+                      </label>
+                      {% if form.description.errors %}
+                      {% render_field form.description class="form-control is-invalid" %}
+                      <div class="invalid-feedback">
+                        {{ form.description.errors }}
+                      </div>
+                      {% else %}
+                      {% render_field form.description class="form-control" %}
+                      {% endif %}
+                      {% if form.description.help_text %}
+                      <small class="form-text text-muted">{{ form.description.help_text }}</small>
+                      {% endif %}
+                    </div>
+                    <!-- Difficulty Field -->
+                    <div class="mb-3">
+                      <label for="{{ form.difficulty.id_for_label }}" class="form-label fw-bold">
+                        Difficulty Level <span class="text-danger">*</span>
+                      </label>
+                      {% if form.difficulty.errors %}
+                      {% render_field form.difficulty class="form-select is-invalid" %}
+                      <div class="invalid-feedback">
+                        {{ form.difficulty.errors }}
+                      </div>
+                      {% else %}
+                      {% render_field form.difficulty class="form-select" %}
+                      {% endif %}
+                      {% if form.difficulty.help_text %}
+                      <small class="form-text text-muted">{{ form.difficulty.help_text }}</small>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Ingredients Card -->
+              <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                  <div class="card-header bg-light">
+                    <h5 class="mb-0 text-muted">
+                      <i class="bi bi-list-ul me-2"></i>Ingredients <span class="text-danger">*</span>
+                    </h5>
+                  </div>
+                  <div class="card-body">
+                    {{ ingredient_formset.management_form }}
+                    <div id="ingredient-forms">
+                      {% for ingredient_form in ingredient_formset %}
+                      <div class="ingredient-form-row mb-3 p-3 border rounded" data-form-index="{{ forloop.counter0 }}">
+                        <div class="row g-2 align-items-end">
+                          <div class="col-12">
+                            <label class="form-label small fw-bold">Name <span class="text-danger">*</span></label>
+                            {% if ingredient_form.name.errors %}
+                            {% render_field ingredient_form.name class="form-control form-control-sm is-invalid" %}
+                            <div class="invalid-feedback small">
+                              {{ ingredient_form.name.errors }}
+                            </div>
+                            {% else %}
+                            {% render_field ingredient_form.name class="form-control form-control-sm" %}
+                            {% endif %}
+                          </div>
+                          <div class="col-5">
+                            <label class="form-label small fw-bold">Quantity</label>
+                            {% if ingredient_form.quantity.errors %}
+                            {% render_field ingredient_form.quantity class="form-control form-control-sm is-invalid" %}
+                            <div class="invalid-feedback small">
+                              {{ ingredient_form.quantity.errors }}
+                            </div>
+                            {% else %}
+                            {% render_field ingredient_form.quantity class="form-control form-control-sm" %}
+                            {% endif %}
+                          </div>
+                          <div class="col-5">
+                            <label class="form-label small fw-bold">Unit</label>
+                            {% if ingredient_form.unit.errors %}
+                            {% render_field ingredient_form.unit class="form-select form-select-sm is-invalid" %}
+                            <div class="invalid-feedback small">
+                              {{ ingredient_form.unit.errors }}
+                            </div>
+                            {% else %}
+                            {% render_field ingredient_form.unit class="form-select form-select-sm" %}
+                            {% endif %}
+                          </div>
+                          <div class="col-2 d-flex justify-content-end">
+                            {% if ingredient_form.DELETE %}
+                            <div style="display: none;">
+                              {{ ingredient_form.DELETE }}
+                            </div>
+                            {% endif %}
+                            {% if ingredient_form.id %}
+                            {{ ingredient_form.id }}
+                            {% endif %}
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-ingredient"
+                              style="display: none;">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-ingredient">
+                      <i class="bi bi-plus-circle me-1"></i>Add Ingredient
+                    </button>
+                    {% if ingredient_formset.non_form_errors %}
+                    <div class="alert alert-danger mt-2 small">
+                      {{ ingredient_formset.non_form_errors }}
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Instructions Card -->
+            <div class="card shadow-sm mb-4">
+              <div class="card-header bg-light">
+                <h5 class="mb-0 text-muted">
+                  <i class="bi bi-list-ol me-2"></i>Instructions
+                </h5>
+              </div>
+              <div class="card-body">
+                <!-- Hidden field that will be populated from individual steps -->
+                <div style="display: none;">
+                  {% if form.instructions.errors %}
+                  {% render_field form.instructions class="form-control is-invalid" %}
+                  {% else %}
+                  {% render_field form.instructions class="form-control" %}
+                  {% endif %}
+                </div>
+
+                {{ instruction_formset.management_form }}
+                <div id="instruction-forms">
+                  {% for instruction_form in instruction_formset %}
+                  <div class="instruction-form-row mb-3 p-3 border rounded" data-form-index="{{ forloop.counter0 }}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <div class="fw-bold">
+                        Step <span class="instruction-step-number">{{ forloop.counter }}</span>
+                      </div>
+                      <div>
+                        {% if instruction_form.DELETE %}
+                        <div style="display: none;">
+                          {{ instruction_form.DELETE }}
+                        </div>
+                        {% endif %}
+                        {% if instruction_form.id %}
+                        {{ instruction_form.id }}
+                        {% endif %}
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-instruction"
+                          style="display: none;">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="mb-2">
+                      <!-- Step field (hidden, managed by JS) -->
+                      {% render_field instruction_form.step type="hidden" class="instruction-step-input" %}
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">Description <span class="text-danger">*</span></label>
+                      {% if instruction_form.description.errors %}
+                      {% render_field instruction_form.description class="form-control is-invalid
+                      instruction-description-input" %}
+                      <div class="invalid-feedback small">
+                        {{ instruction_form.description.errors }}
+                      </div>
+                      {% else %}
+                      {% render_field instruction_form.description class="form-control instruction-description-input" %}
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-instruction">
+                  <i class="bi bi-plus-circle me-1"></i>Add instruction
+                </button>
+                {% if instruction_formset.non_form_errors %}
+                <div class="alert alert-danger mt-2 small">
+                  {{ instruction_formset.non_form_errors }}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+              {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+              <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary me-md-2">
+                <i class="bi bi-x-circle me-2"></i>Cancel
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle me-2"></i>Create Recipe
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .card-header {
+    border-radius: 10px 10px 0 0 !important;
+    padding: 1.25rem;
+  }
+
+  .card .card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, .17);
+  }
+
+  .card .card-header.bg-light {
+    background-color: #f8f9fa !important;
+  }
+
+  .form-label {
+    margin-bottom: 0.5rem;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: 5px;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  }
+
+  textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  #id_instructions {
+    min-height: 200px;
+  }
+
+  @media (max-width: 768px) {
+    .card {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .ingredient-form-row {
+    background-color: #f8f9fa;
+    transition: all 0.2s;
+  }
+
+  .ingredient-form-row:hover {
+    background-color: #e9ecef;
+  }
+
+  .instruction-form-row {
+    background-color: #f8f9fa;
+    transition: all 0.2s;
+  }
+
+  .instruction-form-row:hover {
+    background-color: #e9ecef;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // INGREDIENTS FORMSET LOGIC
+    const ingredientFormsetPrefix = '{{ ingredient_formset.prefix }}';
+    const ingredientTotalFormsInput = document.getElementById('id_' + ingredientFormsetPrefix + '-TOTAL_FORMS');
+    const ingredientMaxFormsInput = document.getElementById('id_' + ingredientFormsetPrefix + '-MAX_NUM_FORMS');
+    const ingredientAddButton = document.getElementById('add-ingredient');
+    const ingredientContainer = document.getElementById('ingredient-forms');
+
+    // Show remove buttons for existing forms (except the first one if it's empty)
+    function updateIngredientRemoveButtons() {
+      const forms = ingredientContainer.querySelectorAll('.ingredient-form-row');
+      forms.forEach((form, index) => {
+        const removeBtn = form.querySelector('.remove-ingredient');
+        const deleteInput = form.querySelector('input[name$="-DELETE"]');
+
+        if (forms.length > 1) {
+          if (removeBtn) removeBtn.style.display = 'block';
+        } else {
+          if (removeBtn) removeBtn.style.display = 'none';
+        }
+
+        // Hide if marked for deletion
+        if (deleteInput && deleteInput.checked) {
+          form.style.display = 'none';
+        }
+      });
+    }
+
+    // Initialize remove buttons
+    updateIngredientRemoveButtons();
+
+    // Add new ingredient form
+    ingredientAddButton.addEventListener('click', function () {
+      const totalForms = parseInt(ingredientTotalFormsInput.value);
+      const maxForms = ingredientMaxFormsInput ? parseInt(ingredientMaxFormsInput.value) : 1000;
+
+      if (totalForms >= maxForms) {
+        alert('Maximum number of ingredients reached.');
+        return;
+      }
+
+      const newFormHtml = `
+      <div class="ingredient-form-row mb-3 p-3 border rounded" data-form-index="${totalForms}">
+        <div class="row g-2 align-items-end">
+          <div class="col-12">
+            <label class="form-label small fw-bold">Name <span class="text-danger">*</span></label>
+            <input type="text" name="${ingredientFormsetPrefix}-${totalForms}-name" class="form-control form-control-sm" placeholder="Ingredient name" maxlength="100" required>
+          </div>
+          <div class="col-5">
+            <label class="form-label small fw-bold">Quantity</label>
+            <input type="number" name="${ingredientFormsetPrefix}-${totalForms}-quantity" class="form-control form-control-sm" placeholder="Amount" min="0" step="0.01">
+          </div>
+          <div class="col-5">
+            <label class="form-label small fw-bold">Unit</label>
+            <select name="${ingredientFormsetPrefix}-${totalForms}-unit" class="form-select form-select-sm">
+              <option value="">Select unit</option>
+              <option value="tsp">tsp</option>
+              <option value="tbsp">tbsp</option>
+              <option value="cup">cup</option>
+              <option value="cups">cups</option>
+              <option value="ml">ml</option>
+              <option value="l">l</option>
+              <option value="g">g</option>
+              <option value="kg">kg</option>
+              <option value="oz">oz</option>
+              <option value="lb">lb</option>
+              <option value="lbs">lbs</option>
+              <option value="piece">piece</option>
+              <option value="pieces">pieces</option>
+              <option value="pinch">pinch</option>
+              <option value="dash">dash</option>
+              <option value="clove">clove</option>
+            </select>
+          </div>
+          <div class="col-2 d-flex justify-content-end">
+            <div style="display: none;">
+              <input type="checkbox" name="${ingredientFormsetPrefix}-${totalForms}-DELETE" id="id_${ingredientFormsetPrefix}-${totalForms}-DELETE">
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-ingredient">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+      ingredientContainer.insertAdjacentHTML('beforeend', newFormHtml);
+      ingredientTotalFormsInput.value = totalForms + 1;
+      updateIngredientRemoveButtons();
+    });
+
+    // Remove ingredient form
+    ingredientContainer.addEventListener('click', function (e) {
+      if (e.target.closest('.remove-ingredient')) {
+        const formRow = e.target.closest('.ingredient-form-row');
+        const deleteInput = formRow.querySelector('input[name$="-DELETE"]');
+
+        if (deleteInput) {
+          // Mark for deletion instead of removing immediately
+          deleteInput.checked = true;
+          formRow.style.display = 'none';
+        } else {
+          // For dynamically added forms, remove immediately
+          formRow.remove();
+          const currentTotal = parseInt(ingredientTotalFormsInput.value);
+          ingredientTotalFormsInput.value = currentTotal - 1;
+        }
+
+        updateIngredientRemoveButtons();
+      }
+    });
+
+    // INSTRUCTIONS FORMSET LOGIC
+    const instructionFormsetPrefix = '{{ instruction_formset.prefix }}';
+    const instructionTotalFormsInput = document.getElementById('id_' + instructionFormsetPrefix + '-TOTAL_FORMS');
+    const instructionMaxFormsInput = document.getElementById('id_' + instructionFormsetPrefix + '-MAX_NUM_FORMS');
+    const instructionAddButton = document.getElementById('add-instruction');
+    const instructionContainer = document.getElementById('instruction-forms');
+
+    function renumberInstructionSteps() {
+      const forms = instructionContainer.querySelectorAll('.instruction-form-row');
+      let currentStep = 0;
+      forms.forEach((form) => {
+        const deleteInput = form.querySelector('input[name$="-DELETE"]');
+        // Skip rows that are marked for deletion
+        if (deleteInput && deleteInput.checked) {
+          return;
+        }
+
+        currentStep += 1;
+        const displayNumber = form.querySelector('.instruction-step-number');
+        const stepInput = form.querySelector('.instruction-step-input');
+        if (displayNumber) {
+          displayNumber.textContent = currentStep;
+        }
+        if (stepInput) {
+          stepInput.value = currentStep;
+        }
+      });
+    }
+
+    function updateInstructionRemoveButtons() {
+      const forms = instructionContainer.querySelectorAll('.instruction-form-row');
+      forms.forEach((form) => {
+        const removeBtn = form.querySelector('.remove-instruction');
+        const deleteInput = form.querySelector('input[name$="-DELETE"]');
+
+        if (forms.length > 1) {
+          if (removeBtn) removeBtn.style.display = 'block';
+        } else {
+          if (removeBtn) removeBtn.style.display = 'none';
+        }
+
+        if (deleteInput && deleteInput.checked) {
+          form.style.display = 'none';
+        }
+      });
+    }
+
+    // Initialize existing instruction rows
+    renumberInstructionSteps();
+    updateInstructionRemoveButtons();
+
+    instructionAddButton.addEventListener('click', function () {
+      const totalForms = parseInt(instructionTotalFormsInput.value);
+      const maxForms = instructionMaxFormsInput ? parseInt(instructionMaxFormsInput.value) : 1000;
+
+      if (totalForms >= maxForms) {
+        alert('Maximum number of instructions reached.');
+        return;
+      }
+
+      const activeForms = Array.from(
+        instructionContainer.querySelectorAll('.instruction-form-row')
+      ).filter((form) => {
+        const deleteInput = form.querySelector('input[name$="-DELETE"]');
+        return !(deleteInput && deleteInput.checked);
+      }).length;
+      const nextStepNumber = activeForms + 1;
+
+      const newFormHtml = `
+      <div class="instruction-form-row mb-3 p-3 border rounded" data-form-index="${totalForms}">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-bold">
+            Step <span class="instruction-step-number">${nextStepNumber}</span>
+          </div>
+          <div>
+            <div style="display: none;">
+              <input type="checkbox" name="${instructionFormsetPrefix}-${totalForms}-DELETE" id="id_${instructionFormsetPrefix}-${totalForms}-DELETE">
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-instruction">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="mb-2">
+          <input type="hidden" name="${instructionFormsetPrefix}-${totalForms}-step" class="instruction-step-input" value="${nextStepNumber}">
+        </div>
+        <div class="mb-2">
+          <label class="form-label small fw-bold">Description <span class="text-danger">*</span></label>
+          <textarea name="${instructionFormsetPrefix}-${totalForms}-description" rows="3" class="form-control instruction-description-input" placeholder="Describe this step..." required></textarea>
+        </div>
+      </div>
+      `;
+
+      instructionContainer.insertAdjacentHTML('beforeend', newFormHtml);
+      instructionTotalFormsInput.value = totalForms + 1;
+      renumberInstructionSteps();
+      updateInstructionRemoveButtons();
+    });
+
+    instructionContainer.addEventListener('click', function (e) {
+      if (e.target.closest('.remove-instruction')) {
+        const formRow = e.target.closest('.instruction-form-row');
+        const deleteInput = formRow.querySelector('input[name$="-DELETE"]');
+
+        if (deleteInput) {
+          deleteInput.checked = true;
+          formRow.style.display = 'none';
+        } else {
+          formRow.remove();
+          const currentTotal = parseInt(instructionTotalFormsInput.value);
+          instructionTotalFormsInput.value = currentTotal - 1;
+        }
+
+        renumberInstructionSteps();
+        updateInstructionRemoveButtons();
+      }
+    });
+
+    // Before submit, aggregate instruction descriptions into the hidden instructions field
+    const formElement = document.querySelector('form');
+    if (formElement) {
+      formElement.addEventListener('submit', function () {
+        const instructionsField = document.getElementById('id_instructions');
+        if (!instructionsField) return;
+
+        const rows = instructionContainer.querySelectorAll('.instruction-form-row');
+        const steps = [];
+
+        rows.forEach((row) => {
+          const deleteInput = row.querySelector('input[name$="-DELETE"]');
+          if (deleteInput && deleteInput.checked) {
+            return;
+          }
+          const descriptionInput = row.querySelector('.instruction-description-input');
+          if (descriptionInput) {
+            const text = descriptionInput.value.trim();
+            if (text) {
+              steps.push(text);
+            }
+          }
+        });
+
+        const combinedText = steps.map((text, index) => `${index + 1}. ${text}`).join('\\n');
+        instructionsField.value = combinedText;
+      });
+    }
+  });
+</script>
+{% endblock %}
