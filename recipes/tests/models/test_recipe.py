@@ -3,6 +3,7 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from recipes.models import Recipe, User, Ingredient, Instruction
+import time
 
 
 class RecipeModelTestCase(TestCase):
@@ -16,7 +17,7 @@ class RecipeModelTestCase(TestCase):
             title="Test Title",
             description="Test Description",
             difficulty=Recipe.Difficulty.EASY,
-            time=45
+            time=45,
         )
 
     def test_valid_recipe(self):
@@ -68,18 +69,18 @@ class RecipeModelTestCase(TestCase):
         self._assert_recipe_is_valid()
 
     def test_image_can_be_blank(self):
-        self.recipe.image= None
+        self.recipe.image = None
         self._assert_recipe_is_valid()
 
     def test_recipe_can_have_multiple_instructions(self):
-        self.assertEqual(self.recipe.instructions.count, 0)
-        Instruction.object.create(
+        self.assertEqual(self.recipe.instructions.count(), 0)
+        Instruction.objects.create(
             recipe=self.recipe, step=1, description="Test description"
         )
-        Instruction.object.create(
+        Instruction.objects.create(
             recipe=self.recipe, step=2, description="Test description 2"
         )
-        self.assertEqual(self.recipe.instructions.count, 2)
+        self.assertEqual(self.recipe.instructions.count(), 2)
 
         instruction_list = self.recipe.instructions.all()
         self.assertEqual(str(instruction_list[0]), "Instruction 1 for Test Title")
@@ -131,6 +132,8 @@ class RecipeModelTestCase(TestCase):
         self.assertIsNotNone(self.recipe.created_at)
 
     def test_default_ordering_is_by_newest(self):
+        time.sleep(0.01)
+
         new_recipe = Recipe.objects.create(
             author=self.author,
             title="Test Recipe 2",

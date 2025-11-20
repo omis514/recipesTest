@@ -75,9 +75,7 @@ class InstructionModelTestCase(TestCase):
             ).full_clean()
 
     def test_instruction_step_can_be_same_in_different_recipes(self):
-        recipe_two = Recipe.objects.create(
-            author=self.author, title="Recipe 2", instructions="Instructions 2"
-        )
+        recipe_two = Recipe.objects.create(author=self.author, title="Recipe 2")
         try:
             Instruction(
                 recipe=recipe_two, step=1, description="First step for recipe 2"
@@ -112,13 +110,21 @@ class InstructionModelTestCase(TestCase):
 
     def test_instruction_recipe_relationship(self):
         self.assertEqual(self.instruction.recipe, self.recipe)
-        self.assertIn(self.instruction, self.recipe.instruction_set.all())
+        self.assertIn(self.instruction, self.recipe.instructions.all())
 
     def test_instruction_without_recipe(self):
         instruction = Instruction.objects.create(
             recipe=None, step=1, description="Standalone instruction"
         )
         self.assertIsNone(instruction.recipe)
+
+    def test_instruction_image_can_be_null(self):
+        self.instruction.image = None
+        self._assert_instruction_is_valid()
+
+    def test_instruction_image_can_be_blank(self):
+        self.instruction.image = ""
+        self._assert_instruction_is_valid()
 
     def _assert_instruction_is_valid(self):
         try:

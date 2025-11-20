@@ -6,22 +6,29 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0005_allow_remove_instruction_from_recipe'),
+        ("recipes", "0005_allow_remove_instruction_from_recipe"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='recipe',
-            name='instructions',
+            model_name="recipe",
+            name="instructions",
         ),
         migrations.AddField(
-            model_name='recipe',
-            name='image',
-            field=models.ImageField(blank=True, help_text='An optional image for the recipe', null=True, upload_to='recipe/images'),
+            model_name="recipe",
+            name="image",
+            field=models.ImageField(
+                blank=True,
+                help_text="An optional image for the recipe",
+                null=True,
+                upload_to="recipe/images",
+            ),
         ),
         migrations.AddField(
-            model_name='recipe',
-            name='time',
-            field=models.IntegerField(default=30, help_text='Time taken to complete the recipe (in minutes)'),
+            model_name="recipe",
+            name="time",
+            field=models.IntegerField(
+                default=30, help_text="Time taken to complete the recipe (in minutes)"
+            ),
         ),
     ]

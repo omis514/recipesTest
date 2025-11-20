@@ -20,6 +20,7 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
             "title": "Test Recipe",
             "description": "A test recipe description",
             "difficulty": Recipe.Difficulty.EASY,
+            "time": "45",
             "ingredients-TOTAL_FORMS": "1",
             "ingredients-INITIAL_FORMS": "0",
             "ingredients-MIN_NUM_FORMS": "1",
@@ -27,12 +28,12 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
             "ingredients-0-name": "Rice",
             "ingredients-0-quantity": "1",
             "ingredients-0-unit": "cup",
-            "instruction_set-TOTAL_FORMS": "1",
-            "instruction_set-INITIAL_FORMS": "0",
-            "instruction_set-MIN_NUM_FORMS": "1",
-            "instruction_set-MAX_NUM_FORMS": "1000",
-            "instruction_set-0-step": "1",
-            "instruction_set-0-description": "First, prepare the ingredients.",
+            "instructions-TOTAL_FORMS": "1",
+            "instructions-INITIAL_FORMS": "0",
+            "instructions-MIN_NUM_FORMS": "1",
+            "instructions-MAX_NUM_FORMS": "1000",
+            "instructions-0-step": "1",
+            "instructions-0-description": "First, prepare the ingredients.",
         }
 
     def test_recipe_create_url(self):
@@ -89,13 +90,14 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
         self.assertEqual(recipe.author, self.user)
         self.assertEqual(recipe.description, "A test recipe description")
         self.assertEqual(recipe.difficulty, Recipe.Difficulty.EASY)
+        self.assertEqual(recipe.time, 45)
 
         ingredient = recipe.ingredients.first()
         self.assertEqual(ingredient.name, "Rice")
         self.assertEqual(ingredient.quantity, 1)
         self.assertEqual(ingredient.unit, "cup")
 
-        instruction = recipe.instruction_set.first()
+        instruction = recipe.instructions.first()
         self.assertEqual(instruction.step, 1)
         self.assertEqual(instruction.description, "First, prepare the ingredients.")
 
@@ -133,7 +135,7 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
 
     def test_unsuccessful_recipe_create_with_invalid_instruction_formset(self):
         self.client.login(username=self.user.username, password="Password123")
-        self.form_input["instruction_set-0-description"] = (
+        self.form_input["instructions-0-description"] = (
             ""  # Invalid - description is required
         )
         before_count = Recipe.objects.count()
@@ -167,9 +169,9 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
 
     def test_recipe_create_with_multiple_instructions(self):
         self.client.login(username=self.user.username, password="Password123")
-        self.form_input["instruction_set-TOTAL_FORMS"] = "2"
-        self.form_input["instruction_set-1-step"] = "2"
-        self.form_input["instruction_set-1-description"] = "Second, cook the rice."
+        self.form_input["instructions-TOTAL_FORMS"] = "2"
+        self.form_input["instructions-1-step"] = "2"
+        self.form_input["instructions-1-description"] = "Second, cook the rice."
 
         before_instruction_count = Instruction.objects.count()
         response = self.client.post(self.url, self.form_input, follow=True)
@@ -178,7 +180,7 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
         self.assertEqual(after_instruction_count, before_instruction_count + 2)
 
         recipe = Recipe.objects.get(title="Test Recipe")
-        instructions = recipe.instruction_set.all().order_by("step")
+        instructions = recipe.instructions.all().order_by("step")
         self.assertEqual(instructions.count(), 2)
         self.assertEqual(instructions[0].step, 1)
         self.assertEqual(instructions[1].step, 2)
@@ -200,9 +202,9 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
 
     def test_recipe_create_minimum_one_instruction_required(self):
         self.client.login(username=self.user.username, password="Password123")
-        self.form_input["instruction_set-TOTAL_FORMS"] = "1"
-        self.form_input["instruction_set-0-step"] = ""
-        self.form_input["instruction_set-0-description"] = ""
+        self.form_input["instructions-TOTAL_FORMS"] = "1"
+        self.form_input["instructions-0-step"] = ""
+        self.form_input["instructions-0-description"] = ""
 
         before_count = Recipe.objects.count()
         response = self.client.post(self.url, self.form_input)

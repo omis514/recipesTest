@@ -25,12 +25,12 @@ class Recipe(models.Model):
         upload_to="recipe/images",
         blank=True,
         null=True,
-        help_text="An optional image for the recipe"
+        help_text="An optional image for the recipe",
     )
     time = models.IntegerField(
         blank=False,
         default=30,
-        help_text="Time taken to complete the recipe (in minutes)"
+        help_text="Time taken to complete the recipe (in minutes)",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -55,8 +55,5 @@ class Recipe(models.Model):
         if minutes < 60:
             return f"{minutes} mins"
 
-        hours = minutes/60
+        hours = minutes / 60
         return f"{hours:.1f} hrs"
-
-
-

@@ -11,7 +11,8 @@ class IngredientModelTestCase(TestCase):
     def setUp(self):
         self.author = User.objects.get(username="@johndoe")
         self.recipe = Recipe.objects.create(
-            author=self.author, title="Test Recipe",
+            author=self.author,
+            title="Test Recipe",
         )
         self.ingredient = Ingredient.objects.create(
             recipe=self.recipe, name="Rice", quantity=1, unit="cup"
@@ -69,9 +70,7 @@ class IngredientModelTestCase(TestCase):
             ).full_clean()
 
     def test_ingredient_name_can_be_same_in_different_recipes(self):
-        recipe_two = Recipe.objects.create(
-            author=self.author, title="Recipe 2", instructions="Instructions 2"
-        )
+        recipe_two = Recipe.objects.create(author=self.author, title="Recipe 2")
         try:
             Ingredient(
                 recipe=recipe_two, name="Rice", quantity=1, unit="cup"

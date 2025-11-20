@@ -9,7 +9,7 @@ class InstructionForm(forms.ModelForm):
         """Form options."""
 
         model = Instruction
-        fields = ["step", "description"]
+        fields = ["step", "description", "image"]
         widgets = {
             "step": forms.NumberInput(attrs={"class": "form-control"}),
             "description": forms.Textarea(
@@ -18,5 +18,8 @@ class InstructionForm(forms.ModelForm):
                     "rows": 3,
                     "placeholder": "Describe this step...",
                 }
+            ),
+            "image": forms.FileInput(
+                attrs={"class": "form-control", "accept": "image/*"}
             ),
         }

@@ -1,0 +1,213 @@
+{% extends "base_content.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-8">
+
+      {# 顶部大卡片：标题 + 作者 + 时间 + 难度 + 总时长 #}
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">
+              <i class="bi bi-journal-text me-2"></i>{{ recipe.title }}
+            </h2>
+            <div class="text-end">
+              <span
+                class="badge
+                  {% if recipe.difficulty == 1 %}
+                    bg-success
+                  {% elif recipe.difficulty == 2 %}
+                    bg-warning text-dark
+                  {% elif recipe.difficulty == 3 %}
+                    bg-danger
+                  {% else %}
+                    bg-secondary
+                  {% endif %}
+                ">
+                {{ recipe.get_difficulty_display }}
+              </span>
+              <div class="small mt-1">
+                ⏱ {{ recipe.get_time }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body p-4">
+          <div class="row g-4">
+            {# 左：基本信息 #}
+            <div class="col-md-7">
+              <h5 class="mb-3 text-muted">
+                <i class="bi bi-info-circle me-2"></i>Basic Information
+              </h5>
+
+              <p class="text-muted small mb-2">
+                {% if recipe.author %}
+                  By <strong>{{ recipe.author.get_full_name|default:recipe.author.username }}</strong>
+                {% endif %}
+                {% if recipe.created_at %}
+                  · Created on {{ recipe.created_at|date:"d M Y" }}
+                {% endif %}
+              </p>
+
+              {% if recipe.description %}
+                <p class="mb-0 lead">{{ recipe.description }}</p>
+              {% else %}
+                <p class="mb-0 text-muted fst-italic">
+                  No description has been added for this recipe yet.
+                </p>
+              {% endif %}
+            </div>
+
+            {# 右：图片 #}
+            <div class="col-md-5">
+              {% if recipe.image %}
+                <div class="card h-100 shadow-sm">
+                  <div class="card-header bg-light">
+                    <h6 class="mb-0 text-muted">
+                      <i class="bi bi-image me-2"></i>Recipe Image
+                    </h6>
+                  </div>
+                  <div class="card-body p-2">
+                    <img src="{{ recipe.image.url }}"
+                         alt="{{ recipe.title }}"
+                         class="img-fluid rounded w-100"
+                         style="object-fit: cover; max-height: 260px;">
+                  </div>
+                </div>
+              {% else %}
+                <div class="h-100 d-flex align-items-center justify-content-center text-muted border rounded">
+                  <span class="small">
+                    <i class="bi bi-image me-1"></i>No image uploaded
+                  </span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# 中间：左 Ingredients 右 Instructions，跟 create 页布局呼应 #}
+      <div class="row mb-4">
+        {# Ingredients #}
+        <div class="col-md-6 mb-3 mb-md-0">
+          <div class="card h-100 shadow-sm">
+            <div class="card-header bg-light">
+              <h5 class="mb-0 text-muted">
+                <i class="bi bi-list-ul me-2"></i>Ingredients
+              </h5>
+            </div>
+            <div class="card-body">
+              {% with ingredients=recipe.ingredient_set.all %}
+                {% if ingredients %}
+                  <ul class="list-group list-group-flush">
+                    {% for ing in ingredients %}
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <strong>{{ ing.name }}</strong>
+                          {% if ing.description %}
+                            <div class="small text-muted">{{ ing.description }}</div>
+                          {% endif %}
+                        </div>
+                        <div class="text-end">
+                          {% if ing.quantity %}
+                            <span class="badge bg-primary-subtle text-primary-emphasis">
+                              {{ ing.quantity }}
+                              {% if ing.unit %}
+                                {{ ing.unit }}
+                              {% endif %}
+                            </span>
+                          {% elif ing.unit %}
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis">
+                              {{ ing.unit }}
+                            </span>
+                          {% endif %}
+                        </div>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="text-muted fst-italic mb-0">
+                    No ingredients have been added for this recipe.
+                  </p>
+                {% endif %}
+              {% endwith %}
+            </div>
+          </div>
+        </div>
+
+        {# Instructions #}
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-header bg-light">
+              <h5 class="mb-0 text-muted">
+                <i class="bi bi-list-ol me-2"></i>Instructions
+              </h5>
+            </div>
+            <div class="card-body">
+              {% with instructions=recipe.instruction_set.all %}
+                {% if instructions %}
+                  <ol class="list-group list-group-numbered">
+                    {% for step in instructions %}
+                      <li class="list-group-item">
+                        <div class="fw-bold mb-1">
+                          Step {{ step.step|default:forloop.counter }}
+                        </div>
+                        <p class="mb-0" style="white-space: pre-line;">
+                          {{ step.description }}
+                        </p>
+                      </li>
+                    {% endfor %}
+                  </ol>
+                {% else %}
+                  <p class="text-muted fst-italic mb-0">
+                    No instructions have been added for this recipe.
+                  </p>
+                {% endif %}
+              {% endwith %}
+
+              {# 如果你们把所有步骤文字聚合到了 recipe.instructions 字段，也可以顺便展示出来 #}
+              {% if recipe.instructions %}
+                <hr>
+                <p class="small text-muted mb-0" style="white-space: pre-line;">
+                  {{ recipe.instructions }}
+                </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# 底部操作按钮 #}
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary me-md-2">
+          <i class="bi bi-arrow-left-circle me-2"></i>Back to dashboard
+        </a>
+        <a href="{% url 'recipe_create' %}" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-2"></i>Create another recipe
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  .card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .card-header {
+    border-radius: 10px 10px 0 0 !important;
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
+  }
+
+  .list-group-item {
+    border-color: rgba(0, 0, 0, .05);
+  }
+</style>
+{% endblock %}

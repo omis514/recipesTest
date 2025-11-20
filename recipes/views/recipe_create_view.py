@@ -40,15 +40,22 @@ class RecipeCreateView(LoginRequiredMixin, FormView):
     form_class = RecipeForm
     template_name = "recipe_create.html"
 
+    def get_form_kwargs(self):
+        """Return the keyword arguments for instantiating the form."""
+        kwargs = super().get_form_kwargs()
+        if self.request.method == "POST":
+            kwargs["files"] = self.request.FILES
+        return kwargs
+
     def get_context_data(self, **kwargs):
         """Add ingredient and instruction formsets to context."""
         context = super().get_context_data(**kwargs)
         if self.request.method == "POST":
             context["ingredient_formset"] = IngredientFormSet(
-                self.request.POST, instance=None
+                self.request.POST, self.request.FILES, instance=None
             )
             context["instruction_formset"] = InstructionFormSet(
-                self.request.POST, instance=None
+                self.request.POST, self.request.FILES, instance=None
             )
         else:
             context["ingredient_formset"] = IngredientFormSet(instance=None)
@@ -65,8 +72,12 @@ class RecipeCreateView(LoginRequiredMixin, FormView):
         recipe.author = self.request.user
         recipe.save()
 
-        ingredient_formset = IngredientFormSet(self.request.POST, instance=recipe)
-        instruction_formset = InstructionFormSet(self.request.POST, instance=recipe)
+        ingredient_formset = IngredientFormSet(
+            self.request.POST, self.request.FILES, instance=recipe
+        )
+        instruction_formset = InstructionFormSet(
+            self.request.POST, self.request.FILES, instance=recipe
+        )
 
         if ingredient_formset.is_valid() and instruction_formset.is_valid():
             ingredient_formset.save()
@@ -92,8 +103,12 @@ class RecipeCreateView(LoginRequiredMixin, FormView):
                 recipe = Recipe(author=self.request.user)
 
             # Don't save yet, just use for formset validation
-            ingredient_formset = IngredientFormSet(self.request.POST, instance=recipe)
-            instruction_formset = InstructionFormSet(self.request.POST, instance=recipe)
+            ingredient_formset = IngredientFormSet(
+                self.request.POST, self.request.FILES, instance=recipe
+            )
+            instruction_formset = InstructionFormSet(
+                self.request.POST, self.request.FILES, instance=recipe
+            )
             context["ingredient_formset"] = ingredient_formset
             context["instruction_formset"] = instruction_formset
         return self.render_to_response(context)

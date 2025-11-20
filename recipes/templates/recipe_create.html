@@ -11,7 +11,7 @@
           </h2>
         </div>
         <div class="card-body p-4">
-          <form action="{% url 'recipe_create' %}" method="post" novalidate>
+          <form action="{% url 'recipe_create' %}" method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
             <div class="row mb-4">
               <!-- Basic Information Card -->
@@ -72,6 +72,40 @@
                       {% endif %}
                       {% if form.difficulty.help_text %}
                       <small class="form-text text-muted">{{ form.difficulty.help_text }}</small>
+                      {% endif %}
+                    </div>
+                    <!-- Time Field -->
+                    <div class="mb-3">
+                      <label for="{{ form.time.id_for_label }}" class="form-label fw-bold">
+                        Time (minutes) <span class="text-danger">*</span>
+                      </label>
+                      {% if form.time.errors %}
+                      {% render_field form.time class="form-control is-invalid" %}
+                      <div class="invalid-feedback">
+                        {{ form.time.errors }}
+                      </div>
+                      {% else %}
+                      {% render_field form.time class="form-control" type="number" min="1" %}
+                      {% endif %}
+                      {% if form.time.help_text %}
+                      <small class="form-text text-muted">{{ form.time.help_text }}</small>
+                      {% endif %}
+                    </div>
+                    <!-- Image Field -->
+                    <div class="mb-3">
+                      <label for="{{ form.image.id_for_label }}" class="form-label fw-bold">
+                        Recipe Image
+                      </label>
+                      {% if form.image.errors %}
+                      {% render_field form.image class="form-control is-invalid" %}
+                      <div class="invalid-feedback">
+                        {{ form.image.errors }}
+                      </div>
+                      {% else %}
+                      {% render_field form.image class="form-control" accept="image/*" %}
+                      {% endif %}
+                      {% if form.image.help_text %}
+                      <small class="form-text text-muted">{{ form.image.help_text }}</small>
                       {% endif %}
                     </div>
                   </div>
@@ -200,6 +234,7 @@
                     </div>
                     <div class="mb-2">
                       <label class="form-label small fw-bold">Description <span class="text-danger">*</span></label>
+                      {% if instruction_form.description %}
                       {% if instruction_form.description.errors %}
                       {% render_field instruction_form.description class="form-control is-invalid
                       instruction-description-input" %}
@@ -208,6 +243,30 @@
                       </div>
                       {% else %}
                       {% render_field instruction_form.description class="form-control instruction-description-input" %}
+                      {% endif %}
+                      {% else %}
+                      <textarea name="{{ instruction_formset.prefix }}-{{ forloop.counter0 }}-description" rows="3"
+                        class="form-control instruction-description-input"
+                        placeholder="Describe this step..."></textarea>
+                      {% endif %}
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label small fw-bold">Step Image (optional)</label>
+                      {% if instruction_form.image %}
+                      {% if instruction_form.image.errors %}
+                      {% render_field instruction_form.image class="form-control form-control-sm is-invalid" %}
+                      <div class="invalid-feedback small">
+                        {{ instruction_form.image.errors }}
+                      </div>
+                      {% else %}
+                      {% render_field instruction_form.image class="form-control form-control-sm" %}
+                      {% endif %}
+                      {% if instruction_form.image.help_text %}
+                      <small class="form-text text-muted">{{ instruction_form.image.help_text }}</small>
+                      {% endif %}
+                      {% else %}
+                      <input type="file" name="{{ instruction_formset.prefix }}-{{ forloop.counter0 }}-image"
+                        class="form-control form-control-sm" accept="image/*">
                       {% endif %}
                     </div>
                   </div>
@@ -515,6 +574,10 @@
           <label class="form-label small fw-bold">Description <span class="text-danger">*</span></label>
           <textarea name="${instructionFormsetPrefix}-${totalForms}-description" rows="3" class="form-control instruction-description-input" placeholder="Describe this step..." required></textarea>
         </div>
+        <div class="mb-2">
+          <label class="form-label small fw-bold">Step Image (optional)</label>
+          <input type="file" name="${instructionFormsetPrefix}-${totalForms}-image" class="form-control form-control-sm" accept="image/*">
+        </div>
       </div>
       `;
 
@@ -543,17 +606,34 @@
       }
     });
 
-    // Before submit, aggregate instruction descriptions into the hidden instructions field
+    // Before submit, validate and aggregate instruction descriptions into the hidden instructions field
     const formElement = document.querySelector('form');
     if (formElement) {
-      formElement.addEventListener('submit', function () {
-        const instructionsField = document.getElementById('id_instructions');
-        if (!instructionsField) return;
+      formElement.addEventListener('submit', function (e) {
+        // Check if all fields are blank
+        const titleInput = document.getElementById('id_title');
+        const titleValue = titleInput ? titleInput.value.trim() : '';
 
-        const rows = instructionContainer.querySelectorAll('.instruction-form-row');
+        // Check ingredients
+        const ingredientRows = ingredientContainer.querySelectorAll('.ingredient-form-row');
+        let hasValidIngredient = false;
+        ingredientRows.forEach((row) => {
+          const deleteInput = row.querySelector('input[name$="-DELETE"]');
+          if (deleteInput && deleteInput.checked) {
+            return;
+          }
+          const nameInput = row.querySelector('input[name$="-name"]');
+          if (nameInput && nameInput.value.trim()) {
+            hasValidIngredient = true;
+          }
+        });
+
+        // Check instructions
+        const instructionRows = instructionContainer.querySelectorAll('.instruction-form-row');
         const steps = [];
+        let hasEmptyInstruction = false;
 
-        rows.forEach((row) => {
+        instructionRows.forEach((row) => {
           const deleteInput = row.querySelector('input[name$="-DELETE"]');
           if (deleteInput && deleteInput.checked) {
             return;
@@ -563,12 +643,53 @@
             const text = descriptionInput.value.trim();
             if (text) {
               steps.push(text);
+            } else {
+              hasEmptyInstruction = true;
             }
           }
         });
 
-        const combinedText = steps.map((text, index) => `${index + 1}. ${text}`).join('\\n');
-        instructionsField.value = combinedText;
+        // Check if all fields are blank
+        if (!titleValue && !hasValidIngredient && steps.length === 0) {
+          e.preventDefault();
+          alert('Please fill in at least the recipe title, one ingredient, and one instruction before submitting.');
+          return false;
+        }
+
+        // Check if title is blank
+        if (!titleValue) {
+          e.preventDefault();
+          alert('Please provide a recipe title.');
+          return false;
+        }
+
+        // Check if there are no ingredients at all
+        if (!hasValidIngredient) {
+          e.preventDefault();
+          alert('Please provide at least one ingredient with a name.');
+          return false;
+        }
+
+        // Check if there are no instructions at all
+        if (steps.length === 0) {
+          e.preventDefault();
+          alert('Please provide at least one instruction step with a description.');
+          return false;
+        }
+
+        // Check if any instruction is empty
+        if (hasEmptyInstruction) {
+          e.preventDefault();
+          alert('Please fill in all instruction descriptions. Empty instruction steps are not allowed.');
+          return false;
+        }
+
+        // Aggregate instruction descriptions into the hidden instructions field
+        const instructionsField = document.getElementById('id_instructions');
+        if (instructionsField) {
+          const combinedText = steps.map((text, index) => `${index + 1}. ${text}`).join('\\n');
+          instructionsField.value = combinedText;
+        }
       });
     }
   });

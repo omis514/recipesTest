@@ -17,7 +17,7 @@ class RecipeFormTestCase(TestCase):
             "title": "Test Recipe",
             "description": "A test recipe description",
             "difficulty": Recipe.Difficulty.EASY,
-            "instructions": "1. First step\n2. Second step",
+            "time": 45,
         }
 
     def test_form_has_necessary_fields(self):
@@ -25,7 +25,7 @@ class RecipeFormTestCase(TestCase):
         self.assertIn("title", form.fields)
         self.assertIn("description", form.fields)
         self.assertIn("difficulty", form.fields)
-        self.assertIn("instructions", form.fields)
+        self.assertIn("time", form.fields)
 
     def test_form_title_field_is_char_field(self):
         form = RecipeForm()
@@ -45,9 +45,9 @@ class RecipeFormTestCase(TestCase):
             )
         )
 
-    def test_form_instructions_field_is_char_field(self):
+    def test_form_time_field_is_integer_field(self):
         form = RecipeForm()
-        self.assertTrue(isinstance(form.fields["instructions"], forms.CharField))
+        self.assertTrue(isinstance(form.fields["time"], forms.IntegerField))
 
     def test_valid_recipe_form(self):
         form = RecipeForm(data=self.form_input)
@@ -102,12 +102,6 @@ class RecipeFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("difficulty", form.errors)
 
-    def test_form_instructions_is_required(self):
-        self.form_input["instructions"] = ""
-        form = RecipeForm(data=self.form_input)
-        self.assertFalse(form.is_valid())
-        self.assertIn("instructions", form.errors)
-
     def test_form_must_save_correctly(self):
         form = RecipeForm(data=self.form_input)
         self.assertTrue(form.is_valid())
@@ -117,7 +111,7 @@ class RecipeFormTestCase(TestCase):
         self.assertEqual(recipe.title, "Test Recipe")
         self.assertEqual(recipe.description, "A test recipe description")
         self.assertEqual(recipe.difficulty, Recipe.Difficulty.EASY)
-        self.assertEqual(recipe.instructions, "1. First step\n2. Second step")
+        self.assertEqual(recipe.time, 45)
 
     def test_form_uses_model_validation(self):
         # Title that's too long

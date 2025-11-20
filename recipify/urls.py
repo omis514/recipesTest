@@ -30,7 +30,9 @@ urlpatterns = [
     path("password/", views.PasswordView.as_view(), name="password"),
     path("profile/", views.ProfileUpdateView.as_view(), name="profile"),
     path("sign_up/", views.SignUpView.as_view(), name="sign_up"),
+    path("users/", views.user_list, name="user_list"),
     path("recipe/create/", views.RecipeCreateView.as_view(), name="recipe_create"),
+    path("recipes/<int:pk>/", views.recipe_detail, name="recipe_detail"),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

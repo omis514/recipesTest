@@ -26,6 +26,7 @@ class InstructionFormTestCase(TestCase):
         form = InstructionForm()
         self.assertIn("step", form.fields)
         self.assertIn("description", form.fields)
+        self.assertIn("image", form.fields)
 
     def test_form_step_field_is_integer_field(self):
         form = InstructionForm()
@@ -94,3 +95,12 @@ class InstructionFormTestCase(TestCase):
         self.form_input["description"] = "x" * 501
         form = InstructionForm(data=self.form_input)
         self.assertFalse(form.is_valid())
+
+    def test_form_image_field_is_optional(self):
+        form = InstructionForm(data=self.form_input)
+        self.assertTrue(form.is_valid())
+
+    def test_form_image_field_can_be_blank(self):
+        # Image is optional, so form should be valid without it
+        form = InstructionForm(data=self.form_input)
+        self.assertTrue(form.is_valid())

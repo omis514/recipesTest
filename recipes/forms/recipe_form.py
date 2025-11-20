@@ -9,4 +9,4 @@ class RecipeForm(forms.ModelForm):
         """Form options."""
 
         model = Recipe
-        fields = ["title", "description", "difficulty", "time"]
+        fields = ["title", "description", "difficulty", "image", "time"]

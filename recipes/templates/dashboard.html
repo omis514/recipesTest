@@ -1,10 +1,86 @@
 {% extends 'base_content.html' %}
+
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-12">
-      <h1>Welcome to your dashboard {{ user.username }}</h1>
+  <div class="container" role="main">
+    <div class="row">
+      <div class="col-12">
+        <h1>Welcome to your dashboard, {{ user.username }}</h1>
+
+        <p class="h5 text-muted">({{ user.get_full_name }})</p>
+
+        {% if user.last_login %}
+          <p class="text-muted small">
+            Last login: {{ user.last_login|date:"d M Y" }} at {{ user.last_login|time:"g:i a"|lower }}
+          </p>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ---------- Staff / Admin shortcuts ---------- #}
+    {% if user.is_staff or user.is_superuser %}
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+              Administration
+            </div>
+            <div class="card-body">
+              <div class="card-text mb-0">
+                <strong>You have elevated privileges:</strong>
+                {% if user.is_staff %}
+                  <span class="badge bg-success ms-2">Staff</span>
+                {% endif %}
+                {% if user.is_superuser %}
+                  <span class="badge bg-danger ms-2">Superuser</span>
+                {% endif %}
+              </div>
+
+              <hr>
+
+              <div class="btn-group" role="group">
+                {% if user.is_superuser %}
+                  <a href="{% url 'admin:index' %}" class="btn btn-outline-primary">
+                    Django Admin
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {# ---------- Regular user content ---------- #}
+    <div class="row mt-4">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Quick Actions</h5>
+            <div class="d-flex flex-wrap gap-2">
+              {% if user.is_staff or user.is_superuser %}
+                <a href="{% url 'user_list' %}" class="btn btn-outline-primary">
+                  View All Users
+                </a>
+              {% endif %}
+              <a href="{% url 'recipe_create' %}" class="btn btn-outline-primary">
+                Create new recipe
+              </a>
+            
+              <a href="{% url 'recipe_detail' 1 %}" class="btn btn-outline-secondary">
+                View recipe details
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="col-12 text-end">
+        <a href="{% url 'log_out' %}" rel="nofollow" class="btn btn-outline-secondary btn-sm">
+          Log out
+        </a>
+      </div>
     </div>
   </div>
-</div>
 {% endblock %}
