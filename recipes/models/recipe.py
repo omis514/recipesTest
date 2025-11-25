@@ -32,6 +32,11 @@ class Recipe(models.Model):
         default=30,
         help_text="Time taken to complete the recipe (in minutes)",
     )
+    favorites = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='favorite_recipes',
+        blank=True
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 

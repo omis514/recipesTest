@@ -8,3 +8,6 @@ from .recipe_create_view import *
 from .sign_up_view import *
 from .user_list_view import *
 from .recipe_detail_view import *
+from .recipe_list_view import *
+from .recipe_list_view_with_comments import *
+from .toggle_favorite_view import *

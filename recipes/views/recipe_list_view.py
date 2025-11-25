@@ -1,9 +1,5 @@
-# recipes/views/recipe_detail_view.py
+# recipes/views/recipe_list_view.py
 
-from django.shortcuts import render, get_object_or_404
-from django.core.paginator import Paginator
-from django.contrib.auth.decorators import login_required
-from recipes.models import Recipe
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
@@ -11,6 +7,7 @@ from django.db.models import Count, Prefetch, Q
 from recipes.models import Recipe, Comment
 
 
+@login_required
 def recipe_list(request):
     """Display all recipes in a TikTok-style grid layout with top comments."""
 
@@ -75,25 +72,3 @@ def recipe_list(request):
         "sort_by": sort_by,
     }
     return render(request, "recipe_list.html", context)
-
-
-def recipe_detail(request, pk):
-    """Display single recipe detail with ingredients and instructions"""
-    recipe = get_object_or_404(
-        Recipe.objects.select_related("author").prefetch_related(
-            "ingredients",
-            "instructions",
-        ),
-        pk=pk,
-    )
-
-    # 用 related_name 访问
-    ingredients = recipe.ingredients.all()
-    instructions = recipe.instructions.all().order_by("step")
-
-    context = {
-        "recipe": recipe,
-        "ingredients": ingredients,
-        "instructions": instructions,
-    }
-    return render(request, "recipe_detail.html", context)

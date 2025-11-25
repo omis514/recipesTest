@@ -20,6 +20,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from recipes import views
+from recipes.views import comment_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -32,7 +33,31 @@ urlpatterns = [
     path("sign_up/", views.SignUpView.as_view(), name="sign_up"),
     path("users/", views.user_list, name="user_list"),
     path("recipe/create/", views.RecipeCreateView.as_view(), name="recipe_create"),
-    path("recipes/<int:pk>/", views.recipe_detail, name="recipe_detail"),
+    path(
+        "recipes/<int:pk>/",
+        views.recipe_detail_view.recipe_detail,
+        name="recipe_detail",
+    ),
+    path("recipes/", views.recipe_list_view.recipe_list, name="recipe_list"),
+    path(
+        "recipes/<int:recipe_pk>/comment/", comment_view.add_comment, name="add_comment"
+    ),
+    path(
+        "recipes/comment/<int:comment_pk>/like/",
+        comment_view.like_comment,
+        name="like_comment",
+    ),
+    path(
+        "recipes/comment/<int:comment_pk>/delete/",
+        comment_view.delete_comment,
+        name="delete_comment",
+    ),
+    path(
+        "recipes/comment/<int:comment_pk>/reply/",
+        comment_view.reply_to_comment,
+        name="reply_to_comment",
+    ),
+    path("recipes/<int:pk>/favorite/", views.toggle_favorite, name="toggle_favorite"),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
