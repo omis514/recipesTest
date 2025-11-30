@@ -6,38 +6,58 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.core.paginator import Paginator
-from recipes.models import Recipe, Comment, CommentReply
+from recipes.models import Recipe, Comment
 
 
 @login_required
 @require_POST
 def add_comment(request, recipe_pk):
-    """Add a comment to a recipe."""
+    """Add a comment or reply using the unified Comment model."""
     recipe = get_object_or_404(Recipe, pk=recipe_pk)
+
     content = request.POST.get("content", "").strip()
+    parent_comment_id = request.POST.get("parent_comment_id", "").strip()
+    reply_to_user = request.POST.get("reply_to_user", "").strip()
 
-    if content:
-        comment = Comment.objects.create(
-            recipe=recipe, author=request.user, content=content
-        )
-        messages.success(request, "Your comment has been added!")
-
-        # Return JSON for AJAX requests
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse(
-                {
-                    "success": True,
-                    "comment_id": comment.pk,
-                    "author": comment.author.username,
-                    "content": comment.content,
-                    "created_at": comment.created_at.strftime("%d %b %Y"),
-                    "like_count": 0,
-                }
-            )
-    else:
-        messages.error(request, "Comment cannot be empty.")
+    if not content:
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({"success": False, "error": "Comment cannot be empty."})
+        messages.error(request, "Comment cannot be empty.")
+        return redirect("recipe_detail", pk=recipe_pk)
+
+    parent_comment = None
+    reply_to = None
+
+    # If replying
+    if parent_comment_id:
+        parent_comment = Comment.objects.filter(pk=parent_comment_id).first()
+
+    # If @mention
+    if reply_to_user:
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        reply_to = User.objects.filter(username=reply_to_user).first()
+
+    # Create unified comment
+    comment = Comment.objects.create(
+        recipe=recipe,
+        author=request.user,
+        content=content,
+        parent_comment=parent_comment,
+        reply_to=reply_to,
+    )
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse(
+            {
+                "success": True,
+                "comment_id": comment.pk,
+                "content": comment.content,
+                "author": comment.author.username,
+                "parent_comment": parent_comment.pk if parent_comment else None,
+            }
+        )
 
     return redirect("recipe_detail", pk=recipe_pk)
 
@@ -45,22 +65,19 @@ def add_comment(request, recipe_pk):
 @login_required
 @require_POST
 def like_comment(request, comment_pk):
-    """Toggle like on a comment."""
+    """Like/unlike any comment (top-level or reply)."""
     comment = get_object_or_404(Comment, pk=comment_pk)
 
     if comment.likes.filter(pk=request.user.pk).exists():
-        # Unlike
         comment.likes.remove(request.user)
         liked = False
     else:
-        # Like
         comment.likes.add(request.user)
         liked = True
 
-    # Return JSON response for AJAX
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         return JsonResponse(
-            {"success": True, "liked": liked, "like_count": comment.like_count}
+            {"success": True, "liked": liked, "like_count": comment.likes.count()}
         )
 
     return redirect("recipe_detail", pk=comment.recipe.pk)
@@ -69,106 +86,18 @@ def like_comment(request, comment_pk):
 @login_required
 @require_POST
 def delete_comment(request, comment_pk):
-    """Delete a comment (only by author or admin)."""
+    """Delete any comment (or reply)."""
     comment = get_object_or_404(Comment, pk=comment_pk)
     recipe_pk = comment.recipe.pk
 
-    if comment.author == request.user or request.user.is_staff:
-        comment.delete()
-        messages.success(request, "Comment deleted successfully.")
-
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({"success": True})
-    else:
-        messages.error(request, "You cannot delete this comment.")
+    if comment.author != request.user and not request.user.is_staff:
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({"success": False, "error": "Permission denied."})
+        return redirect("recipe_detail", pk=recipe_pk)
+
+    comment.delete()
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({"success": True})
 
     return redirect("recipe_detail", pk=recipe_pk)
-
-
-@login_required
-@require_POST
-def reply_to_comment(request, comment_pk):
-    """Add a reply to a comment."""
-    comment = get_object_or_404(Comment, pk=comment_pk)
-    content = request.POST.get("content", "").strip()
-
-    if content:
-        reply = CommentReply.objects.create(
-            comment=comment, author=request.user, content=content
-        )
-
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse(
-                {
-                    "success": True,
-                    "reply_id": reply.pk,
-                    "author": reply.author.username,
-                    "content": reply.content,
-                    "created_at": reply.created_at.strftime("%d %b %Y %H:%M"),
-                }
-            )
-
-        messages.success(request, "Reply added successfully.")
-    else:
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({"success": False, "error": "Reply cannot be empty."})
-        messages.error(request, "Reply cannot be empty.")
-
-    return redirect("recipe_detail", pk=comment.recipe.pk)
-
-
-def recipe_comments_api(request, recipe_pk):
-    """API endpoint to get all comments for a recipe (for AJAX loading)."""
-    recipe = get_object_or_404(Recipe, pk=recipe_pk)
-    comments = (
-        recipe.comments.select_related("author")
-        .prefetch_related("likes", "replies__author")
-        .order_by("-created_at")
-    )
-
-    # Pagination
-    paginator = Paginator(comments, 10)
-    page_number = request.GET.get("page", 1)
-    page_obj = paginator.get_page(page_number)
-
-    comments_data = []
-    for comment in page_obj:
-        comment_dict = {
-            "id": comment.pk,
-            "author": comment.author.username,
-            "content": comment.content,
-            "created_at": comment.created_at.strftime("%d %b %Y %H:%M"),
-            "like_count": comment.like_count,
-            "is_liked": (
-                comment.is_liked_by(request.user)
-                if request.user.is_authenticated
-                else False
-            ),
-            "can_delete": comment.author == request.user or request.user.is_staff,
-            "replies": [],
-        }
-
-        for reply in comment.replies.all():
-            comment_dict["replies"].append(
-                {
-                    "id": reply.pk,
-                    "author": reply.author.username,
-                    "content": reply.content,
-                    "created_at": reply.created_at.strftime("%d %b %Y %H:%M"),
-                }
-            )
-
-        comments_data.append(comment_dict)
-
-    return JsonResponse(
-        {
-            "success": True,
-            "comments": comments_data,
-            "has_next": page_obj.has_next(),
-            "has_previous": page_obj.has_previous(),
-            "page": page_obj.number,
-            "total_pages": paginator.num_pages,
-        }
-    )

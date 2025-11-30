@@ -128,6 +128,11 @@ class RecipeModelTestCase(TestCase):
         self.recipe.time = 73
         self.assertEqual(self.recipe.get_time(), "1.2 hrs")
 
+    def test_recipe_can_have_favorites(self):
+        self.recipe.favorites.add(self.author)
+        self.assertEqual(self.recipe.favorites.count(), 1)
+        self.assertEqual(self.recipe.favorites.first(), self.author)
+
     def test_created_at_is_set(self):
         self.assertIsNotNone(self.recipe.created_at)
 

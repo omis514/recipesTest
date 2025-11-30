@@ -5,7 +5,7 @@
   <div class="row justify-content-center">
     <div class="col-lg-10 col-xl-8">
 
-      {# Original recipe detail content - keeping your existing layout #}
+      {# Original recipe detail content #}
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-primary text-white">
           <div class="d-flex justify-content-between align-items-center">
@@ -120,26 +120,44 @@
         </div>
       </div>
 
-      {# Comments Section #}
+      {# Comments Section with @ Reply Feature #}
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-light">
           <h5 class="mb-0">
             <i class="bi bi-chat-dots me-2"></i>Comments 
-            <span class="badge bg-primary ms-2">{{ recipe.comments.count }}</span>
+            <span class="badge bg-primary ms-2" id="comment-count">{{ recipe.comments.count }}</span>
           </h5>
         </div>
         <div class="card-body">
-          {# Add Comment Form #}
+          {# Main Comment Form #}
           {% if user.is_authenticated %}
-          <form method="post" action="{% url 'add_comment' recipe.pk %}" class="mb-4">
-            {% csrf_token %}
-            <div class="input-group">
-              <textarea name="content" class="form-control" placeholder="Share your thoughts about this recipe..." rows="3" required></textarea>
-              <button class="btn btn-primary" type="submit">
-                <i class="bi bi-send"></i> Post Comment
-              </button>
-            </div>
-          </form>
+          <div class="comment-input-container mb-4">
+            <form method="post" action="{% url 'add_comment' recipe.pk %}" id="main-comment-form">
+              {% csrf_token %}
+              <input type="hidden" name="parent_comment_id" id="parent-comment-id" value="">
+              <input type="hidden" name="reply_to_user" id="reply-to-user" value="">
+              
+              {# Reply indicator #}
+              <div id="reply-indicator" class="reply-indicator mb-2 d-none">
+                <span class="badge bg-info text-dark">
+                  <i class="bi bi-reply-fill"></i> Replying to <span id="reply-to-name"></span>
+                  <button type="button" class="btn-close btn-close-white ms-2" onclick="cancelReply()"></button>
+                </span>
+              </div>
+              
+              <div class="input-group">
+                <textarea name="content" 
+                          id="comment-textarea" 
+                          class="form-control" 
+                          placeholder="Share your thoughts about this recipe..." 
+                          rows="3" 
+                          required></textarea>
+                <button class="btn btn-primary" type="submit" id="submit-comment-btn">
+                  <i class="bi bi-send"></i> Post
+                </button>
+              </div>
+            </form>
+          </div>
           {% else %}
           <div class="alert alert-info">
             <i class="bi bi-info-circle me-2"></i>
@@ -149,74 +167,109 @@
 
           {# Comments List #}
           <div id="comments-container">
-            {% for comment in recipe.comments.all %}
-            <div class="comment-item mb-3" data-comment-id="{{ comment.pk }}">
-              <div class="d-flex">
-                <div class="comment-avatar me-3">
-                  <div class="avatar-circle">{{ comment.author.username|first|upper }}</div>
-                </div>
-                <div class="flex-grow-1">
-                  <div class="comment-header">
-                    <strong class="comment-author">{{ comment.author.get_full_name|default:comment.author.username }}</strong>
-                    <span class="text-muted small ms-2">{{ comment.created_at|timesince }} ago</span>
-                    {% if comment.author == user or user.is_staff %}
-                    <button class="btn btn-sm btn-link text-danger float-end delete-comment" data-comment-id="{{ comment.pk }}">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                    {% endif %}
-                  </div>
-                  <div class="comment-body">{{ comment.content }}</div>
-                  <div class="comment-actions mt-2">
-                    <button class="btn btn-sm btn-link like-btn {% if user in comment.likes.all %}liked{% endif %}" 
-                            data-comment-id="{{ comment.pk }}">
-                      <i class="bi {% if user in comment.likes.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
-                      <span class="like-count">{{ comment.like_count }}</span>
-                    </button>
-                    <button class="btn btn-sm btn-link reply-btn" data-comment-id="{{ comment.pk }}">
-                      <i class="bi bi-reply"></i> Reply
-                    </button>
-                  </div>
-
-                  {# Replies #}
-                  {% if comment.replies.exists %}
-                  <div class="replies mt-3 ms-4">
-                    {% for reply in comment.replies.all %}
-                    <div class="reply-item mb-2">
-                      <div class="d-flex">
-                        <div class="reply-avatar me-2">
-                          <div class="avatar-circle-small">{{ reply.author.username|first|upper }}</div>
-                        </div>
-                        <div class="flex-grow-1">
-                          <strong class="reply-author">{{ reply.author.username }}</strong>
-                          <span class="text-muted small ms-1">{{ reply.created_at|timesince }} ago</span>
-                          <div class="reply-content">{{ reply.content }}</div>
-                        </div>
-                      </div>
+            <div id="comments-list">
+              {% for comment in recipe.comments.all %}
+                {% if not comment.parent_comment %}
+                <div class="comment-item mb-3" data-comment-id="{{ comment.pk }}">
+                  <div class="d-flex">
+                    <div class="comment-avatar me-3">
+                      <div class="avatar-circle">{{ comment.author.username|first|upper }}</div>
                     </div>
-                    {% endfor %}
-                  </div>
-                  {% endif %}
-
-                  {# Reply Form (hidden by default) #}
-                  <div class="reply-form mt-2 ms-4 d-none" id="reply-form-{{ comment.pk }}">
-                    <form method="post" action="{% url 'reply_to_comment' comment.pk %}">
-                      {% csrf_token %}
-                      <div class="input-group input-group-sm">
-                        <input type="text" name="content" class="form-control" placeholder="Write a reply..." required>
-                        <button class="btn btn-outline-primary btn-sm" type="submit">Reply</button>
-                        <button class="btn btn-outline-secondary btn-sm cancel-reply" type="button">Cancel</button>
+                    <div class="flex-grow-1">
+                      <div class="comment-header">
+                        <strong class="comment-author" data-username="{{ comment.author.username }}">
+                          {{ comment.author.get_full_name|default:comment.author.username }}
+                        </strong>
+                        <span class="text-muted small ms-2">{{ comment.created_at|timesince }} ago</span>
+                        {% if comment.author == user or user.is_staff %}
+                        <button class="btn btn-sm btn-link text-danger float-end delete-comment" data-comment-id="{{ comment.pk }}">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                        {% endif %}
                       </div>
-                    </form>
+                      
+                      {# Comment content with @mentions #}
+                      <div class="comment-body">
+                        {% if comment.reply_to %}
+                        <span class="mention-tag">@{{ comment.reply_to.username }}</span>
+                        {% endif %}
+                        {{ comment.content|linebreaks }}
+                      </div>
+                      
+                      <div class="comment-actions mt-2">
+                        <button class="btn btn-sm btn-link like-btn {% if user in comment.likes.all %}liked{% endif %}" 
+                                data-comment-id="{{ comment.pk }}">
+                          <i class="bi {% if user in comment.likes.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
+                          <span class="like-count">{{ comment.like_count }}</span>
+                        </button>
+                        {% if user.is_authenticated %}
+                        <button class="btn btn-sm btn-link reply-btn" 
+                                data-comment-id="{{ comment.pk }}"
+                                data-comment-author="{{ comment.author.username }}">
+                          <i class="bi bi-reply"></i> Reply
+                        </button>
+                        {% endif %}
+                      </div>
+
+                      {# Nested replies under the same comment #}
+                      {% if comment.replies.exists %}
+                      <div class="replies-section mt-3">
+                        {% for reply in comment.replies.all %}
+                        <div class="reply-item mb-2" data-reply-id="{{ reply.pk }}" data-parent-comment="{{ comment.pk }}">
+                          <div class="d-flex">
+                            <div class="reply-avatar me-2">
+                              <div class="avatar-circle-small">{{ reply.author.username|first|upper }}</div>
+                            </div>
+                            <div class="flex-grow-1">
+                              <div class="reply-header">
+                                <strong class="reply-author" data-username="{{ reply.author.username }}">
+                                  {{ reply.author.username }}
+                                </strong>
+                                <span class="text-muted small ms-1">{{ reply.created_at|timesince }} ago</span>
+                                {% if reply.author == user or user.is_staff %}
+                                <button class="btn btn-sm btn-link text-danger float-end delete-reply" 
+                                        data-reply-id="{{ reply.pk }}">
+                                  <i class="bi bi-trash"></i>
+                                </button>
+                                {% endif %}
+                              </div>
+                              <div class="reply-content">
+                                {% if reply.reply_to %}
+                                <span class="mention-tag">@{{ reply.reply_to.username }}</span>
+                                {% endif %}
+                                {{ reply.content }}
+                              </div>
+                              <div class="reply-actions mt-1">
+                                <button class="btn btn-sm btn-link like-reply-btn {% if user in reply.likes.all %}liked{% endif %}" 
+                                        data-reply-id="{{ reply.pk }}">
+                                  <i class="bi {% if user in reply.likes.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
+                                  <span class="reply-like-count">{{ reply.like_count }}</span>
+                                </button>
+                                {% if user.is_authenticated %}
+                                <button class="btn btn-sm btn-link reply-to-reply-btn" 
+                                        data-parent-comment-id="{{ comment.pk }}"
+                                        data-reply-author="{{ reply.author.username }}">
+                                  <i class="bi bi-reply"></i> Reply
+                                </button>
+                                {% endif %}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                      {% endif %}
+                    </div>
                   </div>
                 </div>
+                {% endif %}
+              {% empty %}
+              <div class="text-center py-4 text-muted" id="no-comments-message">
+                <i class="bi bi-chat-left-dots display-4"></i>
+                <p class="mt-3">No comments yet. Be the first to share your thoughts!</p>
               </div>
+              {% endfor %}
             </div>
-            {% empty %}
-            <div class="text-center py-4 text-muted">
-              <i class="bi bi-chat-left-dots display-4"></i>
-              <p class="mt-3">No comments yet. Be the first to share your thoughts!</p>
-            </div>
-            {% endfor %}
           </div>
         </div>
       </div>
@@ -229,31 +282,6 @@
         <a href="{% url 'dashboard' %}" class="btn btn-outline-primary me-md-2">
           <i class="bi bi-house me-2"></i>Dashboard
         </a>
-        <a href="{% url 'recipe_create' %}" class="btn btn-primary">
-          <i class="bi bi-plus-circle me-2"></i>Create another recipe
-        </a>
-      </div>
-
-      <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary me-md-2">
-          <i class="bi bi-arrow-left-circle me-2"></i>Back to dashboard
-        </a>
-
-        {% if user.is_authenticated %}
-        <form action="{% url 'toggle_favorite' recipe.pk %}" method="post" class="d-inline">
-          {% csrf_token %}
-          {% if user in recipe.favorites.all %}
-            <button type="submit" class="btn btn-danger me-md-2">
-              <i class="bi bi-heart-fill me-2"></i>Unfavorite
-            </button>
-          {% else %}
-            <button type="submit" class="btn btn-outline-danger me-md-2">
-              <i class="bi bi-heart me-2"></i>Favorite
-            </button>
-          {% endif %}
-        </form>
-        {% endif %}
-
         <a href="{% url 'recipe_create' %}" class="btn btn-primary">
           <i class="bi bi-plus-circle me-2"></i>Create another recipe
         </a>
@@ -298,6 +326,22 @@
     background-color: #f8f9fa;
   }
 
+  .comment-item.new-comment {
+    animation: slideIn 0.5s ease;
+    background-color: #f0f8ff;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .avatar-circle {
     width: 40px;
     height: 40px;
@@ -311,22 +355,23 @@
   }
 
   .avatar-circle-small {
-    width: 25px;
-    height: 25px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: #6c757d;
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 
-  .like-btn.liked i {
+  .like-btn.liked i, .like-reply-btn.liked i {
     color: #dc3545;
   }
 
-  .replies {
+  .replies-section {
+    margin-left: 48px;
     border-left: 2px solid #e9ecef;
     padding-left: 15px;
   }
@@ -335,33 +380,246 @@
     background: #f8f9fa;
     padding: 10px;
     border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .reply-item:hover {
+    background: #e9ecef;
+  }
+
+  /* @ Mention styles */
+  .mention-tag {
+    color: #007bff;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+
+  .mention-tag:hover {
+    text-decoration: underline;
+  }
+
+  /* Reply indicator */
+  .reply-indicator {
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .reply-indicator .badge {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  .btn-close-white {
+    filter: brightness(0) invert(1);
+    width: 0.5em;
+    height: 0.5em;
+    padding: 0;
+  }
+
+  /* Comment input styling */
+  .comment-input-container {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 15px;
+    background: #f8f9fa;
+  }
+
+  #comment-textarea:focus {
+    box-shadow: none;
+    border-color: #007bff;
+  }
+
+  /* Highlight effect for reply target */
+  .comment-item.reply-target {
+    background: #fff3cd;
+    animation: highlight 2s ease;
+  }
+
+  @keyframes highlight {
+    0% { background: #fff3cd; }
+    100% { background: transparent; }
   }
 </style>
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Handle reply button clicks
-  document.querySelectorAll('.reply-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const commentId = this.dataset.commentId;
-      const replyForm = document.getElementById(`reply-form-${commentId}`);
-      replyForm.classList.toggle('d-none');
-    });
-  });
+  const currentUser = "{{ user.username }}";
+  let replyingTo = null;
 
-  // Handle cancel reply
-  document.querySelectorAll('.cancel-reply').forEach(btn => {
-    btn.addEventListener('click', function() {
-      this.closest('.reply-form').classList.add('d-none');
-    });
-  });
+  // Initialize all event listeners
+  initializeEventListeners();
 
-  // Handle like button clicks (AJAX)
-  document.querySelectorAll('.like-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const commentId = this.dataset.commentId;
-      fetch(`/recipes/comment/${commentId}/like/`, {
+  function initializeEventListeners() {
+    // Reply buttons
+    document.querySelectorAll('.reply-btn').forEach(btn => {
+      btn.addEventListener('click', handleReplyClick);
+    });
+
+    // Reply to reply buttons
+    document.querySelectorAll('.reply-to-reply-btn').forEach(btn => {
+      btn.addEventListener('click', handleReplyToReplyClick);
+    });
+
+    // Like buttons
+    document.querySelectorAll('.like-btn').forEach(btn => {
+      btn.addEventListener('click', handleLikeClick);
+    });
+
+    // Delete buttons
+    document.querySelectorAll('.delete-comment').forEach(btn => {
+      btn.addEventListener('click', handleDeleteClick);
+    });
+
+    document.querySelectorAll('.delete-reply').forEach(btn => {
+      btn.addEventListener('click', handleDeleteReplyClick);
+    });
+  }
+
+  function handleReplyClick(e) {
+    const commentId = this.dataset.commentId;
+    const commentAuthor = this.dataset.commentAuthor;
+    setReplyTo(commentId, commentAuthor, null);
+  }
+
+  function handleReplyToReplyClick(e) {
+    const parentId = this.dataset.parentCommentId;
+    const replyAuthor = this.dataset.replyAuthor;
+    setReplyTo(parentId, replyAuthor, replyAuthor);
+  }
+
+  // Set reply target
+  function setReplyTo(commentId, authorName, replyToUser) {
+    document.getElementById('parent-comment-id').value = commentId;
+    document.getElementById('reply-to-user').value = replyToUser || '';
+    
+    const indicator = document.getElementById('reply-indicator');
+    const replyToName = document.getElementById('reply-to-name');
+    indicator.classList.remove('d-none');
+    replyToName.textContent = authorName;
+    
+    const textarea = document.getElementById('comment-textarea');
+    textarea.placeholder = `Reply to ${authorName}...`;
+    textarea.value = `@${authorName} `;
+    textarea.focus();
+    
+    document.querySelectorAll('.comment-item').forEach(item => {
+      item.classList.remove('reply-target');
+    });
+    const targetComment = document.querySelector(`[data-comment-id="${commentId}"]`);
+    if (targetComment) {
+      targetComment.classList.add('reply-target');
+      targetComment.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    replyingTo = { commentId, authorName, replyToUser };
+  }
+
+  // Cancel reply
+  window.cancelReply = function() {
+    document.getElementById('parent-comment-id').value = '';
+    document.getElementById('reply-to-user').value = '';
+    document.getElementById('reply-indicator').classList.add('d-none');
+    
+    const textarea = document.getElementById('comment-textarea');
+    textarea.placeholder = 'Share your thoughts about this recipe...';
+    textarea.value = '';
+    
+    document.querySelectorAll('.comment-item').forEach(item => {
+      item.classList.remove('reply-target');
+    });
+    
+    replyingTo = null;
+  };
+
+  // Handle like button clicks
+  function handleLikeClick(e) {
+    const commentId = this.dataset.commentId;
+    const btn = this;
+    
+    fetch(`/recipes/comment/${commentId}/like/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const icon = btn.querySelector('i');
+        const count = btn.querySelector('.like-count');
+        
+        if (data.liked) {
+          icon.classList.remove('bi-heart');
+          icon.classList.add('bi-heart-fill', 'text-danger');
+          btn.classList.add('liked');
+        } else {
+          icon.classList.remove('bi-heart-fill', 'text-danger');
+          icon.classList.add('bi-heart');
+          btn.classList.remove('liked');
+        }
+        count.textContent = data.like_count;
+      }
+    });
+  }
+
+  // Handle delete comment
+  function handleDeleteClick(e) {
+  if (confirm('Are you sure you want to delete this comment?')) {
+    const commentId = this.dataset.commentId;
+    const commentElement = document.querySelector(
+      `[data-comment-id="${commentId}"]`
+    );
+      
+    const replyCount = commentElement.querySelectorAll('.reply-item').length;
+    const totalDeleted = 1 + replyCount;  
+
+    fetch(`/recipes/comment/${commentId}/delete/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          commentElement.style.opacity = '0';
+          commentElement.style.transform = 'translateX(-100%)';
+          setTimeout(() => {
+            commentElement.remove();
+
+            updateCommentCount(-totalDeleted);
+            
+            if (document.querySelectorAll('.comment-item').length === 0) {
+              showNoCommentsMessage();
+            }
+          }, 300);
+        }
+      });
+  }
+}
+
+
+  // Handle delete reply
+  function handleDeleteReplyClick(e) {
+    if (confirm('Are you sure you want to delete this reply?')) {
+      const replyId = this.dataset.replyId;
+      const replyElement = document.querySelector(`[data-reply-id="${replyId}"]`);
+      
+      fetch(`/recipes/comment/${replyId}/delete/`, {
         method: 'POST',
         headers: {
           'X-CSRFToken': '{{ csrf_token }}',
@@ -371,43 +629,212 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          const icon = this.querySelector('i');
-          const count = this.querySelector('.like-count');
-          
-          if (data.liked) {
-            icon.classList.remove('bi-heart');
-            icon.classList.add('bi-heart-fill', 'text-danger');
-          } else {
-            icon.classList.remove('bi-heart-fill', 'text-danger');
-            icon.classList.add('bi-heart');
-          }
-          count.textContent = data.like_count;
+          replyElement.style.opacity = '0';
+          setTimeout(() => {
+            replyElement.remove();
+            updateCommentCount(-1);
+          }, 300);
         }
       });
+    }
+  }
+
+  // Handle form submission with AJAX
+  document.getElementById('main-comment-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const textarea = document.getElementById('comment-textarea');
+    const submitBtn = document.getElementById('submit-comment-btn');
+    
+    // Disable submit button
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Posting...';
+    
+    fetch(this.action, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.comment) {
+        // Clear form
+        textarea.value = '';
+        cancelReply();
+        
+        // Remove no comments message if exists
+        const noCommentsMsg = document.getElementById('no-comments-message');
+        if (noCommentsMsg) {
+          noCommentsMsg.remove();
+        }
+        
+        // Add new comment to the DOM
+        if (data.comment.is_reply && data.comment.parent_comment_id) {
+          // It's a reply
+          addReplyToDOM(data.comment);
+        } else {
+          // It's a top-level comment
+          addCommentToDOM(data.comment);
+        }
+        
+        // Update comment count
+        updateCommentCount(1);
+        
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-send"></i> Post';
+      } else {
+        alert(data.error || 'Error posting comment');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-send"></i> Post';
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bi bi-send"></i> Post';
     });
   });
 
-  // Handle delete comment
-  document.querySelectorAll('.delete-comment').forEach(btn => {
-    btn.addEventListener('click', function() {
-      if (confirm('Are you sure you want to delete this comment?')) {
-        const commentId = this.dataset.commentId;
-        fetch(`/recipes/comment/${commentId}/delete/`, {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            document.querySelector(`[data-comment-id="${commentId}"]`).remove();
-          }
-        });
-      }
-    });
-  });
+  function addCommentToDOM(commentData) {
+    const commentHTML = `
+      <div class="comment-item mb-3 new-comment" data-comment-id="${commentData.id}">
+        <div class="d-flex">
+          <div class="comment-avatar me-3">
+            <div class="avatar-circle">${commentData.author.charAt(0).toUpperCase()}</div>
+          </div>
+          <div class="flex-grow-1">
+            <div class="comment-header">
+              <strong class="comment-author" data-username="${commentData.author}">
+                ${commentData.author_display || commentData.author}
+              </strong>
+              <span class="text-muted small ms-2">just now</span>
+              ${commentData.can_delete ? `
+                <button class="btn btn-sm btn-link text-danger float-end delete-comment" data-comment-id="${commentData.id}">
+                  <i class="bi bi-trash"></i>
+                </button>
+              ` : ''}
+            </div>
+            <div class="comment-body">
+              ${commentData.reply_to ? `<span class="mention-tag">@${commentData.reply_to}</span>` : ''}
+              <p>${commentData.content}</p>
+            </div>
+            <div class="comment-actions mt-2">
+              <button class="btn btn-sm btn-link like-btn" data-comment-id="${commentData.id}">
+                <i class="bi bi-heart"></i>
+                <span class="like-count">0</span>
+              </button>
+              <button class="btn btn-sm btn-link reply-btn" 
+                      data-comment-id="${commentData.id}"
+                      data-comment-author="${commentData.author}">
+                <i class="bi bi-reply"></i> Reply
+              </button>
+            </div>
+            <div class="replies-section mt-3"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    const commentsContainer = document.getElementById('comments-list');
+    commentsContainer.insertAdjacentHTML('afterbegin', commentHTML);
+    
+    // Re-attach event listeners to new elements
+    const newComment = commentsContainer.querySelector('.new-comment');
+    newComment.querySelector('.like-btn')?.addEventListener('click', handleLikeClick);
+    newComment.querySelector('.reply-btn')?.addEventListener('click', handleReplyClick);
+    newComment.querySelector('.delete-comment')?.addEventListener('click', handleDeleteClick);
+    
+    // Remove the new-comment class after animation
+    setTimeout(() => {
+      newComment.classList.remove('new-comment');
+    }, 1000);
+  }
+
+  function addReplyToDOM(replyData) {
+    const parentComment = document.querySelector(`[data-comment-id="${replyData.parent_comment_id}"]`);
+    if (!parentComment) return;
+    
+    let repliesSection = parentComment.querySelector('.replies-section');
+    if (!repliesSection) {
+      // Create replies section if it doesn't exist
+      const actionsDiv = parentComment.querySelector('.comment-actions');
+      repliesSection = document.createElement('div');
+      repliesSection.className = 'replies-section mt-3';
+      actionsDiv.insertAdjacentElement('afterend', repliesSection);
+    }
+    
+    const replyHTML = `
+      <div class="reply-item mb-2 new-comment" data-reply-id="${replyData.id}" data-parent-comment="${replyData.parent_comment_id}">
+        <div class="d-flex">
+          <div class="reply-avatar me-2">
+            <div class="avatar-circle-small">${replyData.author.charAt(0).toUpperCase()}</div>
+          </div>
+          <div class="flex-grow-1">
+            <div class="reply-header">
+              <strong class="reply-author" data-username="${replyData.author}">
+                ${replyData.author}
+              </strong>
+              <span class="text-muted small ms-1">just now</span>
+              ${replyData.can_delete ? `
+                <button class="btn btn-sm btn-link text-danger float-end delete-reply" 
+                        data-reply-id="${replyData.id}">
+                  <i class="bi bi-trash"></i>
+                </button>
+              ` : ''}
+            </div>
+            <div class="reply-content">
+              ${replyData.reply_to ? `<span class="mention-tag">@${replyData.reply_to}</span>` : ''}
+              ${replyData.content}
+            </div>
+            <div class="reply-actions mt-1">
+              <button class="btn btn-sm btn-link like-reply-btn" data-reply-id="${replyData.id}">
+                <i class="bi bi-heart"></i>
+                <span class="reply-like-count">0</span>
+              </button>
+              <button class="btn btn-sm btn-link reply-to-reply-btn" 
+                      data-parent-comment-id="${replyData.parent_comment_id}"
+                      data-reply-author="${replyData.author}">
+                <i class="bi bi-reply"></i> Reply
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    repliesSection.insertAdjacentHTML('beforeend', replyHTML);
+    
+    // Re-attach event listeners
+    const newReply = repliesSection.querySelector('.new-comment');
+    newReply.querySelector('.delete-reply')?.addEventListener('click', handleDeleteReplyClick);
+    newReply.querySelector('.reply-to-reply-btn')?.addEventListener('click', handleReplyToReplyClick);
+    
+    setTimeout(() => {
+      newReply.classList.remove('new-comment');
+    }, 1000);
+  }
+
+  function updateCommentCount(change) {
+    const countBadge = document.getElementById('comment-count');
+    if (countBadge) {
+      const currentCount = parseInt(countBadge.textContent) || 0;
+      countBadge.textContent = Math.max(0, currentCount + change);
+    }
+  }
+
+  function showNoCommentsMessage() {
+    const container = document.getElementById('comments-list');
+    container.innerHTML = `
+      <div class="text-center py-4 text-muted" id="no-comments-message">
+        <i class="bi bi-chat-left-dots display-4"></i>
+        <p class="mt-3">No comments yet. Be the first to share your thoughts!</p>
+      </div>
+    `;
+  }
 });
 </script>
 {% endblock %}

@@ -34,6 +34,16 @@ def recipe_list(request):
     if difficulty:
         recipes = recipes.filter(difficulty=difficulty)
 
+    # Filter by spiceness if requested
+    spiceness = request.GET.get("spiceness")
+    if spiceness:
+        recipes = recipes.filter(spiceness=spiceness)
+
+    # Filter by cuisine if requested
+    cuisine = request.GET.get("cuisine")
+    if cuisine:
+        recipes = recipes.filter(cuisine=cuisine)
+
     # Filter by search term if provided
     search = request.GET.get("search", "").strip()
     if search:
@@ -67,7 +77,11 @@ def recipe_list(request):
         "page_obj": page_obj,
         "recipes": page_obj.object_list,
         "difficulties": Recipe.Difficulty.choices,
+        "spicenesses": Recipe.Spiceness.choices,
+        "cuisines": Recipe.Cuisine.choices,
         "selected_difficulty": difficulty,
+        "selected_spiceness": spiceness,
+        "selected_cuisine": cuisine,
         "search_term": search,
         "sort_by": sort_by,
     }

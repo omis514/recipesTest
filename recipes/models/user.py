@@ -20,6 +20,12 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
+    preferred_spiceness = models.FloatField(
+        default=1.5, blank=False, help_text="The user's preferred spiceness level"
+    )
+    preferred_cuisine = models.FloatField(
+        null=True, blank=True, help_text="The user's preferred cuisine id"
+    )
 
     class Meta:
         """Model options."""

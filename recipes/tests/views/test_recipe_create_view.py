@@ -20,6 +20,8 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
             "title": "Test Recipe",
             "description": "A test recipe description",
             "difficulty": Recipe.Difficulty.EASY,
+            "spiceness": Recipe.Spiceness.NOT_SPICY,
+            "cuisine": Recipe.Cuisine.World,
             "time": "45",
             "ingredients-TOTAL_FORMS": "1",
             "ingredients-INITIAL_FORMS": "0",

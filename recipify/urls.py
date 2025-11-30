@@ -33,11 +33,7 @@ urlpatterns = [
     path("sign_up/", views.SignUpView.as_view(), name="sign_up"),
     path("users/", views.user_list, name="user_list"),
     path("recipe/create/", views.RecipeCreateView.as_view(), name="recipe_create"),
-    path(
-        "recipes/<int:pk>/",
-        views.recipe_detail_view.recipe_detail,
-        name="recipe_detail",
-    ),
+    path("recipes/<int:pk>/", views.recipe_detail_view, name="recipe_detail"),
     path("recipes/", views.recipe_list_view.recipe_list, name="recipe_list"),
     path(
         "recipes/<int:recipe_pk>/comment/", comment_view.add_comment, name="add_comment"
@@ -53,9 +49,12 @@ urlpatterns = [
         name="delete_comment",
     ),
     path(
-        "recipes/comment/<int:comment_pk>/reply/",
-        comment_view.reply_to_comment,
-        name="reply_to_comment",
+        "recipes/<int:recipe_pk>/comments/api/",
+        comment_view.recipe_comments_api,
+        name="recipe_comments_api",
+    ),
+    path(
+        "api/users/mentions/", comment_view.get_user_mentions, name="get_user_mentions"
     ),
     path("recipes/<int:pk>/favorite/", views.toggle_favorite, name="toggle_favorite"),
 ]

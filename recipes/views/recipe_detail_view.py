@@ -77,23 +77,27 @@ def recipe_list(request):
     return render(request, "recipe_list.html", context)
 
 
-def recipe_detail(request, pk):
-    """Display single recipe detail with ingredients and instructions"""
+def recipe_detail_view(request, pk):
     recipe = get_object_or_404(
-        Recipe.objects.select_related("author").prefetch_related(
-            "ingredients",
-            "instructions",
-        ),
-        pk=pk,
+        Recipe.objects.prefetch_related("ingredients", "instructions"), pk=pk
     )
 
-    # 用 related_name 访问
-    ingredients = recipe.ingredients.all()
-    instructions = recipe.instructions.all().order_by("step")
+    sort = request.GET.get("sort", "newest")
+
+    comments = recipe.comments.filter(parent_comment__isnull=True)
+
+    if sort == "top":
+        comments = comments.annotate(num_likes=Count("likes")).order_by(
+            "-num_likes", "-created_at"
+        )
+    elif sort == "oldest":
+        comments = comments.order_by("created_at")
+    else:  # newest
+        comments = comments.order_by("-created_at")
 
     context = {
         "recipe": recipe,
-        "ingredients": ingredients,
-        "instructions": instructions,
+        "comments": comments,
+        "sort": sort,
     }
     return render(request, "recipe_detail.html", context)

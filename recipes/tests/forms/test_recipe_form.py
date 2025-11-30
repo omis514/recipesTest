@@ -17,6 +17,8 @@ class RecipeFormTestCase(TestCase):
             "title": "Test Recipe",
             "description": "A test recipe description",
             "difficulty": Recipe.Difficulty.EASY,
+            "spiceness": Recipe.Spiceness.NOT_SPICY,
+            "cuisine": Recipe.Cuisine.World,
             "time": 45,
         }
 

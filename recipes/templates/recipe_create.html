@@ -5,7 +5,7 @@
   <div class="row justify-content-center">
     <div class="col-lg-10 col-xl-8">
       <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-success text-white">
           <h2 class="mb-0">
             <i class="bi bi-plus-circle me-2"></i>Create New Recipe
           </h2>
@@ -91,6 +91,84 @@
                       <small class="form-text text-muted">{{ form.time.help_text }}</small>
                       {% endif %}
                     </div>
+                    <!-- Spiceness Field -->
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">
+                        Spiceness Level <span class="text-danger">*</span>
+                      </label>
+                      <div class="spiceness-buttons d-flex gap-2 flex-wrap">
+                        <input type="hidden" name="spiceness" id="id_spiceness" class="spiceness-input"
+                          value="{% if form.spiceness.value %}{{ form.spiceness.value }}{% endif %}">
+                        <button type="button" class="btn btn-sm spiceness-btn" data-level="0"
+                          style="background-color: #b3d77f; border-color: #d7eaaf; color: #000000;">
+                          Not Spicy
+                        </button>
+                        <button type="button" class="btn btn-sm spiceness-btn" data-level="1"
+                          style="background-color: #88b54a; border-color: #bee2c0; color: #ffffff;">
+                          Mild
+                        </button>
+                        <button type="button" class="btn btn-sm spiceness-btn" data-level="2"
+                          style="background-color: #ffeaa7; border-color: #fdcb6e; color: #545252;">
+                          Medium
+                        </button>
+                        <button type="button" class="btn btn-sm spiceness-btn" data-level="3"
+                          style="background-color: #ff7675; border-color: #e17055; color: #2b2c2c;">
+                          Hot
+                        </button>
+                        <button type="button" class="btn btn-sm spiceness-btn" data-level="4"
+                          style="background-color: #b21b1b; border-color: #7b1111; color: #fff;">
+                          Very Hot
+                        </button>
+                        <button type="button" class="btn btn-sm spiceness-btn" data-level="5"
+                          style="background-color: #000000; border-color: #c41a1a; color: #fff;">
+                          ULTRA Hot
+                        </button>
+                      </div>
+                      {% if form.spiceness.errors %}
+                      <div class="invalid-feedback d-block">
+                        {{ form.spiceness.errors }}
+                      </div>
+                      {% endif %}
+                    </div>
+                    <!-- Vegetarian Field -->
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">
+                        Vegetarian
+                      </label>
+                      <div class="d-flex align-items-center mt-2">
+                        <div class="form-check form-switch">
+                          {% if form.vegetarian.errors %}
+                          {% render_field form.vegetarian class="form-check-input vegetarian-toggle" id="id_vegetarian"
+                          %}
+                          <div class="invalid-feedback d-block">
+                            {{ form.vegetarian.errors }}
+                          </div>
+                          {% else %}
+                          {% render_field form.vegetarian class="form-check-input vegetarian-toggle" id="id_vegetarian" %}
+                          {% endif %}
+                          <label class="form-check-label ms-2" for="id_vegetarian">
+                            <span id="vegetarian-label">{% if form.vegetarian.value %}Yes{% else %}No{% endif %}</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Cuisine Field -->
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">
+                        Cuisine <span class="text-danger">*</span>
+                      </label>
+                      {% if form.cuisine.errors %}
+                      {% render_field form.cuisine class="form-select is-invalid" %}
+                      <div class="invalid-feedback">
+                        {{ form.cuisine.errors }}
+                      </div>
+                      {% else %}
+                      {% render_field form.cuisine class="form-select" %}
+                      {% endif %}
+                      {% if form.cuisine.help_text %}
+                      <small class="form-text text-muted">{{ form.cuisine.help_text }}</small>
+                      {% endif %}
+                    </div>
                     <!-- Image Field -->
                     <div class="mb-3">
                       <label for="{{ form.image.id_for_label }}" class="form-label fw-bold">
@@ -168,7 +246,7 @@
                             {{ ingredient_form.id }}
                             {% endif %}
                             <button type="button" class="btn btn-sm btn-outline-danger remove-ingredient"
-                              style="display: none;">
+                              style="display: none; border-radius: 0.33rem;">
                               <i class="bi bi-trash"></i>
                             </button>
                           </div>
@@ -176,7 +254,8 @@
                       </div>
                       {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-ingredient">
+                    <button type="button" class="btn btn-sm btn-outline-success mt-2" id="add-ingredient"
+                      style="border-radius: 1rem;">
                       <i class="bi bi-plus-circle me-1"></i>Add Ingredient
                     </button>
                     {% if ingredient_formset.non_form_errors %}
@@ -272,8 +351,9 @@
                   </div>
                   {% endfor %}
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-instruction">
-                  <i class="bi bi-plus-circle me-1"></i>Add instruction
+                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-instruction"
+                  style="border-radius: 0.33rem;">
+                  <i class="bi bi-plus-circle me-1"></i>Add Instruction
                 </button>
                 {% if instruction_formset.non_form_errors %}
                 <div class="alert alert-danger mt-2 small">
@@ -288,10 +368,11 @@
             </div>
             {% endif %}
             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-              <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary me-md-2">
+              <a href="{% url 'dashboard' %}" class="btn me-md-2 bg-danger text-white cancel-create-recipe-btn">
                 <i class="bi bi-x-circle me-2"></i>Cancel
               </a>
-              <button type="submit" class="btn btn-primary">
+              <button type="submit"
+                class="btn btn-primary bg-success btn-outline-success text-white cancel-create-recipe-btn">
                 <i class="bi bi-check-circle me-2"></i>Create Recipe
               </button>
             </div>
@@ -368,6 +449,66 @@
 
   .instruction-form-row:hover {
     background-color: #e9ecef;
+  }
+
+  .spiceness-buttons {
+    margin-top: 0.5rem;
+  }
+
+  .spiceness-btn {
+    transition: all 0.2s;
+    border-width: 2px;
+    font-weight: 500;
+    opacity: 0.6;
+    border-radius: 0.75rem;
+  }
+
+  .spiceness-btn:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .cancel-create-recipe-btn.active {
+    opacity: 1;
+    border-width: 3px;
+    font-weight: 700;
+  }
+
+  .cancel-create-recipe-btn {
+    transition: all 0.2s;
+    border-width: 2px;
+    font-weight: 500;
+    opacity: 0.85;
+    border-radius: 0.75rem;
+  }
+
+  .cancel-create-recipe-btn:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .cancel-create-recipe-btn.active {
+    opacity: 1;
+    border-width: 3px;
+    font-weight: 700;
+  }
+
+  /* Vegetarian Toggle Switch */
+  .vegetarian-toggle {
+    width: 3rem;
+    height: 1.5rem;
+    cursor: pointer;
+  }
+
+  .vegetarian-toggle:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+  }
+
+  .vegetarian-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
   }
 </style>
 
@@ -483,6 +624,7 @@
         updateIngredientRemoveButtons();
       }
     });
+
 
     // INSTRUCTIONS FORMSET LOGIC
     const instructionFormsetPrefix = '{{ instruction_formset.prefix }}';
@@ -690,6 +832,59 @@
           const combinedText = steps.map((text, index) => `${index + 1}. ${text}`).join('\\n');
           instructionsField.value = combinedText;
         }
+      });
+    }
+
+    // RECIPE SPICENESS BUTTONS LOGIC
+    const spicenessContainer = document.querySelector('.spiceness-buttons');
+    if (spicenessContainer) {
+      const spicenessInput = document.getElementById('id_spiceness');
+
+      // Handle spiceness button clicks
+      spicenessContainer.addEventListener('click', function (e) {
+        if (e.target.closest('.spiceness-btn')) {
+          const btn = e.target.closest('.spiceness-btn');
+          const level = btn.getAttribute('data-level');
+
+          // Update hidden input
+          if (spicenessInput) {
+            spicenessInput.value = level;
+          }
+
+          // Remove active state from all buttons
+          spicenessContainer.querySelectorAll('.spiceness-btn').forEach(function (b) {
+            b.classList.remove('active');
+            b.style.opacity = '0.6';
+            b.style.boxShadow = '';
+          });
+
+          // Add active state to clicked button
+          btn.classList.add('active');
+          btn.style.opacity = '1';
+          btn.style.boxShadow = '0 0 0 0.2rem rgba(0, 123, 255, 0.25)';
+        }
+      });
+
+      // Set initial active state for existing spiceness value
+      if (spicenessInput && spicenessInput.value) {
+        const level = spicenessInput.value;
+        const btn = spicenessContainer.querySelector(`.spiceness-btn[data-level="${level}"]`);
+        if (btn) {
+          btn.classList.add('active');
+          btn.style.opacity = '1';
+          btn.style.boxShadow = '0 0 0 0.2rem rgba(0, 123, 255, 0.25)';
+        }
+      }
+    }
+
+    // VEGETARIAN TOGGLE SWITCH LOGIC
+    const vegetarianToggle = document.getElementById('id_vegetarian');
+    const vegetarianLabel = document.getElementById('vegetarian-label');
+
+    if (vegetarianToggle && vegetarianLabel) {
+      vegetarianToggle.addEventListener('change', function () {
+        const isChecked = this.checked;
+        vegetarianLabel.textContent = isChecked ? 'Yes' : 'No';
       });
     }
   });

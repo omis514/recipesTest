@@ -7,10 +7,13 @@ are left untouched—if a create fails (e.g., due to duplicates), the error
 is swallowed and generation continues.
 """
 
+import json
 from faker import Faker
-from random import randint, random
 from django.core.management.base import BaseCommand, CommandError
-from recipes.models import User
+from django.conf import settings
+from django.core.files import File
+from recipes.models import User, Recipe, Ingredient, Instruction, Comment
+from django.utils.dateparse import parse_datetime
 
 
 user_fixtures = [
@@ -68,6 +71,8 @@ class Command(BaseCommand):
         """
         self.create_users()
         self.users = User.objects.all()
+        self.create_recipes_from_json()
+        self.create_comments_from_json()
 
     def create_users(self):
         """
@@ -144,6 +149,288 @@ class Command(BaseCommand):
             first_name=data["first_name"],
             last_name=data["last_name"],
         )
+
+    def create_recipes_from_json(self):
+        """
+        Create recipes from the fake_recipes.json file.
+
+        Reads recipe data from JSON and creates Recipe, Ingredient, and Instruction
+        objects.
+        """
+        try:
+            json_path = (
+                settings.BASE_DIR
+                / "static"
+                / "json"
+                / "fake_recipes"
+                / "fake_recipes.json"
+            )
+
+            # Check if file exists
+            if not json_path.exists():
+                return
+
+            with open(json_path, "r", encoding="utf-8") as f:
+                recipes_data = json.load(f)
+
+            for recipe_data in recipes_data:
+                self.create_recipe_from_data(recipe_data)
+
+        except Exception as e:
+            pass
+
+    def create_recipe_from_data(self, recipe_data):
+        """
+        Create a single recipe from recipe data dictionary parsed from JSON.
+        """
+        try:
+            author_username = recipe_data.get("author_username", "@johndoe")
+            author = User.objects.filter(username=author_username).first()
+
+            if not author:
+                # If specified user doesn't exist, use the first available user
+                author = User.objects.first()
+
+            if not author:
+                # No users available, skip recipe creation
+                return
+
+            # Check if recipe already exists
+            title = recipe_data.get("title")
+            if Recipe.objects.filter(title=title).exists():
+                return
+
+            recipe = Recipe.objects.create(
+                author=author,
+                title=title,
+                description=recipe_data.get("description", ""),
+                vegetarian=recipe_data.get("vegetarian", False),
+                difficulty=recipe_data.get("difficulty", Recipe.Difficulty.EASY),
+                spiceness=recipe_data.get("spiceness", Recipe.Spiceness.NOT_SPICY),
+                cuisine=recipe_data.get("cuisine", Recipe.Cuisine.World),
+                time=recipe_data.get("time", 30),
+            )
+
+            # Handle image if provided
+            image_filename = recipe_data.get("image")
+            if image_filename:
+                self.add_recipe_image(recipe, image_filename)
+
+            # Add ingredients
+            for ing_data in recipe_data.get("ingredients", []):
+                Ingredient.objects.create(
+                    recipe=recipe,
+                    name=ing_data.get("name", ""),
+                    quantity=ing_data.get("quantity"),
+                    unit=ing_data.get("unit", ""),
+                )
+
+            # Add instructions
+            for inst_data in recipe_data.get("instructions", []):
+                Instruction.objects.create(
+                    recipe=recipe,
+                    step=inst_data.get("step"),
+                    description=inst_data.get("description", ""),
+                )
+
+        except Exception as e:
+            pass
+
+    def add_recipe_image(self, recipe, image_filename):
+        """
+        Copy image from static/images to media/recipe/images and assign to recipe.
+        """
+        try:
+            # Source path in static/images
+            source_path = settings.BASE_DIR / "static" / "images" / image_filename
+
+            if not source_path.exists():
+                print(f"Image file {image_filename} not found")
+                return
+
+            with open(source_path, "rb") as f:
+                recipe.image.save(image_filename, File(f), save=True)
+
+        except Exception as e:
+            print(f"Error adding image {image_filename} to recipe {recipe.title}: {e}")
+            pass
+
+    def create_comments_from_json(self):
+        """
+        Create comments from the fake_comments.json file.
+
+        Reads comment data from JSON and creates Comment objects with proper
+        relationships (recipe, author, parent_comment, reply_to).
+        """
+        try:
+            json_path = (
+                settings.BASE_DIR
+                / "static"
+                / "json"
+                / "fake_recipes"
+                / "fake_comments.json"
+            )
+
+            # Check if file exists
+            if not json_path.exists():
+                return
+
+            with open(json_path, "r", encoding="utf-8") as f:
+                comments_data = json.load(f)
+
+            # Get all recipes and users for mapping
+            recipes = list(Recipe.objects.all().order_by("id"))
+            users = list(User.objects.all().order_by("id"))
+
+            # Create a mapping of user IDs to user objects for faster lookup
+            users_by_id = {user.id: user for user in users}
+
+            if not recipes or not users:
+                return
+
+            # First pass: create all top-level comments (no parent_comment)
+            created_comments = {}
+
+            for comment_data in comments_data:
+                if comment_data.get("model") == "recipes.comment":
+                    fields = comment_data.get("fields", {})
+                    parent_comment_id = fields.get("parent_comment")
+
+                    # Only create top-level comments in first pass
+                    if not parent_comment_id:
+                        comment = self.create_comment_from_data(
+                            comment_data, created_comments, recipes, users, users_by_id
+                        )
+                        if comment:
+                            pk = comment_data.get("pk")
+                            if pk:
+                                created_comments[pk] = comment
+
+            # Second pass: create reply comments (with parent_comment)
+            for comment_data in comments_data:
+                if comment_data.get("model") == "recipes.comment":
+                    fields = comment_data.get("fields", {})
+                    parent_comment_id = fields.get("parent_comment")
+
+                    # Only create reply comments in second pass
+                    if parent_comment_id:
+                        comment = self.create_comment_from_data(
+                            comment_data, created_comments, recipes, users, users_by_id
+                        )
+                        if comment:
+                            pk = comment_data.get("pk")
+                            if pk:
+                                created_comments[pk] = comment
+
+        except Exception as e:
+            print(f"Error creating comments: {e}")
+            pass
+
+    def create_comment_from_data(
+        self, comment_data, created_comments, recipes, users, users_by_id
+    ):
+        """
+        Create a single comment from comment data dictionary parsed from JSON.
+
+        Args:
+            comment_data (dict): Dictionary containing comment information from JSON.
+            created_comments (dict): Dictionary mapping original PKs to created Comment objects.
+            recipes (list): List of Recipe objects ordered by ID.
+            users (list): List of User objects ordered by ID.
+            users_by_id (dict): Dictionary mapping user IDs to User objects.
+
+        Returns:
+            Comment: The created comment object, or None if creation failed.
+        """
+        try:
+            fields = comment_data.get("fields", {})
+
+            # Get recipe by index (recipe_id - 1 to convert to 0-based index)
+            recipe_id = fields.get("recipe")
+            if recipe_id and recipe_id > 0 and recipe_id <= len(recipes):
+                recipe = recipes[recipe_id - 1]
+            else:
+                return None
+
+            # Get author by actual database ID first, then fall back to index
+            author_id = fields.get("author")
+            author = None
+            if author_id:
+                # Try to get by actual database ID
+                author = users_by_id.get(author_id)
+                # If not found, try index-based lookup as fallback
+                if not author and author_id > 0 and author_id <= len(users):
+                    author = users[author_id - 1]
+
+            if not author:
+                return None
+
+            # Get parent comment if specified
+            parent_comment = None
+            parent_comment_id = fields.get("parent_comment")
+            if parent_comment_id and parent_comment_id in created_comments:
+                parent_comment = created_comments[parent_comment_id]
+
+            # Get reply_to user by actual database ID first, then fall back to index
+            reply_to = None
+            reply_to_id = fields.get("reply_to")
+            if reply_to_id:
+                # Try to get by actual database ID
+                reply_to = users_by_id.get(reply_to_id)
+                # If not found, try index-based lookup as fallback
+                if not reply_to and reply_to_id > 0 and reply_to_id <= len(users):
+                    reply_to = users[reply_to_id - 1]
+
+            # Parse timestamps
+            created_at = None
+            updated_at = None
+            created_at_str = fields.get("created_at")
+            updated_at_str = fields.get("updated_at")
+
+            if created_at_str:
+                created_at = parse_datetime(created_at_str)
+            if updated_at_str:
+                updated_at = parse_datetime(updated_at_str)
+
+            # Check if comment already exists to avoid duplicates
+            content = fields.get("content", "")
+            existing_comment = Comment.objects.filter(
+                recipe=recipe,
+                author=author,
+                content=content,
+                parent_comment=parent_comment,
+            ).first()
+
+            if existing_comment:
+                # Comment already exists, return it instead of creating a new one
+                return existing_comment
+
+            # Create the comment
+            comment = Comment.objects.create(
+                recipe=recipe,
+                author=author,
+                content=content,
+                parent_comment=parent_comment,
+                reply_to=reply_to,
+            )
+
+            # Update timestamps if provided (using update to bypass auto_now/auto_now_add)
+            update_kwargs = {}
+            if created_at:
+                update_kwargs["created_at"] = created_at
+            if updated_at:
+                update_kwargs["updated_at"] = updated_at
+
+            if update_kwargs:
+                Comment.objects.filter(pk=comment.pk).update(**update_kwargs)
+                # Refresh from database to get updated timestamps
+                comment.refresh_from_db()
+
+            return comment
+
+        except Exception as e:
+            print(f"Error creating comment: {e}")
+            return None
 
 
 def create_username(first_name, last_name):
