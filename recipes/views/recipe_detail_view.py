@@ -8,7 +8,7 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Prefetch, Q
-from recipes.models import Recipe, Comment
+from recipes.models import Recipe, Comment, Rating
 
 
 def recipe_list(request):
@@ -95,9 +95,15 @@ def recipe_detail_view(request, pk):
     else:  # newest
         comments = comments.order_by("-created_at")
 
+    user_rating = 0
+    if request.user.is_authenticated:
+        user_rating = Rating.objects.filter(recipe=recipe, user=request.user).first()
+        user_rating_score = user_rating.rating if user_rating else 0
+
     context = {
         "recipe": recipe,
         "comments": comments,
         "sort": sort,
+        "user_rating_score": user_rating_score
     }
     return render(request, "recipe_detail.html", context)

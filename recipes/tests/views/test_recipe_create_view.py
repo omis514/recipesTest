@@ -22,6 +22,7 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
             "difficulty": Recipe.Difficulty.EASY,
             "spiceness": Recipe.Spiceness.NOT_SPICY,
             "cuisine": Recipe.Cuisine.World,
+            "vegetarian": True,
             "time": "45",
             "ingredients-TOTAL_FORMS": "1",
             "ingredients-INITIAL_FORMS": "0",
@@ -92,6 +93,9 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
         self.assertEqual(recipe.author, self.user)
         self.assertEqual(recipe.description, "A test recipe description")
         self.assertEqual(recipe.difficulty, Recipe.Difficulty.EASY)
+        self.assertEqual(recipe.spiceness, Recipe.Spiceness.NOT_SPICY)
+        self.assertEqual(recipe.cuisine, Recipe.Cuisine.World)
+        self.assertTrue(recipe.vegetarian)
         self.assertEqual(recipe.time, 45)
 
         ingredient = recipe.ingredients.first()
@@ -124,7 +128,8 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
 
     def test_unsuccessful_recipe_create_with_invalid_ingredient_formset(self):
         self.client.login(username=self.user.username, password="Password123")
-        self.form_input["ingredients-0-name"] = ""  # Invalid - name is required
+        # Invalid - name is required
+        self.form_input["ingredients-0-name"] = ""
         before_count = Recipe.objects.count()
         response = self.client.post(self.url, self.form_input)
         after_count = Recipe.objects.count()
@@ -215,3 +220,55 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
         self.assertEqual(after_count, before_count)
         instruction_formset = response.context["instruction_formset"]
         self.assertFalse(instruction_formset.is_valid())
+
+    def test_recipe_create_with_different_spiceness_levels(self):
+        self.client.login(username=self.user.username, password="Password123")
+        self.form_input["spiceness"] = Recipe.Spiceness.HOT
+        response = self.client.post(self.url, self.form_input, follow=True)
+
+        recipe = Recipe.objects.get(title="Test Recipe")
+        self.assertEqual(recipe.spiceness, Recipe.Spiceness.HOT)
+
+    def test_recipe_create_with_different_cuisine(self):
+        self.client.login(username=self.user.username, password="Password123")
+        self.form_input["cuisine"] = Recipe.Cuisine.ITALIAN
+        response = self.client.post(self.url, self.form_input, follow=True)
+
+        recipe = Recipe.objects.get(title="Test Recipe")
+        self.assertEqual(recipe.cuisine, Recipe.Cuisine.ITALIAN)
+
+    def test_recipe_create_with_vegetarian_false(self):
+        self.client.login(username=self.user.username, password="Password123")
+        self.form_input["vegetarian"] = False
+        response = self.client.post(self.url, self.form_input, follow=True)
+
+        recipe = Recipe.objects.get(title="Test Recipe")
+        self.assertFalse(recipe.vegetarian)
+
+    def test_unsuccessful_recipe_create_with_invalid_spiceness(self):
+        self.client.login(username=self.user.username, password="Password123")
+        self.form_input["spiceness"] = 10  # Invalid spiceness value
+        before_count = Recipe.objects.count()
+        response = self.client.post(self.url, self.form_input)
+        after_count = Recipe.objects.count()
+
+        self.assertEqual(after_count, before_count)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recipe_create.html")
+        form = response.context["form"]
+        self.assertTrue(form.is_bound)
+        self.assertFalse(form.is_valid())
+
+    def test_unsuccessful_recipe_create_with_invalid_cuisine(self):
+        self.client.login(username=self.user.username, password="Password123")
+        self.form_input["cuisine"] = 100  # Invalid cuisine value
+        before_count = Recipe.objects.count()
+        response = self.client.post(self.url, self.form_input)
+        after_count = Recipe.objects.count()
+
+        self.assertEqual(after_count, before_count)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "recipe_create.html")
+        form = response.context["form"]
+        self.assertTrue(form.is_bound)
+        self.assertFalse(form.is_valid())

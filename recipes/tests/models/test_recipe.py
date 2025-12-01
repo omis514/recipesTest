@@ -150,6 +150,87 @@ class RecipeModelTestCase(TestCase):
     def test_str_returns_title(self):
         self.assertEqual(str(self.recipe), "Test Title")
 
+    def test_default_spiceness_is_not_spicy(self):
+        new_recipe = Recipe.objects.create(
+            author=self.author,
+            title="Test Recipe 2",
+        )
+        self.assertEqual(new_recipe.spiceness, Recipe.Spiceness.NOT_SPICY)
+
+    def test_spiceness_must_be_in_choices(self):
+        self.recipe.spiceness = 10
+        self._assert_recipe_is_invalid()
+
+    def test_spiceness_can_be_not_spicy(self):
+        self.recipe.spiceness = Recipe.Spiceness.NOT_SPICY
+        self._assert_recipe_is_valid()
+
+    def test_spiceness_can_be_mild(self):
+        self.recipe.spiceness = Recipe.Spiceness.MILD
+        self._assert_recipe_is_valid()
+
+    def test_spiceness_can_be_medium(self):
+        self.recipe.spiceness = Recipe.Spiceness.MEDIUM
+        self._assert_recipe_is_valid()
+
+    def test_spiceness_can_be_hot(self):
+        self.recipe.spiceness = Recipe.Spiceness.HOT
+        self._assert_recipe_is_valid()
+
+    def test_spiceness_can_be_very_hot(self):
+        self.recipe.spiceness = Recipe.Spiceness.VERY_HOT
+        self._assert_recipe_is_valid()
+
+    def test_default_cuisine_is_world(self):
+        new_recipe = Recipe.objects.create(
+            author=self.author,
+            title="Test Recipe 2",
+        )
+        self.assertEqual(new_recipe.cuisine, Recipe.Cuisine.World)
+
+    def test_cuisine_must_be_in_choices(self):
+        self.recipe.cuisine = 100
+        self._assert_recipe_is_invalid()
+
+    def test_cuisine_can_be_world(self):
+        self.recipe.cuisine = Recipe.Cuisine.World
+        self._assert_recipe_is_valid()
+
+    def test_cuisine_can_be_british(self):
+        self.recipe.cuisine = Recipe.Cuisine.BRITISH
+        self._assert_recipe_is_valid()
+
+    def test_cuisine_can_be_italian(self):
+        self.recipe.cuisine = Recipe.Cuisine.ITALIAN
+        self._assert_recipe_is_valid()
+
+    def test_cuisine_can_be_chinese(self):
+        self.recipe.cuisine = Recipe.Cuisine.Chinese
+        self._assert_recipe_is_valid()
+
+    def test_cuisine_can_be_japanese(self):
+        self.recipe.cuisine = Recipe.Cuisine.Japanese
+        self._assert_recipe_is_valid()
+
+    def test_cuisine_can_be_indian(self):
+        self.recipe.cuisine = Recipe.Cuisine.Indian
+        self._assert_recipe_is_valid()
+
+    def test_default_vegetarian_is_false(self):
+        new_recipe = Recipe.objects.create(
+            author=self.author,
+            title="Test Recipe 2",
+        )
+        self.assertFalse(new_recipe.vegetarian)
+
+    def test_vegetarian_can_be_true(self):
+        self.recipe.vegetarian = True
+        self._assert_recipe_is_valid()
+
+    def test_vegetarian_can_be_false(self):
+        self.recipe.vegetarian = False
+        self._assert_recipe_is_valid()
+
     def _assert_recipe_is_valid(self):
         try:
             self.recipe.full_clean()

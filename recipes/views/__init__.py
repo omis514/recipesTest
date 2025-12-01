@@ -11,3 +11,6 @@ from .recipe_detail_view import *
 from .recipe_list_view import *
 from .recipe_list_view_with_comments import *
 from .toggle_favorite_view import *
+from .report_view import *
+from .reported_recipes_view import *
+from .rating_view import *

@@ -3,7 +3,7 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Count, Prefetch, Q, Avg
 from recipes.models import Recipe, Comment
 
 
@@ -24,9 +24,12 @@ def recipe_list(request):
     recipes = (
         Recipe.objects.select_related("author")
         .prefetch_related(
-            top_comment_prefetch, "comments"  # Also get all comments for counting
+            top_comment_prefetch, "comments", "ratings"  # Also get all comments for counting
         )
-        .annotate(total_comments=Count("comments", distinct=True))
+        .annotate(total_comments=Count("comments", distinct=True),
+                  average_rating=Avg("ratings__rating"),
+                  rating_count=Count("ratings", distinct=True)
+                  )
     )
 
     # Filter by difficulty if requested
@@ -55,6 +58,8 @@ def recipe_list(request):
     sort_by = request.GET.get("sort", "newest")
     if sort_by == "popular":
         recipes = recipes.order_by("-total_comments", "-created_at")
+    elif sort_by == "rating":
+        recipes = recipes.order_by("-average_rating", "-rating_count")
     elif sort_by == "oldest":
         recipes = recipes.order_by("created_at")
     else:  # newest (default)

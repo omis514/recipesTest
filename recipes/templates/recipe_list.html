@@ -98,6 +98,9 @@
                       href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiceness %}spiceness={{ selected_spiceness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=popular">
                       Most Popular
                     </a></li>
+                  <li><a class="dropdown-item {% if sort_by == 'top_rated' %}active{% endif %}"
+                      href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiceness %}spiceness={{ selected_spiceness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=top_rated">
+                      Top Rated
                   <li><a class="dropdown-item {% if sort_by == 'oldest' %}active{% endif %}"
                       href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiceness %}spiceness={{ selected_spiceness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=oldest">
                       Oldest First
@@ -201,6 +204,19 @@
             {# Recipe Content Section #}
             <div class="recipe-content">
               <h5 class="recipe-title">{{ recipe.title }}</h5>
+
+              {# Rating Display #}
+              <div class="mb-2">
+                {% if recipe.average_rating %}
+                <span class="badge bg-warning text-dark" title="{{ recipe.rating_count }} ratings">
+                  <i class="bi bi-star-fill"></i>
+                  {{ recipe.average_rating|floatformat:1 }} / 5
+                  <small>({{ recipe.rating_count }})</small>
+                </span>
+                {% else %}
+                <span class="badge bg-secondary">Unrated</span>
+                {% endif %}
+              </div>
 
               {% if recipe.description %}
               <p class="recipe-description">{{ recipe.description|truncatewords:15 }}</p>

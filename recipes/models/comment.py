@@ -152,3 +152,11 @@ class Comment(models.Model):
                     pass  # User doesn't exist, leave reply_to as None
 
         super().save(*args, **kwargs)
+
+    def get_author_rating(self):
+        """Return the user's rating for a recipe"""
+        from .rating import Rating
+
+        rating = Rating.objects.filter(recipe=self.recipe, user=self.author).first()
+
+        return rating.rating if rating else None

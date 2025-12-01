@@ -11,6 +11,15 @@
           <div class="d-flex justify-content-between align-items-center">
             <h2 class="mb-0">
               <i class="bi bi-journal-text me-2"></i>{{ recipe.title }}
+              {% if recipe.average_rating %}
+              <span class="badge bg-warning text-dark ms-2" title="{{ recipe.rating_count }} ratings">
+                <i class="bi bi-star-fill"></i>
+                {{ recipe.average_rating|floatformat:1 }} / 5
+                <small>({{ recipe.rating_count }})</small>
+              </span>
+              {% else %}
+              <span class="badge bg-secondary ms-2">Unrated</span>
+              {% endif %}
             </h2>
             <div class="text-end">
               <span class="badge {% if recipe.difficulty == 1 %}bg-success{% elif recipe.difficulty == 2 %}bg-warning text-dark{% elif recipe.difficulty == 3 %}bg-danger{% else %}bg-secondary{% endif %}">
@@ -120,6 +129,29 @@
         </div>
       </div>
 
+      {# User Rating #}
+      {% if user.is_authenticated %}
+      <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <h5 class="mb-0 text-muted">
+            <i class="bi bi-star me-2"></i>Rate this recipe
+          </h5>
+          <div class="rating-widget" data-user-rating="{{ user_rating_score }}" data-recipe-pk="{{ recipe.pk }}">
+            {% for i in "54321"|make_list %}
+            <i class="bi bi-star-fill rating-star" data-score="{{ i }}"></i>
+            {% endfor %}
+            <span class="ms-3 text-muted small" id="rating-message">
+              {% if user_rating_score %}
+                Your rating: <strong>{{ user_rating_score }}</strong> stars
+              {% else %}
+                Click a star to rate
+              {% endif %}
+            </span>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
       {# Comments Section with @ Reply Feature #}
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-light">
@@ -144,15 +176,15 @@
                   <button type="button" class="btn-close btn-close-white ms-2" onclick="cancelReply()"></button>
                 </span>
               </div>
-              
-              <div class="input-group">
-                <textarea name="content" 
-                          id="comment-textarea" 
-                          class="form-control" 
-                          placeholder="Share your thoughts about this recipe..." 
-                          rows="3" 
-                          required></textarea>
-                <button class="btn btn-primary" type="submit" id="submit-comment-btn">
+              <textarea name="content"
+                        id="comment-textarea"
+                        class="form-control"
+                        placeholder="Share your thoughts about this recipe..."
+                        rows="3"
+                        required></textarea>
+
+              <div class="d-flex justify-content-center mt-2">
+                <button class="btn btn-primary w-25" type="submit" id="submit-comment-btn">
                   <i class="bi bi-send"></i> Post
                 </button>
               </div>
@@ -180,6 +212,15 @@
                         <strong class="comment-author" data-username="{{ comment.author.username }}">
                           {{ comment.author.get_full_name|default:comment.author.username }}
                         </strong>
+                        {# Display Author's Rating next to Comment #}
+                        {% with author_rating=comment.get_author_rating %}
+                        {% if author_rating %}
+                        <span class="badge bg-warning text-dark ms-2 small" title="Recipe rating given by this user">
+                          <i class="bi bi-star-fill"></i>
+                          {{ author_rating }} / 5
+                        </span>
+                        {% endif %}
+                        {% endwith %}
                         <span class="text-muted small ms-2">{{ comment.created_at|timesince }} ago</span>
                         {% if comment.author == user or user.is_staff %}
                         <button class="btn btn-sm btn-link text-danger float-end delete-comment" data-comment-id="{{ comment.pk }}">
@@ -273,20 +314,40 @@
           </div>
         </div>
       </div>
+    </div>
 
-      {# Bottom action buttons #}
-      <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-        <a href="{% url 'recipe_list' %}" class="btn btn-outline-secondary me-md-2">
-          <i class="bi bi-arrow-left-circle me-2"></i>Back to recipes
-        </a>
-        <a href="{% url 'dashboard' %}" class="btn btn-outline-primary me-md-2">
-          <i class="bi bi-house me-2"></i>Dashboard
-        </a>
-        <a href="{% url 'recipe_create' %}" class="btn btn-primary">
-          <i class="bi bi-plus-circle me-2"></i>Create another recipe
-        </a>
-      </div>
+    {# Bottom action buttons #}
+    <div class="d-grid gap-2 d-md-flex justify-content-center gap-2 mt-1 mb-4">
+      <a href="{% url 'recipe_list' %}" class="btn btn-outline-secondary me-md-2">
+        <i class="bi bi-arrow-left-circle me-2"></i>Back to recipes
+      </a>
 
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-primary me-md-2">
+        <i class="bi bi-house me-2"></i>Dashboard
+      </a>
+
+      {% if user.is_authenticated %}
+      <form action="{% url 'toggle_favorite' recipe.pk %}" method="post" class="d-inline me-md-2">
+        {% csrf_token %}
+        {% if user in recipe.favorites.all %}
+        <button type="submit" class="btn btn-danger">
+          <i class="bi bi-heart-fill me-2"></i>Unfavorite
+        </button>
+        {% else %}
+        <button type="submit" class="btn btn-outline-danger">
+          <i class="bi bi-heart me-2"></i>Favorite
+        </button>
+        {% endif %}
+      </form>
+      <a href="{% url 'report_recipe' recipe.pk %}" class="btn btn-outline-warning me-md-2">
+        <i class="bi bi-flag me-2"></i>Report Recipe
+      </a>
+      {% endif %}
+
+      <a href="{% url 'recipe_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Create another recipe
+      </a>
+    </div>
     </div>
   </div>
 </div>
@@ -450,6 +511,34 @@
     0% { background: #fff3cd; }
     100% { background: transparent; }
   }
+
+  .rating-widget {
+      display: flex;
+      align-items: center;
+      direction: rtl;
+  }
+
+  .rating-star {
+      font-size: 1.8rem;
+      color: #e9ecef;
+      cursor: pointer;
+      transition: color 0.2s;
+      margin-right: 2px;
+  }
+
+  .rating-widget .ms-3 {
+      direction: ltr;
+  }
+
+  .rating-widget > .rating-star {
+      order: 1;
+  }
+  .rating-star[data-score="5"] { order: 1; }
+  .rating-star[data-score="4"] { order: 2; }
+  .rating-star[data-score="3"] { order: 3; }
+  .rating-star[data-score="2"] { order: 4; }
+  .rating-star[data-score="1"] { order: 5; }
+
 </style>
 
 {% block extra_js %}
@@ -834,6 +923,86 @@ document.addEventListener('DOMContentLoaded', function() {
         <p class="mt-3">No comments yet. Be the first to share your thoughts!</p>
       </div>
     `;
+  }
+
+  const ratingWidget = document.querySelector('.rating-widget');
+  if (ratingWidget) {
+      const stars = ratingWidget.querySelectorAll('.rating-star');
+      const ratingMessage = document.getElementById('rating-message');
+      const recipePk = ratingWidget.dataset.recipePk;
+      let currentRating = parseInt(ratingWidget.dataset.userRating);
+
+      // Helper to update star appearance
+      function updateStars(score) {
+          stars.forEach(star => {
+              const starScore = parseInt(star.dataset.score);
+              star.style.color = starScore <= score ? '#ffc107' : '#e9ecef';
+          });
+      }
+
+      // Initial draw
+      updateStars(currentRating);
+
+      // Hover effect
+      stars.forEach(star => {
+          star.addEventListener('mouseover', function() {
+              const hoverScore = parseInt(this.dataset.score);
+              updateStars(hoverScore);
+          });
+
+          star.addEventListener('mouseout', function() {
+              updateStars(currentRating); // Revert to current saved rating
+          });
+
+          star.addEventListener('click', function() {
+              const newScore = parseInt(this.dataset.score);
+              submitRating(newScore);
+          });
+      });
+
+      function submitRating(score) {
+          fetch(`{% url "submit_rating" 0 %}`.replace('0', recipePk), {
+              method: 'POST',
+              headers: {
+                  'X-CSRFToken': '{{ csrf_token }}',
+                  'X-Requested-With': 'XMLHttpRequest',
+                  'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              // CORRECTED: Send 'rating' instead of 'score' in the request body
+              body: `rating=${rating}`
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  // Update frontend state
+                  currentRating = score;
+                  updateStars(currentRating);
+
+                  // Update message
+                  ratingMessage.innerHTML = `Your rating: <strong>${score}</strong> stars`;
+
+                  // Update overall rating display
+                  const overallRatingContainer = document.getElementById('overall-rating-badge');
+                  if (overallRatingContainer) {
+                      overallRatingContainer.classList.remove('bg-secondary');
+                      overallRatingContainer.classList.add('bg-warning', 'text-dark');
+                      overallRatingContainer.innerHTML = `
+                          <i class="bi bi-star-fill"></i>
+                          ${data.average_rating} / 5
+                          <small>(${data.rating_count})</small>
+                      `;
+                      overallRatingContainer.title = `${data.rating_count} ratings`;
+                  }
+
+              } else {
+                  alert(data.error || 'Failed to submit rating.');
+              }
+          })
+          .catch(error => {
+              console.error('Error submitting rating:', error);
+              alert('An error occurred while submitting your rating.');
+          });
+      }
   }
 });
 </script>
