@@ -209,9 +209,18 @@
               <div class="mb-2">
                 {% if recipe.average_rating %}
                 <span class="badge bg-warning text-dark" title="{{ recipe.rating_count }} ratings">
-                  <i class="bi bi-star-fill"></i>
-                  {{ recipe.average_rating|floatformat:1 }} / 5
-                  <small>({{ recipe.rating_count }})</small>
+                  {% for i in "12345"|make_list %}
+                    {% with score=i|add:0 %}
+                      {% if recipe.average_rating >= score %}
+                        <i class="bi bi-star-fill"></i>
+                      {% elif recipe.average_rating >= score|add:"-0.5" %}
+                        <i class="bi bi-star-half"></i>
+                      {% else %}
+                        <i class="bi bi-star"></i>
+                      {% endif %}
+                    {% endwith %}
+                  {% endfor %}
+                  <small class="ms-1">({{ recipe.rating_count }})</small>
                 </span>
                 {% else %}
                 <span class="badge bg-secondary">Unrated</span>

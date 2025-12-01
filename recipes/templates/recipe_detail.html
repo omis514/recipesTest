@@ -12,13 +12,22 @@
             <h2 class="mb-0">
               <i class="bi bi-journal-text me-2"></i>{{ recipe.title }}
               {% if recipe.average_rating %}
-              <span class="badge bg-warning text-dark ms-2" title="{{ recipe.rating_count }} ratings">
-                <i class="bi bi-star-fill"></i>
-                {{ recipe.average_rating|floatformat:1 }} / 5
-                <small>({{ recipe.rating_count }})</small>
+              <span id="overall-rating-badge" class="badge bg-warning text-dark ms-2" title="{{ recipe.rating_count }} ratings">
+                {% for i in "12345"|make_list %}
+                  {% with score=i|add:0 %}
+                    {% if recipe.average_rating >= score %}
+                      <i class="bi bi-star-fill"></i>
+                    {% elif recipe.average_rating >= score|add:"-0.5" %}
+                      <i class="bi bi-star-half"></i>
+                    {% else %}
+                      <i class="bi bi-star"></i>
+                    {% endif %}
+                  {% endwith %}
+                {% endfor %}
+                <small class="ms-1">({{ recipe.rating_count }})</small>
               </span>
               {% else %}
-              <span class="badge bg-secondary ms-2">Unrated</span>
+              <span id="overall-rating-badge" class="badge bg-secondary ms-2">Unrated</span>
               {% endif %}
             </h2>
             <div class="text-end">
@@ -213,15 +222,22 @@
                           {{ comment.author.get_full_name|default:comment.author.username }}
                         </strong>
                         {# Display Author's Rating next to Comment #}
+                        <span class="user-rating-badge text-warning ms-2 small" data-username="{{ comment.author.username }}">
                         {% with author_rating=comment.get_author_rating %}
-                        {% if author_rating %}
-                        <span class="badge bg-warning text-dark ms-2 small" title="Recipe rating given by this user">
-                          <i class="bi bi-star-fill"></i>
-                          {{ author_rating }} / 5
-                        </span>
-                        {% endif %}
+                          {% if author_rating %}
+                            {% for i in "12345"|make_list %}
+                              {% with score=i|add:0 %}
+                                {% if author_rating >= score %}
+                                  <i class="bi bi-star-fill"></i>
+                                {% else %}
+                                  <i class="bi bi-star"></i>
+                                {% endif %}
+                              {% endwith %}
+                            {% endfor %}
+                          {% endif %}
                         {% endwith %}
-                        <span class="text-muted small ms-2">{{ comment.created_at|timesince }} ago</span>
+                        </span>
+                        <span class="small ms-2">{{ comment.created_at|timesince }} ago</span>
                         {% if comment.author == user or user.is_staff %}
                         <button class="btn btn-sm btn-link text-danger float-end delete-comment" data-comment-id="{{ comment.pk }}">
                           <i class="bi bi-trash"></i>
@@ -789,6 +805,20 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function addCommentToDOM(commentData) {
+    let starsHTML = '';
+    const ratingWidget = document.querySelector('.rating-widget');
+    const currentRating = ratingWidget ? (parseInt(ratingWidget.dataset.userRating) || 0) : 0;
+
+    if (currentRating > 0) {
+      for (let i = 1; i <= 5; i++) {
+        if (currentRating >= i) {
+          starsHTML += '<i class="bi bi-star-fill"></i> ';
+        } else {
+          starsHTML += '<i class="bi bi-star"></i> ';
+        }
+      }
+    }
+
     const commentHTML = `
       <div class="comment-item mb-3 new-comment" data-comment-id="${commentData.id}">
         <div class="d-flex">
@@ -930,9 +960,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const stars = ratingWidget.querySelectorAll('.rating-star');
       const ratingMessage = document.getElementById('rating-message');
       const recipePk = ratingWidget.dataset.recipePk;
-      let currentRating = parseInt(ratingWidget.dataset.userRating);
+      let currentRating = parseInt(ratingWidget.dataset.userRating) || 0;
 
-      // Helper to update star appearance
       function updateStars(score) {
           stars.forEach(star => {
               const starScore = parseInt(star.dataset.score);
@@ -940,10 +969,58 @@ document.addEventListener('DOMContentLoaded', function() {
           });
       }
 
-      // Initial draw
+      function updateOverallBadge(data) {
+          const overallRatingContainer = document.getElementById('overall-rating-badge');
+          if (overallRatingContainer) {
+              if (data.rating_count > 0) {
+                  overallRatingContainer.className = 'badge bg-warning text-dark ms-2';
+
+                  let starsHtml = '';
+                  const avg = parseFloat(data.average_rating);
+                  for (let i = 1; i <= 5; i++) {
+                      if (avg >= i) {
+                          starsHtml += '<i class="bi bi-star-fill"></i> ';
+                      } else if (avg >= i - 0.5) {
+                          starsHtml += '<i class="bi bi-star-half"></i> ';
+                      } else {
+                          starsHtml += '<i class="bi bi-star"></i> ';
+                      }
+                  }
+
+                  overallRatingContainer.innerHTML = `
+                      ${starsHtml}
+                      <small class="ms-1">(${data.rating_count})</small>
+                  `;
+                  overallRatingContainer.title = `${data.rating_count} ratings`;
+              } else {
+                  overallRatingContainer.className = 'badge bg-secondary ms-2';
+                  overallRatingContainer.innerHTML = 'Unrated';
+                  overallRatingContainer.title = '';
+              }
+          }
+      }
+
+      function updateUserCommentRatings(score) {
+          const badges = document.querySelectorAll(`.user-rating-badge[data-username="${currentUser}"]`);
+
+          let starsHtml = '';
+          if (score > 0) {
+              for (let i = 1; i <= 5; i++) {
+                  if (score >= i) {
+                      starsHtml += '<i class="bi bi-star-fill"></i> ';
+                  } else {
+                      starsHtml += '<i class="bi bi-star"></i> ';
+                  }
+              }
+          }
+
+          badges.forEach(badge => {
+              badge.innerHTML = starsHtml;
+          });
+      }
+
       updateStars(currentRating);
 
-      // Hover effect
       stars.forEach(star => {
           star.addEventListener('mouseover', function() {
               const hoverScore = parseInt(this.dataset.score);
@@ -951,14 +1028,47 @@ document.addEventListener('DOMContentLoaded', function() {
           });
 
           star.addEventListener('mouseout', function() {
-              updateStars(currentRating); // Revert to current saved rating
+              updateStars(currentRating);
           });
 
           star.addEventListener('click', function() {
               const newScore = parseInt(this.dataset.score);
-              submitRating(newScore);
+
+              if (newScore === currentRating) {
+                  // If clicking the same star, remove the rating
+                  deleteRating();
+              } else {
+                  // Otherwise, submit the new rating
+                  submitRating(newScore);
+              }
           });
       });
+
+      function deleteRating() {
+          fetch(`{% url "delete_rating" 0 %}`.replace('0', recipePk), {
+              method: 'POST',
+              headers: {
+                  'X-CSRFToken': '{{ csrf_token }}',
+                  'X-Requested-With': 'XMLHttpRequest',
+              },
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  currentRating = 0;
+                  ratingWidget.dataset.userRating = 0;
+                  updateStars(0);
+                  ratingMessage.innerHTML = 'Click a star to rate';
+                  updateOverallBadge(data);
+                  updateUserCommentRatings(0);
+              } else {
+                  alert(data.error || 'Failed to remove rating.');
+              }
+          })
+          .catch(error => {
+              console.error('Error removing rating:', error);
+          });
+      }
 
       function submitRating(score) {
           fetch(`{% url "submit_rating" 0 %}`.replace('0', recipePk), {
@@ -968,32 +1078,17 @@ document.addEventListener('DOMContentLoaded', function() {
                   'X-Requested-With': 'XMLHttpRequest',
                   'Content-Type': 'application/x-www-form-urlencoded',
               },
-              // CORRECTED: Send 'rating' instead of 'score' in the request body
               body: `rating=${score}`
           })
           .then(response => response.json())
           .then(data => {
               if (data.success) {
-                  // Update frontend state
                   currentRating = score;
                   updateStars(currentRating);
-
-                  // Update message
+                  ratingWidget.dataset.userRating = score;
                   ratingMessage.innerHTML = `Your rating: <strong>${score}</strong> stars`;
-
-                  // Update overall rating display
-                  const overallRatingContainer = document.getElementById('overall-rating-badge');
-                  if (overallRatingContainer) {
-                      overallRatingContainer.classList.remove('bg-secondary');
-                      overallRatingContainer.classList.add('bg-warning', 'text-dark');
-                      overallRatingContainer.innerHTML = `
-                          <i class="bi bi-star-fill"></i>
-                          ${data.average_rating} / 5
-                          <small>(${data.rating_count})</small>
-                      `;
-                      overallRatingContainer.title = `${data.rating_count} ratings`;
-                  }
-
+                  updateOverallBadge(data);
+                  updateUserCommentRatings(score);
               } else {
                   alert(data.error || 'Failed to submit rating.');
               }

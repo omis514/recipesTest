@@ -7,7 +7,7 @@ from recipes.models import Recipe
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Count, Prefetch, Q, Avg
 from recipes.models import Recipe, Comment, Rating
 
 
@@ -78,9 +78,12 @@ def recipe_list(request):
 
 
 def recipe_detail_view(request, pk):
-    recipe = get_object_or_404(
-        Recipe.objects.prefetch_related("ingredients", "instructions"), pk=pk
+
+    queryset = Recipe.objects.prefetch_related("ingredients", "instructions").annotate(
+        average_rating=Avg("ratings__rating"),
+        rating_count=Count("ratings")
     )
+    recipe = get_object_or_404(queryset, pk=pk)
 
     sort = request.GET.get("sort", "newest")
 
@@ -92,7 +95,7 @@ def recipe_detail_view(request, pk):
         )
     elif sort == "oldest":
         comments = comments.order_by("created_at")
-    else:  # newest
+    else:
         comments = comments.order_by("-created_at")
 
     user_rating = 0
