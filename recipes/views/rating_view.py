@@ -32,7 +32,7 @@ def submit_rating(request, recipe_pk):
     )
 
     average_rating = recipe.metrics.get('average_rating') or 0.0
-    rating_count = recipe.metrics.get('rating_count') or 0.0
+    rating_count = recipe.metrics.get('rating_count') or 0
 
     return JsonResponse({
         "success": True,

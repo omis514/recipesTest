@@ -969,7 +969,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   'Content-Type': 'application/x-www-form-urlencoded',
               },
               // CORRECTED: Send 'rating' instead of 'score' in the request body
-              body: `rating=${rating}`
+              body: `rating=${score}`
           })
           .then(response => response.json())
           .then(data => {
