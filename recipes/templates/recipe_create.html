@@ -92,42 +92,42 @@
                         <small class="form-text text-muted">{{ form.time.help_text }}</small>
                         {% endif %}
                       </div>
-                      <!-- Spiceness Field -->
+                      <!-- Spiciness Field -->
                       <div class="mb-3">
                         <label class="form-label fw-bold text-white">
-                          Spiceness Level <span class="text-danger">*</span>
+                          Spiciness Level <span class="text-danger">*</span>
                         </label>
-                        <div class="spiceness-buttons d-flex gap-2 flex-wrap">
-                          <input type="hidden" name="spiceness" id="id_spiceness" class="spiceness-input"
-                            value="{% if form.spiceness.value %}{{ form.spiceness.value }}{% endif %}">
-                          <button type="button" class="btn btn-sm spiceness-btn" data-level="0"
+                        <div class="spiciness-buttons d-flex gap-2 flex-wrap">
+                          <input type="hidden" name="spiciness" id="id_spiciness" class="spiciness-input"
+                            value="{% if form.spiciness.value %}{{ form.spiciness.value }}{% endif %}">
+                          <button type="button" class="btn btn-sm spiciness-btn" data-level="0"
                             style="background-color: #b3d77f; border-color: #d7eaaf; color: #000000;">
                             Not Spicy
                           </button>
-                          <button type="button" class="btn btn-sm spiceness-btn" data-level="1"
+                          <button type="button" class="btn btn-sm spiciness-btn" data-level="1"
                             style="background-color: #88b54a; border-color: #bee2c0; color: #ffffff;">
                             Mild
                           </button>
-                          <button type="button" class="btn btn-sm spiceness-btn" data-level="2"
+                          <button type="button" class="btn btn-sm spiciness-btn" data-level="2"
                             style="background-color: #ffeaa7; border-color: #fdcb6e; color: #545252;">
                             Medium
                           </button>
-                          <button type="button" class="btn btn-sm spiceness-btn" data-level="3"
+                          <button type="button" class="btn btn-sm spiciness-btn" data-level="3"
                             style="background-color: #ff7675; border-color: #e17055; color: #2b2c2c;">
                             Hot
                           </button>
-                          <button type="button" class="btn btn-sm spiceness-btn" data-level="4"
+                          <button type="button" class="btn btn-sm spiciness-btn" data-level="4"
                             style="background-color: #b21b1b; border-color: #7b1111; color: #fff;">
                             Very Hot
                           </button>
-                          <button type="button" class="btn btn-sm spiceness-btn" data-level="5"
+                          <button type="button" class="btn btn-sm spiciness-btn" data-level="5"
                             style="background-color: #000000; border-color: #c41a1a; color: #fff;">
                             ULTRA Hot
                           </button>
                         </div>
-                        {% if form.spiceness.errors %}
+                        {% if form.spiciness.errors %}
                         <div class="invalid-feedback d-block">
-                          {{ form.spiceness.errors }}
+                          {{ form.spiciness.errors }}
                         </div>
                         {% endif %}
                       </div>
@@ -518,8 +518,8 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       }
 
-      /* Spiceness Buttons with Colors */
-      .spiceness-btn {
+      /* Spiciness Buttons with Colors */
+      .spiciness-btn {
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         transition: all 0.3s ease;
@@ -530,14 +530,14 @@
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
       }
 
-      .spiceness-btn:hover {
+      .spiciness-btn:hover {
         opacity: 1;
         transform: translateY(-2px) scale(1.05);
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         filter: brightness(1.1);
       }
 
-      .spiceness-btn.active {
+      .spiciness-btn.active {
         opacity: 1;
         transform: scale(1.08);
         box-shadow:
@@ -1010,23 +1010,23 @@
           });
         }
 
-        // RECIPE SPICENESS BUTTONS LOGIC
-        const spicenessContainer = document.querySelector('.spiceness-buttons');
-        if (spicenessContainer) {
-          const spicenessInput = document.getElementById('id_spiceness');
+        // RECIPE SPICINESS BUTTONS LOGIC
+        const spicinessContainer = document.querySelector('.spiciness-buttons');
+        if (spicinessContainer) {
+          const spicinessInput = document.getElementById('id_spiciness');
 
-          spicenessContainer.addEventListener('click', function (e) {
-            if (e.target.closest('.spiceness-btn')) {
-              const btn = e.target.closest('.spiceness-btn');
+          spicinessContainer.addEventListener('click', function (e) {
+            if (e.target.closest('.spiciness-btn')) {
+              const btn = e.target.closest('.spiciness-btn');
               const level = btn.getAttribute('data-level');
 
               // Update hidden input
-              if (spicenessInput) {
-                spicenessInput.value = level;
+              if (spicinessInput) {
+                spicinessInput.value = level;
               }
 
               // Remove active state from all buttons
-              spicenessContainer.querySelectorAll('.spiceness-btn').forEach(function (b) {
+              spicinessContainer.querySelectorAll('.spiciness-btn').forEach(function (b) {
                 b.classList.remove('active');
                 b.style.opacity = '0.6';
                 b.style.boxShadow = '';
@@ -1039,10 +1039,10 @@
             }
           });
 
-          // Set initial active state for existing spiceness value
-          if (spicenessInput && spicenessInput.value) {
-            const level = spicenessInput.value;
-            const btn = spicenessContainer.querySelector(`.spiceness-btn[data-level="${level}"]`);
+          // Set initial active state for existing spiciness value
+          if (spicinessInput && spicinessInput.value) {
+            const level = spicinessInput.value;
+            const btn = spicinessContainer.querySelector(`.spiciness-btn[data-level="${level}"]`);
             if (btn) {
               btn.classList.add('active');
               btn.style.opacity = '1';

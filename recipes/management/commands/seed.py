@@ -71,7 +71,7 @@ class Command(BaseCommand):
         """
         self.create_users()
         self.users = User.objects.all()
-        self.create_recipes_from_json()
+        self.recipes_in_json_order = self.create_recipes_from_json()
         self.create_comments_from_json()
 
     def create_users(self):
@@ -156,7 +156,11 @@ class Command(BaseCommand):
 
         Reads recipe data from JSON and creates Recipe, Ingredient, and Instruction
         objects.
+
+        Returns:
+            list: List of Recipe objects in the same order as they appear in the JSON file.
         """
+        recipes_in_order = []
         try:
             json_path = (
                 settings.BASE_DIR
@@ -168,20 +172,27 @@ class Command(BaseCommand):
 
             # Check if file exists
             if not json_path.exists():
-                return
+                return recipes_in_order
 
             with open(json_path, "r", encoding="utf-8") as f:
                 recipes_data = json.load(f)
 
             for recipe_data in recipes_data:
-                self.create_recipe_from_data(recipe_data)
+                recipe = self.create_recipe_from_data(recipe_data)
+                if recipe:
+                    recipes_in_order.append(recipe)
 
         except Exception as e:
             pass
 
+        return recipes_in_order
+
     def create_recipe_from_data(self, recipe_data):
         """
         Create a single recipe from recipe data dictionary parsed from JSON.
+
+        Returns:
+            Recipe: The created or existing Recipe object, or None if creation failed.
         """
         try:
             author_username = recipe_data.get("author_username", "@johndoe")
@@ -193,12 +204,13 @@ class Command(BaseCommand):
 
             if not author:
                 # No users available, skip recipe creation
-                return
+                return None
 
             # Check if recipe already exists
             title = recipe_data.get("title")
-            if Recipe.objects.filter(title=title).exists():
-                return
+            existing_recipe = Recipe.objects.filter(title=title).first()
+            if existing_recipe:
+                return existing_recipe
 
             recipe = Recipe.objects.create(
                 author=author,
@@ -206,7 +218,7 @@ class Command(BaseCommand):
                 description=recipe_data.get("description", ""),
                 vegetarian=recipe_data.get("vegetarian", False),
                 difficulty=recipe_data.get("difficulty", Recipe.Difficulty.EASY),
-                spiceness=recipe_data.get("spiceness", Recipe.Spiceness.NOT_SPICY),
+                spiciness=recipe_data.get("spiciness", Recipe.Spiciness.NOT_SPICY),
                 cuisine=recipe_data.get("cuisine", Recipe.Cuisine.World),
                 time=recipe_data.get("time", 30),
             )
@@ -233,8 +245,10 @@ class Command(BaseCommand):
                     description=inst_data.get("description", ""),
                 )
 
+            return recipe
+
         except Exception as e:
-            pass
+            return None
 
     def add_recipe_image(self, recipe, image_filename):
         """
@@ -278,8 +292,12 @@ class Command(BaseCommand):
             with open(json_path, "r", encoding="utf-8") as f:
                 comments_data = json.load(f)
 
-            # Get all recipes and users for mapping
-            recipes = list(Recipe.objects.all().order_by("id"))
+            # Use recipes in JSON order if available, otherwise fall back to database order
+            recipes = (
+                self.recipes_in_json_order
+                if hasattr(self, "recipes_in_json_order") and self.recipes_in_json_order
+                else list(Recipe.objects.all().order_by("id"))
+            )
             users = list(User.objects.all().order_by("id"))
 
             # Create a mapping of user IDs to user objects for faster lookup
@@ -335,7 +353,7 @@ class Command(BaseCommand):
         Args:
             comment_data (dict): Dictionary containing comment information from JSON.
             created_comments (dict): Dictionary mapping original PKs to created Comment objects.
-            recipes (list): List of Recipe objects ordered by ID.
+            recipes (list): List of Recipe objects in the same order as they appear in the JSON file.
             users (list): List of User objects ordered by ID.
             users_by_id (dict): Dictionary mapping user IDs to User objects.
 

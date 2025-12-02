@@ -150,35 +150,35 @@ class RecipeModelTestCase(TestCase):
     def test_str_returns_title(self):
         self.assertEqual(str(self.recipe), "Test Title")
 
-    def test_default_spiceness_is_not_spicy(self):
+    def test_default_spiciness_is_not_spicy(self):
         new_recipe = Recipe.objects.create(
             author=self.author,
             title="Test Recipe 2",
         )
-        self.assertEqual(new_recipe.spiceness, Recipe.Spiceness.NOT_SPICY)
+        self.assertEqual(new_recipe.spiciness, Recipe.Spiciness.NOT_SPICY)
 
-    def test_spiceness_must_be_in_choices(self):
-        self.recipe.spiceness = 10
+    def test_spiciness_must_be_in_choices(self):
+        self.recipe.spiciness = 10
         self._assert_recipe_is_invalid()
 
-    def test_spiceness_can_be_not_spicy(self):
-        self.recipe.spiceness = Recipe.Spiceness.NOT_SPICY
+    def test_spiciness_can_be_not_spicy(self):
+        self.recipe.spiciness = Recipe.Spiciness.NOT_SPICY
         self._assert_recipe_is_valid()
 
-    def test_spiceness_can_be_mild(self):
-        self.recipe.spiceness = Recipe.Spiceness.MILD
+    def test_spiciness_can_be_mild(self):
+        self.recipe.spiciness = Recipe.Spiciness.MILD
         self._assert_recipe_is_valid()
 
-    def test_spiceness_can_be_medium(self):
-        self.recipe.spiceness = Recipe.Spiceness.MEDIUM
+    def test_spiciness_can_be_medium(self):
+        self.recipe.spiciness = Recipe.Spiciness.MEDIUM
         self._assert_recipe_is_valid()
 
-    def test_spiceness_can_be_hot(self):
-        self.recipe.spiceness = Recipe.Spiceness.HOT
+    def test_spiciness_can_be_hot(self):
+        self.recipe.spiciness = Recipe.Spiciness.HOT
         self._assert_recipe_is_valid()
 
-    def test_spiceness_can_be_very_hot(self):
-        self.recipe.spiceness = Recipe.Spiceness.VERY_HOT
+    def test_spiciness_can_be_very_hot(self):
+        self.recipe.spiciness = Recipe.Spiciness.VERY_HOT
         self._assert_recipe_is_valid()
 
     def test_default_cuisine_is_world(self):

@@ -17,7 +17,7 @@ class RecipeFormTestCase(TestCase):
             "title": "Test Recipe",
             "description": "A test recipe description",
             "difficulty": Recipe.Difficulty.EASY,
-            "spiceness": Recipe.Spiceness.NOT_SPICY,
+            "spiciness": Recipe.Spiciness.NOT_SPICY,
             "cuisine": Recipe.Cuisine.World,
             "time": 45,
         }
@@ -27,7 +27,7 @@ class RecipeFormTestCase(TestCase):
         self.assertIn("title", form.fields)
         self.assertIn("description", form.fields)
         self.assertIn("difficulty", form.fields)
-        self.assertIn("spiceness", form.fields)
+        self.assertIn("spiciness", form.fields)
         self.assertIn("cuisine", form.fields)
         self.assertIn("vegetarian", form.fields)
         self.assertIn("time", form.fields)
@@ -125,37 +125,37 @@ class RecipeFormTestCase(TestCase):
         form = RecipeForm(data=self.form_input)
         self.assertFalse(form.is_valid())
 
-    def test_form_spiceness_field_is_choice_field(self):
+    def test_form_spiciness_field_is_choice_field(self):
         form = RecipeForm()
         # ModelForm with IntegerField choices becomes TypedChoiceField
         self.assertTrue(
             isinstance(
-                form.fields["spiceness"],
+                form.fields["spiciness"],
                 (forms.TypedChoiceField, forms.ChoiceField, forms.IntegerField),
             )
         )
 
-    def test_form_spiceness_is_required(self):
-        self.form_input["spiceness"] = ""
+    def test_form_spiciness_is_required(self):
+        self.form_input["spiciness"] = ""
         form = RecipeForm(data=self.form_input)
         self.assertFalse(form.is_valid())
-        self.assertIn("spiceness", form.errors)
+        self.assertIn("spiciness", form.errors)
 
-    def test_form_spiceness_can_be_not_spicy(self):
-        self.form_input["spiceness"] = Recipe.Spiceness.NOT_SPICY
+    def test_form_spiciness_can_be_not_spicy(self):
+        self.form_input["spiciness"] = Recipe.Spiciness.NOT_SPICY
         form = RecipeForm(data=self.form_input)
         self.assertTrue(form.is_valid())
 
-    def test_form_spiceness_can_be_hot(self):
-        self.form_input["spiceness"] = Recipe.Spiceness.HOT
+    def test_form_spiciness_can_be_hot(self):
+        self.form_input["spiciness"] = Recipe.Spiciness.HOT
         form = RecipeForm(data=self.form_input)
         self.assertTrue(form.is_valid())
 
-    def test_form_spiceness_cannot_be_invalid_choice(self):
-        self.form_input["spiceness"] = 10
+    def test_form_spiciness_cannot_be_invalid_choice(self):
+        self.form_input["spiciness"] = 10
         form = RecipeForm(data=self.form_input)
         self.assertFalse(form.is_valid())
-        self.assertIn("spiceness", form.errors)
+        self.assertIn("spiciness", form.errors)
 
     def test_form_cuisine_field_is_choice_field(self):
         form = RecipeForm()
@@ -206,14 +206,14 @@ class RecipeFormTestCase(TestCase):
         recipe = form.save(commit=False)
         self.assertFalse(recipe.vegetarian)
 
-    def test_form_must_save_spiceness_correctly(self):
-        self.form_input["spiceness"] = Recipe.Spiceness.HOT
+    def test_form_must_save_spiciness_correctly(self):
+        self.form_input["spiciness"] = Recipe.Spiciness.HOT
         form = RecipeForm(data=self.form_input)
         self.assertTrue(form.is_valid())
         recipe = form.save(commit=False)
         recipe.author = self.author
         recipe.save()
-        self.assertEqual(recipe.spiceness, Recipe.Spiceness.HOT)
+        self.assertEqual(recipe.spiciness, Recipe.Spiciness.HOT)
 
     def test_form_must_save_cuisine_correctly(self):
         self.form_input["cuisine"] = Recipe.Cuisine.ITALIAN

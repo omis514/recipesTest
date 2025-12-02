@@ -33,25 +33,25 @@
             <div class="col-md-8">
               <div class="d-flex flex-wrap gap-2 align-items-center">
                 <span class="text-muted me-2">Difficulty:</span>
-                <a href="?{% if selected_spiceness %}spiceness={{ selected_spiceness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}{% if sort_by %}sort={{ sort_by }}{% endif %}"
+                <a href="?{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}{% if sort_by %}sort={{ sort_by }}{% endif %}"
                   class="btn btn-sm {% if not selected_difficulty %}btn-primary{% else %}btn-outline-primary{% endif %}">
                   All
                 </a>
                 {% for value, label in difficulties %}
-                <a href="?difficulty={{ value }}{% if selected_spiceness %}&spiceness={{ selected_spiceness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
+                <a href="?difficulty={{ value }}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
                   class="btn btn-sm {% if selected_difficulty == value|stringformat:'s' %}btn-primary{% else %}btn-outline-primary{% endif %}">
                   {{ label }}
                 </a>
                 {% endfor %}
                 <div class="w-100 d-flex flex-nowrap gap-2 align-items-center">
-                  <span class="text-muted me-2">Spiceness:</span>
+                  <span class="text-muted me-2">Spiciness:</span>
                   <a href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}{% if sort_by %}sort={{ sort_by }}{% endif %}"
-                    class="btn btn-sm {% if not selected_spiceness %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    class="btn btn-sm {% if not selected_spiciness %}btn-primary{% else %}btn-outline-primary{% endif %}">
                     All
                   </a>
-                  {% for value, label in spicenesses %}
-                  <a href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}spiceness={{ value }}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
-                    class="btn btn-sm {% if selected_spiceness == value|stringformat:'s' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                  {% for value, label in spicinesses %}
+                  <a href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}spiciness={{ value }}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
+                    class="btn btn-sm {% if selected_spiciness == value|stringformat:'s' %}btn-primary{% else %}btn-outline-primary{% endif %}">
                     {{ label }}
                   </a>
                   {% endfor %}
@@ -69,12 +69,12 @@
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="cuisineDropdown">
                       <li><a class="dropdown-item {% if not selected_cuisine %}active{% endif %}"
-                          href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiceness %}spiceness={{ selected_spiceness }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}{% if sort_by %}sort={{ sort_by }}{% endif %}">
+                          href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}{% if sort_by %}sort={{ sort_by }}{% endif %}">
                           All Cuisines
                         </a></li>
                       {% for value, label in cuisines %}
                       <li><a class="dropdown-item {% if selected_cuisine == value|stringformat:'s' %}active{% endif %}"
-                          href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiceness %}spiceness={{ selected_spiceness }}&{% endif %}cuisine={{ value }}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                          href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}cuisine={{ value }}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
                           {{ label }}
                         </a></li>
                       {% endfor %}
@@ -91,18 +91,18 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortDropdown">
                   <li><a class="dropdown-item {% if sort_by == 'newest' or not sort_by %}active{% endif %}"
-                      href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiceness %}spiceness={{ selected_spiceness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=newest">
+                      href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=newest">
                       Newest First
                     </a></li>
                   <li><a class="dropdown-item {% if sort_by == 'popular' %}active{% endif %}"
-                      href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiceness %}spiceness={{ selected_spiceness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=popular">
+                      href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if selected
                       Most Popular
                     </a></li>
                   <li><a class="dropdown-item {% if sort_by == 'top_rated' %}active{% endif %}"
                       href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiceness %}spiceness={{ selected_spiceness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=top_rated">
                       Top Rated
                   <li><a class="dropdown-item {% if sort_by == 'oldest' %}active{% endif %}"
-                      href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiceness %}spiceness={{ selected_spiceness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=oldest">
+                      href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=oldest">
                       Oldest First
                     </a></li>
                 </ul>
@@ -124,16 +124,16 @@
               {% if recipe.image %}
               <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-image">
               <div class="placeholder-badges-left">
-                {# spiceness badge #}
-                <span class="spiceness-badge"
-                  style="outline: 1px solid #000; {% if recipe.spiceness == 0 %}background-color: #b3d77f; color: #000;{% elif recipe.spiceness == 1 %}background-color: #88b54a; color: #000;{% elif recipe.spiceness == 2 %}background-color: #ffeaa7; color: #000;{% elif recipe.spiceness == 3 %}background-color: #ff7657; color: #000;{% elif recipe.spiceness == 4 %}background-color: #b21b1b; color: #fff;{% elif recipe.spiceness == 5 %}background-color: #000000; color: #fff;{% endif %}">
-                  {% if recipe.spiceness == 1 %} 🫑
-                  {% elif recipe.spiceness == 2 %} 🌶️
-                  {% elif recipe.spiceness == 3 %} 🔥
-                  {% elif recipe.spiceness == 4 %} 🔥🔥🔥
-                  {% elif recipe.spiceness == 5 %} ☠️
+                {# spiciness badge #}
+                <span class="spiciness-badge"
+                  style="outline: 1px solid #000; {% if recipe.spiciness == 0 %}background-color: #b3d77f; color: #000;{% elif recipe.spiciness == 1 %}background-color: #88b54a; color: #000;{% elif recipe.spiciness == 2 %}background-color: #ffeaa7; color: #000;{% elif recipe.spiciness == 3 %}background-color: #ff7657; color: #000;{% elif recipe.spiciness == 4 %}background-color: #b21b1b; color: #fff;{% elif recipe.spiciness == 5 %}background-color: #000000; color: #fff;{% endif %}">
+                  {% if recipe.spiciness == 1 %} 🫑
+                  {% elif recipe.spiciness == 2 %} 🌶️
+                  {% elif recipe.spiciness == 3 %} 🔥
+                  {% elif recipe.spiciness == 4 %} 🔥🔥🔥
+                  {% elif recipe.spiciness == 5 %} ☠️
                   {% endif %}
-                  {{ recipe.get_spiceness_display }}
+                  {{ recipe.get_spiciness_display }}
                 </span>
 
                 {# Difficulty Badge #}
@@ -165,51 +165,73 @@
               {% else %}
               <div class="recipe-placeholder">
                 <div class="placeholder-badges-left">
-                  {# spiceness badge #}
-                  <span class="spiceness-badge"
-                    style="outline: 1rem solid #000; {% if recipe.spiceness == 0 %}background-color: #b3d77f; color: #000;{% elif recipe.spiceness == 1 %}background-color: #88b54a; color: #000;{% elif recipe.spiceness == 2 %}background-color: #ffeaa7; color: #000;{% elif recipe.spiceness == 3 %}background-color: #ff7657; color: #000;{% elif recipe.spiceness == 4 %}background-color: #b21b1b; color: #fff;{% elif recipe.spiceness == 5 %}background-color: #000000; color: #fff;{% endif %}">
-                    {% if recipe.spiceness == 1 %} 🫑
-                    {% elif recipe.spiceness == 2 %} 🌶️
-                    {% elif recipe.spiceness == 3 %} 🔥
-                    {% elif recipe.spiceness == 4 %} 🔥🔥🔥
-                    {% elif recipe.spiceness == 5 %} ☠️
+                  {# spiciness badge #}
+                  <span class="spiciness-badge"
+                    style="outline: 1px solid #000; {% if recipe.spiciness == 0 %}background-color: #b3d77f; color: #000;{% elif recipe.spiciness == 1 %}background-color: #88b54a; color: #000;{% elif recipe.spiciness == 2 %}background-color: #ffeaa7; color: #000;{% elif recipe.spiciness == 3 %}background-color: #ff7657; color: #000;{% elif recipe.spiciness == 4 %}background-color: #b21b1b; color: #fff;{% elif recipe.spiciness == 5 %}background-color: #000000; color: #fff;{% endif %}">
+                    {% if recipe.spiciness == 1 %} 🫑
+                    {% elif recipe.spiciness == 2 %} 🌶️
+                    {% elif recipe.spiciness == 3 %} 🔥
+                    {% elif recipe.spiciness == 4 %} 🔥🔥🔥
+                    {% elif recipe.spiciness == 5 %} ☠️
                     {% endif %}
-                    {{ recipe.get_spiceness_display }}
+                    {{ recipe.get_spiciness_display }}
                   </span>
 
                   {# Difficulty Badge #}
                   <span class="difficulty-badge 
                     {% if recipe.difficulty == 1 %}badge-easy
                     {% elif recipe.difficulty == 2 %}badge-medium
-                    {% else %}badge-hard{% endif %}">
+                    {% else %}badge-hard{% endif %}" style="outline: 1px solid #000;">
                     {{ recipe.get_difficulty_display }}
                   </span>
                 </div>
                 <div class="placeholder-badges-right">
+                  {% if recipe.vegetarian %}
+                  {# vegetarian badge #}
+                  <span class="vegetarian-badge bg-success" style="outline: 1px solid #000;">
+                    Vegetarian
+                  </span>
+                  {% endif %}
+
                   {# time badge #}
-                  <span class="time-badge">
+                  <span class="time-badge" style="outline: 1px solid #000;">
                     <i class="bi bi-clock"></i> {{ recipe.get_time }}
                   </span>
 
                   {# cuisine badge #}
-                  <span class="cuisine-badge bg-primary text-white">
+                  <span class="cuisine-badge bg-primary text-white" style="outline: 1px solid #000;">
                     {{ recipe.get_cuisine_display }}
                   </span>
                 </div>
                 <i class="bi bi-image display-1 text-muted"></i>
               </div>
               {% endif %}
+              <div class="favorite-badge-wrapper">
+                {% if user.is_authenticated %}
+                <form action="{% url 'toggle_favorite' recipe.pk %}" method="post" onsubmit="event.stopPropagation();">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  <button type="submit" class="btn btn-light rounded-circle shadow-sm favorite-btn" onclick="event.stopPropagation();" title="{% if user in recipe.favorites.all %}Unfavorite{% else %}Favorite{% endif %}">
+                    {% if user in recipe.favorites.all %}
+                    <i class="bi bi-heart-fill text-danger"></i>
+                    {% else %}
+                    <i class="bi bi-heart text-danger"></i>
+                    {% endif %}
+                  </button>
+                </form>
+                {% endif %}
+              </div>
             </div>
 
             {# Recipe Content Section #}
             <div class="recipe-content">
-              <h5 class="recipe-title">{{ recipe.title }}</h5>
-
-              {# Rating Display #}
-              <div class="mb-2">
-                {% if recipe.average_rating %}
-                <span class="badge bg-warning text-dark" title="{{ recipe.rating_count }} ratings">
-                  {% for i in "12345"|make_list %}
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="recipe-title mb-0">{{ recipe.title }}</h5>
+                {# Rating Display #}
+                <div class="flex-shrink-0 ms-2">
+                  {% if recipe.average_rating %}
+                  <span class="badge bg-warning text-dark" title="{{ recipe.rating_count }} ratings">
+                    {% for i in "12345"|make_list %}
                     {% with score=i|add:0 %}
                       {% if recipe.average_rating >= score %}
                         <i class="bi bi-star-fill"></i>
@@ -220,11 +242,14 @@
                       {% endif %}
                     {% endwith %}
                   {% endfor %}
-                  <small class="ms-1">({{ recipe.rating_count }})</small>
-                </span>
-                {% else %}
-                <span class="badge bg-secondary">Unrated</span>
-                {% endif %}
+                  </span>
+                  {% else %}
+                  <span class="badge bg-light text-muted border" title="No ratings yet">
+                    {% for i in "12345"|make_list %}
+                      <i class="bi bi-star"></i>{% endfor %}
+                  </span>
+                  {% endif %}
+                </div>
               </div>
 
               {% if recipe.description %}
@@ -258,11 +283,11 @@
               </span>
               <span class="stats-item">
                 <i class="bi bi-bar-chart"></i>
-                {{ recipe.ingredient_set.count }} ingredients
+                {{ recipe.ingredients.count }} ingredients
               </span>
               <span class="stats-item">
                 <i class="bi bi-list-ol"></i>
-                {{ recipe.instruction_set.count }} steps
+                {{ recipe.instructions.count }} steps
               </span>
             </div>
 
@@ -301,13 +326,13 @@
           {% if page_obj.has_previous %}
           <li class="page-item">
             <a class="page-link"
-              href="?page=1{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiceness %}&spiceness={{ selected_spiceness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+              href="?page=1{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
               First
             </a>
           </li>
           <li class="page-item">
             <a class="page-link"
-              href="?page={{ page_obj.previous_page_number }}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiceness %}&spiceness={{ selected_spiceness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+              href="?page={{ page_obj.previous_page_number }}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
               Previous
             </a>
           </li>
@@ -322,13 +347,13 @@
           {% if page_obj.has_next %}
           <li class="page-item">
             <a class="page-link"
-              href="?page={{ page_obj.next_page_number }}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiceness %}&spiceness={{ selected_spiceness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+              href="?page={{ page_obj.next_page_number }}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
               Next
             </a>
           </li>
           <li class="page-item">
             <a class="page-link"
-              href="?page={{ page_obj.paginator.num_pages }}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiceness %}&spiceness={{ selected_spiceness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+              href="?page={{ page_obj.paginator.num_pages }}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
               Last
             </a>
           </li>
@@ -443,7 +468,7 @@
   }
 
   .placeholder-badges-left .difficulty-badge,
-  .placeholder-badges-left .spiceness-badge {
+  .placeholder-badges-left .spiciness-badge {
     position: static;
     padding: 4px 12px;
     border-radius: 20px;
@@ -470,7 +495,7 @@
     text-align: right;
   }
 
-  .spiceness-badge {
+  .spiciness-badge {
     text-transform: none;
   }
 
@@ -719,8 +744,36 @@
   .dropdown-toggle {
     pointer-events: auto !important;
   }
+
+  .favorite-badge-wrapper {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 20;
+}
+
+.favorite-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  border: none;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.1);
+}
 </style>
 
-{# Bootstrap JS is already included in base.html, no need to load again #}
+<script>
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      window.location.reload();
+    }
+  });
+</script>
 
 {% endblock %}

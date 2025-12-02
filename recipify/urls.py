@@ -67,8 +67,14 @@ urlpatterns = [
         "api/users/mentions/", comment_view.get_user_mentions, name="get_user_mentions"
     ),
     path("recipes/<int:pk>/favorite/", views.toggle_favorite, name="toggle_favorite"),
-    path("recipes/<int:recipe_pk>/rate/", rating_view.submit_rating, name="submit_rating"),
-    path("recipes/<int:recipe_pk>/rate/delete/", rating_view.delete_rating, name="delete_rating"),
+    path(
+        "recipes/<int:recipe_pk>/rate/", rating_view.submit_rating, name="submit_rating"
+    ),
+    path(
+        "recipes/<int:recipe_pk>/rate/delete/",
+        rating_view.delete_rating,
+        name="delete_rating",
+    ),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -14,4 +14,8 @@ def toggle_favorite(request, pk):
     else:
         recipe.favorites.add(request.user)
 
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
+
     return redirect("recipe_detail", pk=pk)

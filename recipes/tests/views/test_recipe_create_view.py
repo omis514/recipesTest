@@ -20,7 +20,7 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
             "title": "Test Recipe",
             "description": "A test recipe description",
             "difficulty": Recipe.Difficulty.EASY,
-            "spiceness": Recipe.Spiceness.NOT_SPICY,
+            "spiciness": Recipe.Spiciness.NOT_SPICY,
             "cuisine": Recipe.Cuisine.World,
             "vegetarian": True,
             "time": "45",
@@ -93,7 +93,7 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
         self.assertEqual(recipe.author, self.user)
         self.assertEqual(recipe.description, "A test recipe description")
         self.assertEqual(recipe.difficulty, Recipe.Difficulty.EASY)
-        self.assertEqual(recipe.spiceness, Recipe.Spiceness.NOT_SPICY)
+        self.assertEqual(recipe.spiciness, Recipe.Spiciness.NOT_SPICY)
         self.assertEqual(recipe.cuisine, Recipe.Cuisine.World)
         self.assertTrue(recipe.vegetarian)
         self.assertEqual(recipe.time, 45)
@@ -221,13 +221,13 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
         instruction_formset = response.context["instruction_formset"]
         self.assertFalse(instruction_formset.is_valid())
 
-    def test_recipe_create_with_different_spiceness_levels(self):
+    def test_recipe_create_with_different_spiciness_levels(self):
         self.client.login(username=self.user.username, password="Password123")
-        self.form_input["spiceness"] = Recipe.Spiceness.HOT
+        self.form_input["spiciness"] = Recipe.Spiciness.HOT
         response = self.client.post(self.url, self.form_input, follow=True)
 
         recipe = Recipe.objects.get(title="Test Recipe")
-        self.assertEqual(recipe.spiceness, Recipe.Spiceness.HOT)
+        self.assertEqual(recipe.spiciness, Recipe.Spiciness.HOT)
 
     def test_recipe_create_with_different_cuisine(self):
         self.client.login(username=self.user.username, password="Password123")
@@ -245,9 +245,9 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
         recipe = Recipe.objects.get(title="Test Recipe")
         self.assertFalse(recipe.vegetarian)
 
-    def test_unsuccessful_recipe_create_with_invalid_spiceness(self):
+    def test_unsuccessful_recipe_create_with_invalid_spiciness(self):
         self.client.login(username=self.user.username, password="Password123")
-        self.form_input["spiceness"] = 10  # Invalid spiceness value
+        self.form_input["spiciness"] = 10  # Invalid spiciness value
         before_count = Recipe.objects.count()
         response = self.client.post(self.url, self.form_input)
         after_count = Recipe.objects.count()

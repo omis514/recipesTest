@@ -44,7 +44,7 @@
         "fields": {
             "recipe": 1,
             "author": 1,
-            "content": "@charlie They're definitely on the spicier side! If you want to tone it down, you can reduce the amount of hot sauce or add more butter. The recipe calls for hot level spiceness, so be prepared!",
+            "content": "@charlie They're definitely on the spicier side! If you want to tone it down, you can reduce the amount of hot sauce or add more butter. The recipe calls for hot level spiciness, so be prepared!",
             "parent_comment": 3,
             "reply_to": 3,
             "created_at": "2025-11-27T12:30:00Z",

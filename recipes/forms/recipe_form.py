@@ -13,7 +13,7 @@ class RecipeForm(forms.ModelForm):
             "title",
             "description",
             "difficulty",
-            "spiceness",
+            "spiciness",
             "vegetarian",
             "cuisine",
             "image",

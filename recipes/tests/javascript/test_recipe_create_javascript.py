@@ -347,13 +347,13 @@ class RecipeCreateJavaScriptTestCase(StaticLiveServerTestCase, LogInTester):
         except TimeoutException:
             self.fail("Expected alert dialog for empty form submission")
 
-    def test_clicking_spiceness_button_updates_hidden_input(self):
-        """Test that clicking a spiceness button updates the hidden input value."""
+    def test_clicking_spiciness_button_updates_hidden_input(self):
+        """Test that clicking a spiciness button updates the hidden input value."""
         self.driver.get(self.url)
 
         # Wait for page to load
         WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".spiceness-btn"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".spiciness-btn"))
         )
         WebDriverWait(self.driver, 5).until(
             lambda d: d.execute_script("return document.readyState") == "complete"
@@ -361,25 +361,25 @@ class RecipeCreateJavaScriptTestCase(StaticLiveServerTestCase, LogInTester):
 
         # Wait for hidden input to be present
         WebDriverWait(self.driver, 5).until(
-            EC.presence_of_element_located((By.ID, "id_spiceness"))
+            EC.presence_of_element_located((By.ID, "id_spiciness"))
         )
 
         # Find hidden input and button
-        hidden_input = self.driver.find_element(By.ID, "id_spiceness")
+        hidden_input = self.driver.find_element(By.ID, "id_spiciness")
         mild_button = self.driver.find_element(
-            By.CSS_SELECTOR, ".spiceness-btn[data-level='1']"
+            By.CSS_SELECTOR, ".spiciness-btn[data-level='1']"
         )
 
         # Verify initial value is empty
         initial_value = hidden_input.get_attribute("value") or ""
-        self.assertEqual(initial_value, "", "Initial spiceness value should be empty")
+        self.assertEqual(initial_value, "", "Initial spiciness value should be empty")
 
         # Click the mild button
         self.click_element(mild_button)
 
         # Wait for value to update
         WebDriverWait(self.driver, 5).until(
-            lambda d: d.find_element(By.ID, "id_spiceness").get_attribute("value")
+            lambda d: d.find_element(By.ID, "id_spiciness").get_attribute("value")
             == "1"
         )
 

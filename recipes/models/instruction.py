@@ -30,6 +30,7 @@ class Instruction(models.Model):
         """Model options."""
 
         unique_together = ("recipe", "step")
+        ordering = ["step"]
 
     def __str__(self):
         """Return a string representation of the instruction."""

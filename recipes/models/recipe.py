@@ -10,7 +10,7 @@ class Recipe(models.Model):
         MEDIUM = 2, "Medium"
         HARD = 3, "Hard"
 
-    class Spiceness(models.IntegerChoices):
+    class Spiciness(models.IntegerChoices):
         NOT_SPICY = 0, "Not Spicy"
         MILD = 1, "Mild"
         MEDIUM = 2, "Medium"
@@ -59,12 +59,12 @@ class Recipe(models.Model):
         default=Difficulty.EASY,
         help_text="Estimated difficulty of the recipe",
     )
-    spiceness = models.IntegerField(
+    spiciness = models.IntegerField(
         blank=False,
         null=False,
-        help_text="The spiceness level of the recipe",
-        choices=Spiceness.choices,
-        default=Spiceness.NOT_SPICY,
+        help_text="The spiciness level of the recipe",
+        choices=Spiciness.choices,
+        default=Spiciness.NOT_SPICY,
     )
     cuisine = models.IntegerField(
         blank=False,
@@ -74,8 +74,7 @@ class Recipe(models.Model):
         default=Cuisine.World,
     )
     vegetarian = models.BooleanField(
-        default=False,
-        help_text="Whether the recipe is vegetarian"
+        default=False, help_text="Whether the recipe is vegetarian"
     )
     image = models.ImageField(
         upload_to="recipe/images",
