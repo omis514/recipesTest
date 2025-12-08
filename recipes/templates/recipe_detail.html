@@ -1,362 +1,519 @@
 {% extends "base_content.html" %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="row justify-content-center">
-    <div class="col-lg-10 col-xl-8">
+<div class="glass-background-wrapper">
+  <div class="container mt-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-xl-8">
 
-      {# Original recipe detail content #}
-      <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white">
-          <div class="d-flex justify-content-between align-items-center">
-            <h2 class="mb-0">
-              <i class="bi bi-journal-text me-2"></i>{{ recipe.title }}
-              {% if recipe.average_rating %}
-              <span id="overall-rating-badge" class="badge bg-warning text-dark ms-2" title="{{ recipe.rating_count }} ratings">
-                {% for i in "12345"|make_list %}
-                  {% with score=i|add:0 %}
-                    {% if recipe.average_rating >= score %}
-                      <i class="bi bi-star-fill"></i>
-                    {% elif recipe.average_rating >= score|add:"-0.5" %}
-                      <i class="bi bi-star-half"></i>
-                    {% else %}
-                      <i class="bi bi-star"></i>
-                    {% endif %}
-                  {% endwith %}
-                {% endfor %}
-                <small class="ms-1">({{ recipe.rating_count }})</small>
-              </span>
-              {% else %}
-              <span id="overall-rating-badge" class="badge bg-light text-muted border ms-2" title="No ratings yet">
-                {% for i in "12345"|make_list %}<i class="bi bi-star"></i>{% endfor %}
-              </span>
-              {% endif %}
-            </h2>
-            <div class="text-end">
-              <span
-                class="badge {% if recipe.difficulty == 1 %}bg-success{% elif recipe.difficulty == 2 %}bg-warning text-dark{% elif recipe.difficulty == 3 %}bg-danger{% else %}bg-secondary{% endif %}">
-                {{ recipe.get_difficulty_display }}
-              </span>
-              <div class="small mt-1">⏱ {{ recipe.get_time }}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-body p-3">
-          <div class="row g-3">
-            <div class="col-md-7">
-              <p class="text-muted small mb-2">
-                By <strong>{{ recipe.author.get_full_name|default:recipe.author.username }}</strong>
-                · Created on {{ recipe.created_at|date:"d M Y" }}
-              </p>
-              {% if recipe.description %}
-              <p class="mb-0">{{ recipe.description }}</p>
-              {% else %}
-              <p class="mb-0 text-muted fst-italic">No description has been added for this recipe yet.</p>
-              {% endif %}
-            </div>
-
-            <div class="col-md-5">
-              {% if recipe.image %}
-              <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="img-fluid rounded w-100"
-                style="object-fit: cover; max-height: 200px;">
-              {% else %}
-              <div class="d-flex align-items-center justify-content-center text-muted border rounded"
-                style="min-height: 200px;">
-                <span class="small"><i class="bi bi-image me-1"></i>No image uploaded</span>
-              </div>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {# Ingredients and Instructions #}
-      <div class="row mb-4">
-        <div class="col-md-6 mb-3 mb-md-0">
-          <div class="card h-100 shadow-sm">
-            <div class="card-header bg-light">
-              <h5 class="mb-0 text-muted"><i class="bi bi-list-ul me-2"></i>Ingredients</h5>
-            </div>
-            <div class="card-body">
-              {% with ingredients=recipe.ingredients.all %}
-              {% if ingredients %}
-              <ul class="list-group list-group-flush">
-                {% for ing in ingredients %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>{{ ing.name }}</strong>
-                    {% if ing.description %}<div class="small text-muted">{{ ing.description }}</div>{% endif %}
-                  </div>
-                  <div class="text-end">
-                    {% if ing.quantity %}
-                    <span class="badge bg-primary-subtle text-primary-emphasis">
-                      {{ ing.quantity }}{% if ing.unit %} {{ ing.unit }}{% endif %}
-                    </span>
-                    {% elif ing.unit %}
-                    <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ ing.unit }}</span>
-                    {% endif %}
-                  </div>
-                </li>
-                {% endfor %}
-              </ul>
-              {% else %}
-              <p class="text-muted fst-italic mb-0">No ingredients have been added for this recipe.</p>
-              {% endif %}
-              {% endwith %}
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-6">
-          <div class="card h-100 shadow-sm">
-            <div class="card-header bg-light">
-              <h5 class="mb-0 text-muted"><i class="bi bi-list-ol me-2"></i>Instructions</h5>
-            </div>
-            <div class="card-body">
-              {% with instructions=recipe.instructions.all %}
-              {% if instructions %}
-              <ul class="list-group">
-                {% for step in instructions %}
-                <li class="list-group-item">
-                  <div class="fw-bold mb-1">Step {{ step.step|default:forloop.counter }}</div>
-                  <p class="mb-0" style="white-space: pre-line;">{{ step.description }}</p>
-                </li>
-                {% endfor %}
-              </ul>
-              {% else %}
-              <p class="text-muted fst-italic mb-0">No instructions have been added for this recipe.</p>
-              {% endif %}
-              {% endwith %}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {# User Rating #}
-      {% if user.is_authenticated %}
-      <div class="card shadow-sm mb-4">
-        <div class="card-body d-flex align-items-center justify-content-between">
-          <h5 class="mb-0 text-muted">
-            <i class="bi bi-star me-2"></i>Rate this recipe
-          </h5>
-          <div class="d-flex align-items-center gap-3">
-            <form action="{% url 'toggle_favorite' recipe.pk %}" method="post" class="d-inline">
-              {% csrf_token %}
-              {% if user in recipe.favorites.all %}
-              <button type="submit" class="btn btn-danger">
-                <i class="bi bi-heart-fill"></i>
-              </button>
-              {% else %}
-              <button type="submit" class="btn btn-outline-danger">
-                <i class="bi bi-heart"></i>
-              </button>
-              {% endif %}
-            </form>
-            <div class="rating-widget" data-user-rating="{{ user_rating_score }}" data-recipe-pk="{{ recipe.pk }}">
-              {% for i in "54321"|make_list %}
-              <i class="bi bi-star-fill rating-star" data-score="{{ i }}"></i>
-              {% endfor %}
-              <span class="ms-3 text-muted small" id="rating-message">
-                {% if user_rating_score %}
-                  Your rating: <strong>{{ user_rating_score }}</strong> stars
-                {% else %}
-                  Click a star to rate
-                {% endif %}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      {# Comments Section with @ Reply Feature #}
-      <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light">
-          <h5 class="mb-0">
-            <i class="bi bi-chat-dots me-2"></i>Comments
-            <span class="badge bg-primary ms-2" id="comment-count">{{ recipe.comments.count }}</span>
-          </h5>
-        </div>
-        <div class="card-body">
-          {# Main Comment Form #}
-          {% if user.is_authenticated %}
-          <div class="comment-input-container mb-4">
-            <form method="post" action="{% url 'add_comment' recipe.pk %}" id="main-comment-form">
-              {% csrf_token %}
-              <input type="hidden" name="parent_comment_id" id="parent-comment-id" value="">
-              <input type="hidden" name="reply_to_user" id="reply-to-user" value="">
-
-              {# Reply indicator #}
-              <div id="reply-indicator" class="reply-indicator mb-2 d-none">
-                <span class="badge bg-info text-dark">
-                  <i class="bi bi-reply-fill"></i> Replying to <span id="reply-to-name"></span>
-                  <button type="button" class="btn-close btn-close-white ms-2" onclick="cancelReply()"></button>
+        {# Recipe detail card #}
+        <div class="card glass-card shadow-sm mb-4">
+          <div class="card-header glass-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <h2 class="mb-0 text-white">
+                <i class="bi bi-journal-text me-2"></i>{{ recipe.title }}
+                  {% if recipe.average_rating %}
+                  <span id="overall-rating-badge" class="badge bg-warning text-dark ms-2"
+                    title="{{ recipe.rating_count }} ratings"
+                    data-average-rating="{{ recipe.average_rating }}">
+                    <span id="overall-stars"></span>
+                    <small class="ms-1">({{ recipe.rating_count }})</small>
+                  </span>
+                  {% else %}
+                  <span id="overall-rating-badge" class="badge bg-warning text-dark ms-2" title="No ratings yet">
+                    {% for i in "12345"|make_list %}<i class="bi bi-star"> </i>{% endfor %}
+                  </span>
+                  {% endif %}
+              </h2>
+              <div class="text-end">
+                <span
+                  class="badge difficulty-badge {% if recipe.difficulty == 1 %}difficulty-easy{% elif recipe.difficulty == 2 %}difficulty-medium{% elif recipe.difficulty == 3 %}difficulty-hard{% else %}difficulty-default{% endif %}">
+                  {{ recipe.get_difficulty_display }}
                 </span>
+                <div class="small mt-1 text-white">⏱ {{ recipe.get_time }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body p-4">
+            <div class="row g-3">
+              <div class="col-md-7">
+                <p class="text-white small mb-2" style="opacity: 0.8;">
+                  By <strong>{{ recipe.author.get_full_name|default:recipe.author.username }}</strong>
+                  · Created on {{ recipe.created_at|date:"d M Y" }}
+                </p>
+                {% if recipe.description %}
+                <p class="mb-0 text-white">{{ recipe.description }}</p>
+                {% else %}
+                <p class="mb-0 text-white fst-italic" style="opacity: 0.6;">No description has been added for this recipe
+                  yet.</p>
+                {% endif %}
               </div>
 
-              <div class="input-group">
-                <textarea name="content" id="comment-textarea" class="form-control"
-                  placeholder="Share your thoughts about this recipe..." rows="3" required></textarea>
-                <button class="btn btn-primary" type="submit" id="submit-comment-btn">
-                  <i class="bi bi-send"></i> Post
-                </button>
+              <div class="col-md-5">
+                {% if recipe.image %}
+                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="img-fluid rounded w-100 recipe-image"
+                  style="object-fit: cover; max-height: 200px;">
+                {% else %}
+                <div class="d-flex align-items-center justify-content-center text-white border rounded glass-placeholder"
+                  style="min-height: 200px;">
+                  <span class="small"><i class="bi bi-image me-1"></i>No image uploaded</span>
+                </div>
+                {% endif %}
               </div>
-            </form>
+            </div>
           </div>
-          {% else %}
-          <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>
-            Please <a href="{% url 'log_in' %}">log in</a> to leave a comment.
-          </div>
-          {% endif %}
+        </div>
 
-          {# Comments List #}
-          <div id="comments-container">
-            <div id="comments-list">
-              {% for comment in recipe.comments.all %}
-                {% if not comment.parent_comment %}
-                <div class="comment-item mb-3" data-comment-id="{{ comment.pk }}">
-                  <div class="d-flex">
-                    <div class="comment-avatar me-3">
-                      <div class="avatar-circle">{{ comment.author.username|first|upper }}</div>
-                    </div>
-                    <div class="flex-grow-1">
-                      <div class="comment-header">
-                        <strong class="comment-author" data-username="{{ comment.author.username }}">
-                          {{ comment.author.get_full_name|default:comment.author.username }}
-                        </strong>
-                        {# Display Author's Rating next to Comment #}
-                        <span class="user-rating-badge text-warning ms-2 small" data-username="{{ comment.author.username }}">
-                        {% with author_rating=comment.get_author_rating %}
-                          {% if author_rating %}
-                            {% for i in "12345"|make_list %}
-                              {% with score=i|add:0 %}
-                                {% if author_rating >= score %}
-                                  <i class="bi bi-star-fill"></i>
-                                {% else %}
-                                  <i class="bi bi-star"></i>
-                                {% endif %}
-                              {% endwith %}
-                            {% endfor %}
-                          {% endif %}
-                        {% endwith %}
-                        </span>
-                        <span class="small ms-2">{{ comment.created_at|timesince }} ago</span>
-                        {% if comment.author == user or user.is_staff %}
-                        <button class="btn btn-sm btn-link text-danger float-end delete-comment" data-comment-id="{{ comment.pk }}">
-                          <i class="bi bi-trash"></i>
-                        </button>
-                        {% endif %}
-                      </div>
-                      
-                      {# Comment content with @mentions #}
-                      <div class="comment-body">
-                        {% if comment.reply_to %}
-                        <span class="mention-tag">@{{ comment.reply_to.username }}</span>
-                        {% endif %}
-                        {{ comment.content|linebreaks }}
-                      </div>
-                      
-                      <div class="comment-actions mt-2">
-                        <button class="btn btn-sm btn-link like-btn {% if user in comment.likes.all %}liked{% endif %}" 
-                                data-comment-id="{{ comment.pk }}">
-                          <i class="bi {% if user in comment.likes.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
-                          <span class="like-count">{{ comment.like_count }}</span>
-                        </button>
-                        {% if user.is_authenticated %}
-                        <button class="btn btn-sm btn-link reply-btn" 
-                                data-comment-id="{{ comment.pk }}"
-                                data-comment-author="{{ comment.author.username }}">
-                          <i class="bi bi-reply"></i> Reply
-                        </button>
-                        {% endif %}
-                      </div>
+        {# Ingredients and Instructions #}
+        <div class="row mb-4">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <div class="card h-100 glass-card shadow-sm">
+              <div class="card-header glass-subheader">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-white">
+                      <i class="bi bi-list-ul me-2"></i>Ingredients
+                    </h5>
 
-                    {# Nested replies under the same comment #}
-                    {% if comment.replies.exists %}
-                    <div class="replies-section mt-3">
-                      {% for reply in comment.replies.all %}
-                      <div class="reply-item mb-2" data-reply-id="{{ reply.pk }}"
-                        data-parent-comment="{{ comment.pk }}">
-                        <div class="d-flex">
-                          <div class="reply-avatar me-2">
-                            <div class="avatar-circle-small">{{ reply.author.username|first|upper }}</div>
-                          </div>
-                          <div class="flex-grow-1">
-                            <div class="reply-header">
-                              <strong class="reply-author" data-username="{{ reply.author.username }}">
-                                {{ reply.author.username }}
-                              </strong>
-                              <span class="text-muted small ms-1">{{ reply.created_at|timesince }} ago</span>
-                              {% if reply.author == user or user.is_staff %}
-                              <button class="btn btn-sm btn-link text-danger float-end delete-reply"
-                                data-reply-id="{{ reply.pk }}">
-                                <i class="bi bi-trash"></i>
-                              </button>
-                              {% endif %}
-                            </div>
-                            <div class="reply-content">
-                              {% if reply.reply_to %}
-                              <span class="mention-tag">@{{ reply.reply_to.username }}</span>
-                              {% endif %}
-                              {{ reply.content }}
-                            </div>
-                            <div class="reply-actions mt-1">
-                              <button
-                                class="btn btn-sm btn-link like-reply-btn {% if user in reply.likes.all %}liked{% endif %}"
-                                data-reply-id="{{ reply.pk }}">
-                                <i
-                                  class="bi {% if user in reply.likes.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
-                                <span class="reply-like-count">{{ reply.like_count }}</span>
-                              </button>
-                              {% if user.is_authenticated %}
-                              <button class="btn btn-sm btn-link reply-to-reply-btn"
-                                data-parent-comment-id="{{ comment.pk }}"
-                                data-reply-author="{{ reply.author.username }}">
-                                <i class="bi bi-reply"></i> Reply
-                              </button>
-                              {% endif %}
-                            </div>
-                          </div>
-                        </div>
+                    {# Ingredient scaling controls #}
+                    <div class="scaling-controls d-flex align-items-center gap-2">
+                      <small class="text-white d-none d-sm-inline" style="opacity: 0.8;">Servings:</small>
+                      <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn glass-scale-btn scale-btn" id="scale-decrease">
+                          <i class="bi bi-dash"></i>
+                        </button>
+                        <button type="button"
+                                class="btn glass-scale-btn-current position-relative"
+                                id="current-scale"
+                                data-original-servings="{{ recipe.servings|default:4 }}">
+                          <span id="serving-number">{{ recipe.servings|default:4 }}</span>
+                          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"
+                                id="scale-badge">
+                            ×<span id="scale-multiplier">1</span>
+                          </span>
+                        </button>
+                        <button type="button" class="btn glass-scale-btn scale-btn" id="scale-increase">
+                          <i class="bi bi-plus"></i>
+                        </button>
                       </div>
-                      {% endfor %}
+                      <button type="button" class="btn btn-sm glass-scale-reset p-0 ms-1"
+                              id="reset-scale" title="Reset to original">
+                        <i class="bi bi-arrow-clockwise"></i>
+                      </button>
                     </div>
-                    {% endif %}
                   </div>
                 </div>
+
+                <div class="card-body">
+                  {# Quick scale buttons + info #}
+                  <div class="quick-scale-buttons mb-3 d-none" id="quick-scale-section">
+                    <small class="text-white d-block mb-2" style="opacity: 0.7;">Quick adjust:</small>
+                    <div class="btn-group btn-group-sm" role="group">
+                      <button type="button" class="btn glass-quick-scale quick-scale" data-factor="0.5">½×</button>
+                      <button type="button" class="btn glass-quick-scale quick-scale" data-factor="2">2×</button>
+                      <button type="button" class="btn glass-quick-scale quick-scale" data-factor="3">3×</button>
+                    </div>
+                  </div>
+
+                {# if your bug-fixed version uses ingredient_set, change to recipe.ingredient_set.all here #}
+                {% with ingredients=recipe.ingredients.all %}
+                {% if ingredients %}
+                <ul class="list-group list-group-flush glass-list" id="ingredients-list">
+                  {% for ing in ingredients %}
+                  <li class="list-group-item glass-list-item d-flex justify-content-between align-items-center ingredient-item">
+                    <div class="text-white">
+                      <strong>{{ ing.name }}</strong>
+                      {% if ing.description %}
+                      <div class="small" style="opacity: 0.7;">{{ ing.description }}</div>
+                      {% endif %}
+                    </div>
+                    <div class="text-end">
+                      {% if ing.quantity %}
+                      <span class="badge glass-badge ingredient-quantity"
+                            data-original-quantity="{{ ing.quantity }}"
+                            data-unit="{{ ing.unit|default:'' }}"
+                            data-ingredient-id="{{ ing.id }}">
+                        <span class="quantity-value">{{ ing.quantity }}</span>
+                        {% if ing.unit %}
+                          <span class="unit-label">{{ ing.unit }}</span>
+                        {% endif %}
+                      </span>
+                      {% elif ing.unit %}
+                      <span class="badge glass-badge-secondary">{{ ing.unit }}</span>
+                      {% endif %}
+                    </div>
+                  </li>
+                  {% endfor %}
+                </ul>
+
+                <div class="alert glass-alert-scaling mt-3 d-none small" id="scaling-info">
+                  <i class="bi bi-info-circle me-1"></i>
+                  <span id="scaling-message"></span>
+                </div>
+
+                {% else %}
+                <p class="text-white fst-italic mb-0" style="opacity: 0.6;">No ingredients have been added for this
+                  recipe.</p>
+                {% endif %}
+                {% endwith %}
               </div>
-              {% endif %}
-              {% empty %}
-              <div class="text-center py-4 text-muted" id="no-comments-message">
-                <i class="bi bi-chat-left-dots display-4"></i>
-                <p class="mt-3">No comments yet. Be the first to share your thoughts!</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card h-100 glass-card shadow-sm">
+              <div class="card-header glass-subheader">
+                <h5 class="mb-0 text-white"><i class="bi bi-list-ol me-2"></i>Instructions</h5>
               </div>
-              {% endfor %}
+              <div class="card-body">
+                {% with instructions=recipe.instructions.all %}
+                {% if instructions %}
+                <ul class="list-group glass-list">
+                  {% for step in instructions %}
+                  <li class="list-group-item glass-list-item">
+                    <div class="fw-bold mb-1 text-white">Step {{ step.step|default:forloop.counter }}</div>
+                    <p class="mb-0 text-white" style="white-space: pre-line; opacity: 0.9;">
+                      {{ step.description }}</p>
+                  </li>
+                  {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-white fst-italic mb-0" style="opacity: 0.6;">No instructions have been added for this
+                  recipe.</p>
+                {% endif %}
+                {% endwith %}
+              </div>
             </div>
           </div>
         </div>
+
+        {# User Rating #}
+        {% if user.is_authenticated %}
+        <div class="card shadow-sm mb-4">
+          <div class="card-body d-flex align-items-center justify-content-between">
+            <h5 class="mb-0 text-muted">
+              <i class="bi bi-star me-2"></i>Rate this recipe
+            </h5>
+            <div class="d-flex align-items-center gap-3">
+              <form action="{% url 'toggle_favorite' recipe.pk %}" method="post" class="d-inline">
+                {% csrf_token %}
+                {% if user in recipe.favorites.all %}
+                <button type="submit" class="btn btn-danger">
+                  <i class="bi bi-heart-fill"></i>
+                </button>
+                {% else %}
+                <button type="submit" class="btn btn-outline-danger">
+                  <i class="bi bi-heart"></i>
+                </button>
+                {% endif %}
+              </form>
+              <div class="rating-widget" data-user-rating="{{ user_rating_score }}" data-recipe-pk="{{ recipe.pk }}">
+                {% for i in "54321"|make_list %}
+                <i class="bi bi-star-fill rating-star" data-score="{{ i }}"></i>
+                {% endfor %}
+                <span class="ms-3 text-muted small" id="rating-message">
+                  {% if user_rating_score %}
+                    Your rating: <strong>{{ user_rating_score }}</strong> stars
+                  {% else %}
+                    Click a star to rate
+                  {% endif %}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        {# Comments Section with @ Reply Feature + sorting #}
+        <div class="card glass-card shadow-sm mb-4">
+          <div class="card-header glass-subheader">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0 text-white">
+                <i class="bi bi-chat-dots me-2"></i>Comments
+                <span class="badge glass-badge-count ms-2" id="comment-count">{{ recipe.comments.count }}</span>
+              </h5>
+              <div class="ms-3 d-flex align-items-center gap-2 flex-nowrap">
+                <span class="text-white small" style="opacity: 0.7;">Sort by</span>
+                <div class="dropdown d-inline-block">
+                    <button class="btn btn-sm glass-filter-btn dropdown-toggle"
+                          type="button" id="commentSortDropdown"
+                          data-bs-toggle="dropdown" aria-expanded="false">
+                    Newest first
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end glass-dropdown"
+                      aria-labelledby="commentSortDropdown">
+                    <li>
+                      <button class="dropdown-item glass-dropdown-item sort-option"
+                              type="button" data-sort="newest">
+                        Newest first
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dropdown-item glass-dropdown-item sort-option"
+                              type="button" data-sort="oldest">
+                        Oldest first
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dropdown-item glass-dropdown-item sort-option"
+                              type="button" data-sort="most_liked">
+                        Most liked
+                      </button>
+                    </li>
+                    </ul>
+                    </div>
+
+                </div>
+
+            </div>
+          </div>
+
+          <div class="card-body">
+            {# Main Comment Form #}
+            {% if user.is_authenticated %}
+            <div class="comment-input-container mb-4">
+              <form method="post" action="{% url 'add_comment' recipe.pk %}" id="main-comment-form">
+                {% csrf_token %}
+                <input type="hidden" name="parent_comment_id" id="parent-comment-id" value="">
+                <input type="hidden" name="reply_to_user" id="reply-to-user" value="">
+
+                <div id="reply-indicator" class="reply-indicator mb-2 d-none">
+                  <span class="badge glass-badge-info">
+                    <i class="bi bi-reply-fill"></i> Replying to
+                    <span id="reply-to-name"></span>
+                    <button type="button" class="btn-close btn-close-white ms-2"
+                      onclick="cancelReply()"></button>
+                  </span>
+                </div>
+
+                <div class="input-group">
+                  <textarea name="content" id="comment-textarea"
+                    class="form-control glass-input"
+                    placeholder="Share your thoughts about this recipe..." rows="3"
+                    required></textarea>
+                  <button class="btn glass-btn-primary" type="submit" id="submit-comment-btn">
+                    <i class="bi bi-send"></i> Post
+                  </button>
+                </div>
+              </form>
+            </div>
+            {% else %}
+            <div class="alert glass-alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              Please <a href="{% url 'log_in' %}" class="text-white fw-bold">log in</a> to leave a comment.
+            </div>
+            {% endif %}
+
+            {# Comments List #}
+            <div id="comments-container" class="comments-scroll">
+                    <div id="comments-list">
+                {% for comment in recipe.comments.all %}
+                  {% if not comment.parent_comment %}
+                  <div class="comment-item mb-3"
+                       data-comment-id="{{ comment.pk }}"
+                       data-created-at="{{ comment.created_at|date:'U' }}"
+                       data-like-count="{{ comment.like_count }}">
+                    <div class="d-flex">
+                      <div class="comment-avatar me-3">
+                        <div class="avatar-circle">{{ comment.author.username|first|upper }}</div>
+                      </div>
+                      <div class="flex-grow-1">
+                        <div class="comment-header">
+                          <strong class="comment-author text-white"
+                                  data-username="{{ comment.author.username }}">
+                            {{ comment.author.get_full_name|default:comment.author.username }}
+                          </strong>
+                            {# Display Author's Rating next to Comment #}
+                            <span class="user-rating-badge text-warning ms-2 small" data-username="{{ comment.author.username }}">
+                              {% with author_rating=comment.get_author_rating %}
+                                {% if author_rating and author_rating > 0 %}
+                                  {% for i in "12345"|make_list %}
+                                    {% with i_val=i|add:0 %}
+                                      {% if author_rating >= i_val %}
+                                        <i class="bi bi-star-fill"></i>
+                                      {% else %}
+                                        <i class="bi bi-star"></i>
+                                      {% endif %}
+                                    {% endwith %}
+                                  {% endfor %}
+                                {% endif %}
+                              {% endwith %}
+                            </span>
+                          <span class="text-white small ms-2" style="opacity: 0.6;">
+                            {{ comment.created_at|timesince }} ago
+                          </span>
+                          {% if comment.author == user or user.is_staff %}
+                          <button class="btn btn-sm btn-link text-danger float-end delete-comment"
+                                  data-comment-id="{{ comment.pk }}">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                          {% endif %}
+                        </div>
+
+                        <div class="comment-body">
+                          {% if comment.reply_to %}
+                          <span class="mention-tag">@{{ comment.reply_to.username }}</span>
+                          {% endif %}
+                          <span class="text-white" style="opacity: 0.9; white-space: pre-line;">
+                            {{ comment.content }}
+                          </span>
+                        </div>
+
+                        <div class="comment-actions mt-2">
+                          <button
+                            class="btn btn-sm btn-link glass-btn-like like-btn {% if user in comment.likes.all %}liked{% endif %}"
+                            data-comment-id="{{ comment.pk }}">
+                            <i class="bi {% if user in comment.likes.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
+                            <span class="like-count">{{ comment.like_count }}</span>
+                          </button>
+                          {% if user.is_authenticated %}
+                          <button class="btn btn-sm btn-link glass-btn-reply reply-btn"
+                                  data-comment-id="{{ comment.pk }}"
+                                  data-comment-author="{{ comment.author.username }}">
+                            <i class="bi bi-reply"></i> Reply
+                          </button>
+                          {% endif %}
+                        </div>
+
+                        {% if comment.replies.exists %}
+                        <div class="replies-section mt-3" data-parent-id="{{ comment.pk }}">
+                          <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center">
+                              <span class="text-white small" style="opacity: 0.7;">Sort replies</span>
+                              <div class="dropdown d-inline-block ms-2">
+                                <button class="btn btn-sm glass-filter-btn dropdown-toggle reply-sort-dropdown"
+                                        type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                  Newest first
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end glass-dropdown">
+                                  <li>
+                                    <button class="dropdown-item glass-dropdown-item reply-sort-option"
+                                            type="button" data-sort="newest">
+                                      Newest first
+                                    </button>
+                                  </li>
+                                  <li>
+                                    <button class="dropdown-item glass-dropdown-item reply-sort-option"
+                                            type="button" data-sort="oldest">
+                                      Oldest first
+                                    </button>
+                                  </li>
+                                  <li>
+                                    <button class="dropdown-item glass-dropdown-item reply-sort-option"
+                                            type="button" data-sort="most_liked">
+                                      Most liked
+                                    </button>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+
+                            <button type="button"
+                                    class="btn btn-sm glass-filter-btn toggle-replies-btn"
+                                    data-expanded="false">
+                              Show top replies ({{ comment.replies.count }})
+                            </button>
+                          </div>
+
+                          <div class="replies-list">
+                            {% for reply in comment.replies.all %}
+                            <div class="reply-item mb-2"
+                                 data-reply-id="{{ reply.pk }}"
+                                 data-parent-comment="{{ comment.pk }}"
+                                 data-created-at="{{ reply.created_at|date:'U' }}"
+                                 data-like-count="{{ reply.like_count }}">
+                              <div class="d-flex">
+                                <div class="reply-avatar me-2">
+                                  <div class="avatar-circle-small">
+                                    {{ reply.author.username|first|upper }}
+                                  </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                  <div class="reply-header">
+                                    <strong class="reply-author text-white"
+                                            data-username="{{ reply.author.username }}">
+                                      {{ reply.author.username }}
+                                    </strong>
+                                    <span class="text-white small ms-1"
+                                          style="opacity: 0.6;">
+                                      {{ reply.created_at|timesince }} ago
+                                    </span>
+                                    {% if reply.author == user or user.is_staff %}
+                                    <button
+                                      class="btn btn-sm btn-link text-danger float-end delete-reply"
+                                      data-reply-id="{{ reply.pk }}">
+                                      <i class="bi bi-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                  </div>
+                                  <div class="reply-content">
+                                    {% if reply.reply_to %}
+                                    <span class="mention-tag">@{{ reply.reply_to.username }}</span>
+                                    {% endif %}
+                                    <span class="text-white" style="opacity: 0.9; white-space: pre-line;">
+                                      {{ reply.content }}
+                                    </span>
+                                  </div>
+                                  <div class="reply-actions mt-1">
+                                    <button
+                                      class="btn btn-sm btn-link glass-btn-like like-reply-btn {% if user in reply.likes.all %}liked{% endif %}"
+                                      data-reply-id="{{ reply.pk }}">
+                                      <i class="bi {% if user in reply.likes.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
+                                      <span class="reply-like-count">{{ reply.like_count }}</span>
+                                    </button>
+                                    {% if user.is_authenticated %}
+                                    <button
+                                      class="btn btn-sm btn-link glass-btn-reply reply-to-reply-btn"
+                                      data-parent-comment-id="{{ comment.pk }}"
+                                      data-reply-author="{{ reply.author.username }}">
+                                      <i class="bi bi-reply"></i> Reply
+                                    </button>
+                                    {% endif %}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            {% endfor %}
+                          </div>
+                        </div>
+                        {% endif %}
+
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        {% empty %}
+        <div class="text-center py-4 text-white" id="no-comments-message"
+             style="opacity: 0.6%;">
+          <i class="bi bi-chat-left-dots display-4"></i>
+          <p class="mt-3">No comments yet. Be the first to share your thoughts!</p>
+        </div>
+        {% endfor %}
       </div>
-    </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-    {# Bottom action buttons #}
-    <div class="d-grid gap-2 d-md-flex justify-content-center gap-2 mt-1 mb-4">
-      <a href="{% url 'recipe_list' %}" class="btn btn-outline-secondary me-md-2">
-        <i class="bi bi-arrow-left-circle me-2"></i>Back to recipes
-      </a>
+      </div>
 
-      <a href="{% url 'dashboard' %}" class="btn btn-outline-primary me-md-2">
-        <i class="bi bi-house me-2"></i>Dashboard
-      </a>
+      {# Bottom action buttons #}
+      <div class="d-grid gap-2 d-md-flex justify-content-center gap-2 mt-1 mb-4">
+        <a href="{% url 'recipe_list' %}" class="btn glass-btn-secondary me-md-2">
+          <i class="bi bi-arrow-left-circle me-2"></i>Back to recipes
+        </a>
+
+        <a href="{% url 'dashboard' %}" class="btn glass-btn-primary me-md-2">
+          <i class="bi bi-house me-2"></i>Dashboard
+        </a>
 
       {% if user.is_authenticated %}
-      <a href="{% url 'report_recipe' recipe.pk %}" class="btn btn-outline-warning me-md-2">
+      <a href="{% url 'report_recipe' recipe.pk %}" class="btn glass-btn-warning me-md-2">
         <i class="bi bi-flag me-2"></i>Report Recipe
       </a>
       {% endif %}
 
-      <a href="{% url 'recipe_create' %}" class="btn btn-primary">
+      <a href="{% url 'recipe_create' %}" class="btn glass-btn-success">
         <i class="bi bi-plus-circle me-2"></i>Create another recipe
       </a>
     </div>
@@ -365,54 +522,526 @@
 </div>
 
 <style>
-  .card {
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+
+  .glass-background-wrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    position: relative;
+    padding: 2rem 0;
+    overflow: hidden;
   }
 
-  .card-header {
-    border-radius: 10px 10px 0 0 !important;
-    padding: 1.1rem 1.25rem;
-    border-bottom: 1px solid rgba(0, 0, 0, .08);
+  .glass-background-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+    background-size: 100% 100%;
+    filter: blur(60px);
+    z-index: 0;
   }
 
-  .list-group-item {
-    border-color: rgba(0, 0, 0, .05);
+  .glass-background-wrapper>.container {
+    position: relative;
+    z-index: 1;
   }
 
-  /* Bootstrap 5 compatibility */
-  .bg-primary-subtle {
-    background-color: rgba(13, 110, 253, 0.1) !important;
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 16px !important;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.3s ease;
   }
 
-  .text-primary-emphasis {
-    color: #0d6efd !important;
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-2px);
   }
 
-  .bg-secondary-subtle {
-    background-color: rgba(108, 117, 125, 0.1) !important;
+  .glass-header {
+    background: rgba(40, 167, 69, 0.25) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 1.5rem !important;
   }
 
-  .text-secondary-emphasis {
-    color: #6c757d !important;
+  .glass-subheader {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 1.25rem !important;
   }
 
-  /* Comment Styles */
+  .card-body {
+    background: transparent !important;
+  }
+
+  .recipe-image {
+    border-radius: 12px !important;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .glass-placeholder {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 2px dashed rgba(255, 255, 255, 0.2) !important;
+    border-radius: 12px !important;
+  }
+
+  .difficulty-badge {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .difficulty-easy {
+    background: rgba(40, 167, 69, 0.8) !important;
+    color: white !important;
+  }
+
+  .difficulty-medium {
+    background: rgba(255, 193, 7, 0.8) !important;
+    color: #000 !important;
+  }
+
+  .difficulty-hard {
+    background: rgba(220, 53, 69, 0.8) !important;
+    color: white !important;
+  }
+
+  .difficulty-default {
+    background: rgba(108, 117, 125, 0.8) !important;
+    color: white !important;
+  }
+
+  .glass-list {
+    background: transparent !important;
+  }
+
+  .glass-list-item {
+    background: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    margin-bottom: 0.5rem;
+    border-radius: 8px !important;
+    transition: all 0.2s ease;
+  }
+
+  .glass-list-item:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    transform: translateX(5px);
+  }
+
+  .glass-badge {
+    background: rgba(13, 110, 253, 0.6) !important;
+    color: white !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.4rem 0.8rem;
+    font-weight: 600;
+  }
+
+  .glass-badge-secondary {
+    background: rgba(108, 117, 125, 0.6) !important;
+    color: white !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.4rem 0.8rem;
+    font-weight: 600;
+  }
+
+  .glass-badge-count {
+    background: rgba(13, 110, 253, 0.7) !important;
+    color: white !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Ingredient scaling styles */
+    .scaling-controls {
+      user-select: none;
+    }
+
+    .scaling-controls .btn {
+      min-width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .glass-scale-btn {
+      background: rgba(255, 255, 255, 0.1) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      color: white !important;
+      transition: all 0.3s ease;
+      border-radius: 8px !important;
+    }
+
+    .glass-scale-btn:hover {
+      background: rgba(255, 255, 255, 0.2) !important;
+      transform: scale(1.05);
+    }
+
+    .glass-scale-btn-current {
+      min-width: 45px;
+      font-weight: 600;
+      background: rgba(13, 110, 253, 0.6) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      color: white !important;
+      border-radius: 8px !important;
+    }
+
+    .glass-scale-reset {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border-radius: 999px !important;
+
+      background: rgba(255, 255, 255, 0.12) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.35) !important;
+
+      color: rgba(255, 255, 255, 0.85) !important;
+      transition: all 0.3s ease;
+    }
+
+    .glass-scale-reset:hover {
+      background: rgba(255, 255, 255, 0.22) !important;
+      border-color: rgba(255, 255, 255, 0.6) !important;
+      color: #ffffff !important;
+      transform: rotate(180deg) scale(1.05);
+    }
+
+    .glass-quick-scale {
+      background: rgba(255, 255, 255, 0.1) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      color: rgba(255, 255, 255, 0.9) !important;
+      transition: all 0.3s ease;
+      border-radius: 6px !important;
+    }
+
+    .glass-quick-scale:hover {
+      background: rgba(255, 255, 255, 0.2) !important;
+      border-color: rgba(255, 255, 255, 0.3) !important;
+      color: white !important;
+    }
+
+    .ingredient-quantity {
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      padding: 0.4rem 0.6rem;
+    }
+
+    .ingredient-quantity.scaled {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      font-weight: 600;
+      animation: pulse 0.5s ease;
+    }
+
+    .ingredient-item.updating .ingredient-quantity {
+      animation: pulse 0.5s ease;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .glass-alert-scaling {
+      background: rgba(13, 202, 240, 0.2) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(13, 202, 240, 0.4) !important;
+      border-left: 3px solid #0dcaf0 !important;
+      color: #ffffff !important;
+      border-radius: 8px;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .quick-scale-buttons {
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .toggle-replies-btn {
+      white-space: nowrap;
+    }
+
+    .reply-item.collapsed-hidden {
+      display: none !important;
+    }
+
+  .glass-badge-info {
+    background: rgba(13, 202, 240, 0.7) !important;
+    color: white !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
+  .glass-input,
+  .form-control {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    transition: all 0.3s ease;
+  }
+
+  .glass-select-sort {
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+  padding: 0.25rem 0.9rem;
+  width: auto;
+  min-width: 150px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  }
+
+  .glass-select-sort:focus {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.8) !important;
+    box-shadow:
+      0 0 0 0.15rem rgba(255, 255, 255, 0.35),
+      0 6px 20px rgba(0, 0, 0, 0.45);
+    outline: none;
+  }
+
+  /* Dark dropdown panel and text for options */
+  .glass-select-sort option {
+    background-color: rgba(10, 25, 47, 0.96);
+    color: #ffffff;
+  }
+
+  /* Remove Bootstrap default background/outline on the select itself */
+  .form-select.glass-select-sort,
+  .form-select-sm.glass-select-sort {
+    background-color: rgba(15, 52, 96, 0.6) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+  }
+
+  .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  .form-control:focus {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow:
+      0 0 0 0.2rem rgba(255, 255, 255, 0.2),
+      inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    outline: none;
+  }
+
+  .glass-btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .glass-btn-primary:hover {
+    background: linear-gradient(135deg, #0069d9 0%, #004085 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+  }
+
+  .comment-input-container .input-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .comment-input-container .input-group > .glass-btn-primary {
+    border-radius: 999px !important;
+    margin-left: 6px;
+  }
+
+  .comment-input-container .input-group > .form-control {
+    flex: 1 1 auto;
+    margin-right: 1.5rem;
+    max-width: calc(100% - 110px);
+  }
+
+  .comment-input-container .input-group > .glass-btn-primary {
+    margin-left: auto;
+  }
+
+  .glass-btn-secondary {
+    background: rgba(108, 117, 125, 0.6) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .glass-btn-secondary:hover {
+    background: rgba(108, 117, 125, 0.8) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+  }
+
+  .glass-btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .glass-btn-success:hover {
+    background: linear-gradient(135deg, #34ce57 0%, #28a745 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+  }
+
+  .glass-btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .glass-btn-danger:hover {
+    background: linear-gradient(135deg, #e74c3c 0%, #dc3545 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+  }
+
+  .glass-btn-danger-outline {
+    background: rgba(220, 53, 69, 0.2) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(220, 53, 69, 0.6) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .glass-btn-danger-outline:hover {
+    background: rgba(220, 53, 69, 0.4) !important;
+    border-color: rgba(220, 53, 69, 0.8) !important;
+    transform: translateY(-2px);
+  }
+
+  .glass-btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: #000 !important;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .glass-btn-warning:hover {
+    background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+  }
+
+  .glass-btn-like,
+  .glass-btn-reply {
+    color: rgba(255, 255, 255, 0.8) !important;
+    transition: all 0.2s ease;
+  }
+
+  .glass-btn-like:hover,
+  .glass-btn-reply:hover {
+    color: rgba(255, 255, 255, 1) !important;
+    transform: translateY(-1px);
+  }
+
+  .glass-btn-like.liked {
+    color: #dc3545 !important;
+  }
+
   .comment-item {
     padding: 15px;
-    border: 1px solid #e9ecef;
-    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
     transition: all 0.3s ease;
   }
 
   .comment-item:hover {
-    background-color: #f8f9fa;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2);
   }
 
   .comment-item.new-comment {
     animation: slideIn 0.5s ease;
-    background-color: #f0f8ff;
+    background: rgba(13, 110, 253, 0.2) !important;
   }
 
   @keyframes slideIn {
@@ -437,45 +1066,45 @@
     align-items: center;
     justify-content: center;
     font-weight: bold;
+    border: 2px solid rgba(255, 255, 255, 0.3);
   }
 
   .avatar-circle-small {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: #6c757d;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.75rem;
-  }
-
-  .like-btn.liked i,
-  .like-reply-btn.liked i {
-    color: #dc3545;
+    border: 2px solid rgba(255, 255, 255, 0.3);
   }
 
   .replies-section {
     margin-left: 48px;
-    border-left: 2px solid #e9ecef;
+    border-left: 2px solid rgba(255, 255, 255, 0.2);
     padding-left: 15px;
   }
 
   .reply-item {
-    background: #f8f9fa;
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 10px;
     border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.2s ease;
   }
 
   .reply-item:hover {
-    background: #e9ecef;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.15);
   }
 
-  /* @ Mention styles */
   .mention-tag {
-    color: #007bff;
+    color: #4dabf7;
     font-weight: 600;
     cursor: pointer;
     margin-right: 5px;
@@ -483,9 +1112,9 @@
 
   .mention-tag:hover {
     text-decoration: underline;
+    color: #74c0fc;
   }
 
-  /* Reply indicator */
   .reply-indicator {
     animation: slideDown 0.3s ease;
   }
@@ -502,11 +1131,6 @@
     }
   }
 
-  .reply-indicator .badge {
-    font-size: 0.9rem;
-    padding: 8px 12px;
-  }
-
   .btn-close-white {
     filter: brightness(0) invert(1);
     width: 0.5em;
@@ -514,33 +1138,166 @@
     padding: 0;
   }
 
-  /* Comment input styling */
   .comment-input-container {
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
     padding: 15px;
-    background: #f8f9fa;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
-  #comment-textarea:focus {
-    box-shadow: none;
-    border-color: #007bff;
+  .glass-alert-info {
+    background: rgba(13, 202, 240, 0.2) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(13, 202, 240, 0.4) !important;
+    color: #ffffff !important;
+    border-radius: 8px;
   }
 
-  /* Highlight effect for reply target */
+  .glass-alert-info a {
+    color: #ffffff !important;
+    text-decoration: underline;
+  }
+
   .comment-item.reply-target {
-    background: #fff3cd;
+    background: rgba(255, 243, 205, 0.15) !important;
+    border-color: rgba(255, 193, 7, 0.5) !important;
     animation: highlight 2s ease;
   }
 
+
+    .comments-scroll {
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+
+      border-radius: 12px;
+    }
+
+    .comments-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .comments-scroll::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+    }
+
+    .comments-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.35);
+      border-radius: 999px;
+    }
+
+    .comments-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    @media (max-width: 768px) {
+      .comments-scroll {
+        max-height: 55vh;
+      }
+    }
+
+
   @keyframes highlight {
     0% {
-      background: #fff3cd;
+      background: rgba(255, 243, 205, 0.25) !important;
     }
 
     100% {
-      background: transparent;
+      background: rgba(255, 255, 255, 0.06) !important;
     }
+  }
+
+  .text-white {
+    color: #ffffff !important;
+  }
+
+  @media (max-width: 768px) {
+    .glass-background-wrapper {
+      padding: 1rem 0;
+    }
+
+    .card {
+      margin-bottom: 1rem;
+    }
+
+    .replies-section {
+      margin-left: 20px;
+      padding-left: 10px;
+    }
+  }
+
+    .dropdown {
+      position: relative;
+    }
+
+    .glass-dropdown-item.active {
+      background: rgba(13, 110, 253, 0.7) !important;
+      color: #ffffff !important;
+    }
+
+    .glass-subheader {
+      position: relative;
+      z-index: 20;
+    }
+
+    .glass-subheader .dropdown-menu {
+      position: absolute;
+      right: 0;
+      margin-top: 0.35rem;
+      z-index: 3000;
+    }
+
+    .glass-filter-btn {
+      background: rgba(15, 52, 96, 0.7) !important;
+      color: #ffffff !important;
+      border-radius: 999px !important;
+      border: 1px solid rgba(255, 255, 255, 0.4) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .glass-filter-btn:focus,
+    .glass-filter-btn:hover {
+      background: rgba(15, 52, 96, 0.9) !important;
+      box-shadow: 0 0 0 0.12rem rgba(255, 255, 255, 0.35);
+      color: #ffffff !important;
+    }
+
+    .glass-dropdown {
+      background: rgba(34, 38, 54, 0.89) !important;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+      padding: 0.5rem;
+      z-index: 3000 !important;
+    }
+
+    .glass-dropdown-item {
+      background: transparent !important;
+      color: rgba(255, 255, 255, 0.9) !important;
+      border-radius: 8px !important;
+      transition: all 0.2s ease;
+      margin-bottom: 0.25rem;
+    }
+
+    .glass-dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.18) !important;
+      color: #ffffff !important;
+    }
+
+
+    .glass-dropdown-item.active {
+      background: rgba(13, 110, 253, 0.7) !important;
+      color: #ffffff !important;
+    }
+
+
   }
 
   .rating-widget {
@@ -575,35 +1332,284 @@
 {% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const currentUser = "{{ user.username }}";
-    let replyingTo = null;
+  const scaleCurrentBtn = document.getElementById('current-scale');
+  const scaleDecreaseBtn = document.getElementById('scale-decrease');
+  const scaleIncreaseBtn = document.getElementById('scale-increase');
+  const resetScaleBtn    = document.getElementById('reset-scale');
+  const quickScaleBtns   = document.querySelectorAll('.quick-scale');
+  const scalingInfo      = document.getElementById('scaling-info');
+  const scalingMessage   = document.getElementById('scaling-message');
+  const quickScaleSection = document.getElementById('quick-scale-section');
 
-    // Initialize all event listeners
+  let originalServings = 4;
+  let currentServings  = 4;
+  let scaleFactor      = 1;
+
+  if (scaleCurrentBtn) {
+    originalServings = parseInt(scaleCurrentBtn.dataset.originalServings || '4', 10);
+    currentServings  = originalServings;
+    updateScalingUI();
+
+    scaleDecreaseBtn?.addEventListener('click', function () {
+      if (currentServings > 1) {
+        currentServings--;
+        updateScalingUI();
+      }
+    });
+
+    scaleIncreaseBtn?.addEventListener('click', function () {
+      if (currentServings < 50) {
+        currentServings++;
+        updateScalingUI();
+      }
+    });
+
+    resetScaleBtn?.addEventListener('click', function () {
+      currentServings = originalServings;
+      updateScalingUI();
+    });
+
+    quickScaleBtns.forEach(btn => {
+      btn.addEventListener('click', function () {
+        const factor = parseFloat(this.dataset.factor);
+        currentServings = Math.max(1, Math.round(originalServings * factor));
+        updateScalingUI();
+      });
+    });
+  }
+
+  function updateScalingUI() {
+    scaleFactor = currentServings / originalServings;
+    const servingNumber = document.getElementById('serving-number');
+    const scaleBadge    = document.getElementById('scale-badge');
+    const scaleMultiplier = document.getElementById('scale-multiplier');
+
+    if (servingNumber) servingNumber.textContent = currentServings;
+
+    if (scaleFactor !== 1) {
+      scaleBadge?.classList.remove('d-none');
+      if (scaleMultiplier) {
+        scaleMultiplier.textContent = scaleFactor.toFixed(2).replace(/\.?0+$/, '');
+      }
+      if (scalingInfo && scalingMessage) {
+        scalingInfo.classList.remove('d-none');
+        const percentage = ((scaleFactor - 1) * 100).toFixed(0);
+        scalingMessage.innerHTML =
+          `Recipe scaled to <strong>${currentServings}</strong> servings (${percentage > 0 ? '+' : ''}${percentage}% from original)`;
+      }
+      quickScaleSection?.classList.remove('d-none');
+    } else {
+      scaleBadge?.classList.add('d-none');
+      scalingInfo?.classList.add('d-none');
+      quickScaleSection?.classList.add('d-none');
+    }
+
+    updateIngredientQuantities();
+  }
+
+  function updateIngredientQuantities() {
+    document.querySelectorAll('.ingredient-quantity').forEach(elem => {
+      const originalQty = parseFloat(elem.dataset.originalQuantity);
+      if (isNaN(originalQty)) return;
+
+      const newQty = originalQty * scaleFactor;
+      const valueSpan = elem.querySelector('.quantity-value');
+
+      if (valueSpan) {
+        valueSpan.textContent = formatQuantity(newQty);
+      }
+
+      const li = elem.closest('.ingredient-item');
+      li?.classList.add('updating');
+
+      if (scaleFactor !== 1) {
+        elem.classList.add('scaled');
+      } else {
+        elem.classList.remove('scaled');
+      }
+
+      setTimeout(() => li?.classList.remove('updating'), 400);
+    });
+  }
+
+  const MAX_VISIBLE_REPLIES = 2;
+
+  function collapseReplies(section, toggleBtn) {
+    const replies = Array.from(section.querySelectorAll('.reply-item'));
+    if (!toggleBtn || replies.length === 0) return;
+
+    if (replies.length <= MAX_VISIBLE_REPLIES) {
+      toggleBtn.classList.add('d-none');
+      replies.forEach(r => r.classList.remove('d-none'));
+      toggleBtn.dataset.expanded = 'true';
+      return;
+    }
+
+    const sortedByLikes = [...replies].sort((a, b) => {
+      const la = parseInt(a.dataset.likeCount || '0', 10);
+      const lb = parseInt(b.dataset.likeCount || '0', 10);
+      return lb - la;
+    });
+
+    const keepIds = new Set(
+      sortedByLikes.slice(0, MAX_VISIBLE_REPLIES).map(el => el.dataset.replyId)
+    );
+
+    replies.forEach(r => {
+      if (keepIds.has(r.dataset.replyId)) {
+        r.classList.remove('d-none');
+      } else {
+        r.classList.add('d-none');
+      }
+    });
+
+    toggleBtn.dataset.expanded = 'false';
+    toggleBtn.textContent = `Show all replies (${replies.length})`;
+  }
+
+  function expandReplies(section, toggleBtn) {
+    const replies = section.querySelectorAll('.reply-item');
+    replies.forEach(r => r.classList.remove('d-none'));
+    if (toggleBtn) {
+      toggleBtn.dataset.expanded = 'true';
+      toggleBtn.textContent = 'Hide extra replies';
+    }
+  }
+
+  function refreshSectionCollapse(section) {
+    const toggleBtn = section.querySelector('.toggle-replies-btn');
+    if (!toggleBtn) return;
+    const expanded = toggleBtn.dataset.expanded === 'true';
+    if (expanded) {
+      expandReplies(section, toggleBtn);
+    } else {
+      collapseReplies(section, toggleBtn);
+    }
+  }
+
+  function initReplyCollapse() {
+    document.querySelectorAll('.replies-section').forEach(section => {
+      const toggleBtn = section.querySelector('.toggle-replies-btn');
+      if (!toggleBtn) return;
+
+      collapseReplies(section, toggleBtn);
+
+      toggleBtn.addEventListener('click', function () {
+        const isExpanded = this.dataset.expanded === 'true';
+        if (isExpanded) {
+          collapseReplies(section, this);
+        } else {
+          expandReplies(section, this);
+        }
+      });
+    });
+  }
+
+  function formatQuantity(v) {
+    if (v >= 100) return Math.round(v).toString();
+    if (v >= 10)  return v.toFixed(1).replace(/\.0$/, '');
+    if (v >= 1)   return v.toFixed(2).replace(/\.?0+$/, '');
+    return v.toFixed(2);
+  }
+
+    function escapeHtml(str) {
+        return (str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+    }
+
+    const currentUser = "{{ user.username }}";
+    const sortButton = document.getElementById('commentSortDropdown');
+    let currentSort = 'newest';
+
     initializeEventListeners();
+    initSortDropdown();
+    initReplySortDropdowns();
+    initReplyCollapse();
+
+
+  function initSortDropdown() {
+      const options = document.querySelectorAll('.sort-option');
+      options.forEach(btn => {
+        btn.addEventListener('click', function () {
+          const value = this.dataset.sort;       // newest / oldest / most_liked
+          currentSort = value;
+          sortComments(value);
+
+          if (sortButton) {
+            sortButton.textContent = this.textContent.trim();
+          }
+        });
+      });
+
+      sortComments(currentSort);
+    }
+
+    function initReplySortDropdowns() {
+      document.querySelectorAll('.reply-sort-option').forEach(btn => {
+        btn.addEventListener('click', function () {
+          const order = this.dataset.sort;
+          const section = this.closest('.replies-section');
+          const dropdown = section.querySelector('.reply-sort-dropdown');
+
+          if (dropdown) {
+            dropdown.textContent = this.textContent.trim();
+          }
+
+          const replies = Array.from(section.querySelectorAll('.reply-item'));
+          replies.sort((a, b) => {
+            const ta = parseInt(a.dataset.createdAt || '0', 10);
+            const tb = parseInt(b.dataset.createdAt || '0', 10);
+            const la = parseInt(a.dataset.likeCount || '0', 10);
+            const lb = parseInt(b.dataset.likeCount || '0', 10);
+
+            if (order === 'newest') {
+              return tb - ta;
+            } else if (order === 'oldest') {
+              return ta - tb;
+            } else if (order === 'most_liked') {
+              if (lb !== la) return lb - la;
+              return tb - ta;
+            }
+            return 0;
+          });
+
+          const repliesList = section.querySelector('.replies-list') || section;
+          replies.forEach(r => section.appendChild(r));
+
+          const toggleBtn = section.querySelector('.toggle-replies-btn');
+          if (toggleBtn && toggleBtn.dataset.expanded === 'false') {
+            collapseReplies(section, toggleBtn);
+          }
+        });
+      });
+    }
+
 
     function initializeEventListeners() {
-      // Reply buttons
       document.querySelectorAll('.reply-btn').forEach(btn => {
         btn.addEventListener('click', handleReplyClick);
       });
 
-      // Reply to reply buttons
       document.querySelectorAll('.reply-to-reply-btn').forEach(btn => {
         btn.addEventListener('click', handleReplyToReplyClick);
       });
 
-      // Like buttons
       document.querySelectorAll('.like-btn').forEach(btn => {
         btn.addEventListener('click', handleLikeClick);
       });
 
-      // Delete buttons
       document.querySelectorAll('.delete-comment').forEach(btn => {
         btn.addEventListener('click', handleDeleteClick);
       });
 
       document.querySelectorAll('.delete-reply').forEach(btn => {
         btn.addEventListener('click', handleDeleteReplyClick);
+      });
+
+      document.querySelectorAll('.like-reply-btn').forEach(btn => {
+        btn.addEventListener('click', handleReplyLikeClick);
       });
     }
 
@@ -619,7 +1625,6 @@
       setReplyTo(parentId, replyAuthor, replyAuthor);
     }
 
-    // Set reply target
     function setReplyTo(commentId, authorName, replyToUser) {
       document.getElementById('parent-comment-id').value = commentId;
       document.getElementById('reply-to-user').value = replyToUser || '';
@@ -631,7 +1636,6 @@
 
       const textarea = document.getElementById('comment-textarea');
       textarea.placeholder = `Reply to ${authorName}...`;
-      textarea.value = `@${authorName} `;
       textarea.focus();
 
       document.querySelectorAll('.comment-item').forEach(item => {
@@ -646,7 +1650,6 @@
       replyingTo = { commentId, authorName, replyToUser };
     }
 
-    // Cancel reply
     window.cancelReply = function () {
       document.getElementById('parent-comment-id').value = '';
       document.getElementById('reply-to-user').value = '';
@@ -663,39 +1666,85 @@
       replyingTo = null;
     };
 
-    // Handle like button clicks
-    function handleLikeClick(e) {
-      const commentId = this.dataset.commentId;
-      const btn = this;
+  function handleLikeClick(e) {
+    const commentId = this.dataset.commentId;
+    const btn = this;
 
-      fetch(`/recipes/comment/${commentId}/like/`, {
+    fetch(`/recipes/comment/${commentId}/like/`, {
         method: 'POST',
         headers: {
-          'X-CSRFToken': '{{ csrf_token }}',
-          'X-Requested-With': 'XMLHttpRequest'
+        'X-CSRFToken': '{{ csrf_token }}',
+        'X-Requested-With': 'XMLHttpRequest'
         }
-      })
+    })
         .then(response => response.json())
         .then(data => {
-          if (data.success) {
-            const icon = btn.querySelector('i');
-            const count = btn.querySelector('.like-count');
+      if (data.success) {
+        const icon = btn.querySelector('i');
+        const count = btn.querySelector('.like-count');
 
-            if (data.liked) {
-              icon.classList.remove('bi-heart');
-              icon.classList.add('bi-heart-fill', 'text-danger');
-              btn.classList.add('liked');
-            } else {
-              icon.classList.remove('bi-heart-fill', 'text-danger');
-              icon.classList.add('bi-heart');
-              btn.classList.remove('liked');
-            }
-            count.textContent = data.like_count;
+        if (data.liked) {
+          icon.classList.remove('bi-heart');
+          icon.classList.add('bi-heart-fill', 'text-danger');
+          btn.classList.add('liked');
+        } else {
+          icon.classList.remove('bi-heart-fill', 'text-danger');
+          icon.classList.add('bi-heart');
+          btn.classList.remove('liked');
+        }
+        count.textContent = data.like_count;
+
+        const replyElement = btn.closest('.reply-item');
+        if (replyElement) {
+          replyElement.dataset.likeCount = data.like_count;
+          if (currentSort === 'most_liked') {
+            sortComments('most_liked');
           }
-        });
+        }
+
+        const commentElement = btn.closest('.comment-item');
+        if (commentElement) {
+          commentElement.dataset.likeCount = data.like_count;
+          if (currentSort === 'most_liked') {
+              sortComments('most_liked');
+          }
+        }
+        }
+      });
     }
 
-    // Handle delete comment
+    function handleReplyLikeClick(e) {
+    const replyId = this.dataset.replyId;
+    const btn = this;
+
+    fetch(`/recipes/comment/${replyId}/like/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const icon = btn.querySelector('i');
+          const count = btn.querySelector('.reply-like-count');
+
+          if (data.liked) {
+            icon.classList.remove('bi-heart');
+            icon.classList.add('bi-heart-fill', 'text-danger');
+            btn.classList.add('liked');
+          } else {
+            icon.classList.remove('bi-heart-fill', 'text-danger');
+            icon.classList.add('bi-heart');
+            btn.classList.remove('liked');
+          }
+          count.textContent = data.like_count;
+        }
+      });
+    }
+
+
     function handleDeleteClick(e) {
       if (confirm('Are you sure you want to delete this comment?')) {
         const commentId = this.dataset.commentId;
@@ -732,8 +1781,6 @@
       }
     }
 
-
-    // Handle delete reply
     function handleDeleteReplyClick(e) {
       if (confirm('Are you sure you want to delete this reply?')) {
         const replyId = this.dataset.replyId;
@@ -759,7 +1806,6 @@
       }
     }
 
-    // Handle form submission with AJAX
     document.getElementById('main-comment-form').addEventListener('submit', function (e) {
       e.preventDefault();
 
@@ -767,7 +1813,6 @@
       const textarea = document.getElementById('comment-textarea');
       const submitBtn = document.getElementById('submit-comment-btn');
 
-      // Disable submit button
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Posting...';
 
@@ -781,29 +1826,21 @@
         .then(response => response.json())
         .then(data => {
           if (data.success && data.comment) {
-            // Clear form
             textarea.value = '';
             cancelReply();
 
-            // Remove no comments message if exists
             const noCommentsMsg = document.getElementById('no-comments-message');
             if (noCommentsMsg) {
               noCommentsMsg.remove();
             }
 
-            // Add new comment to the DOM
             if (data.comment.is_reply && data.comment.parent_comment_id) {
-              // It's a reply
               addReplyToDOM(data.comment);
+              updateCommentCount(1);
             } else {
-              // It's a top-level comment
               addCommentToDOM(data.comment);
             }
 
-            // Update comment count
-            updateCommentCount(1);
-
-            // Re-enable submit button
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="bi bi-send"></i> Post';
           } else {
@@ -819,49 +1856,62 @@
         });
     });
 
-  function addCommentToDOM(commentData) {
-    let starsHTML = '';
-    const ratingWidget = document.querySelector('.rating-widget');
-    const currentRating = ratingWidget ? (parseInt(ratingWidget.dataset.userRating) || 0) : 0;
+    function addCommentToDOM(commentData) {
+      const createdTs = commentData.created_at || Math.floor(Date.now() / 1000);
 
-    if (currentRating > 0) {
-      for (let i = 1; i <= 5; i++) {
-        if (currentRating >= i) {
-          starsHTML += '<i class="bi bi-star-fill"></i> ';
-        } else {
-          starsHTML += '<i class="bi bi-star"></i> ';
+
+      let starsHTML = '';
+      const authorRating = commentData.author_rating || 0;
+
+      if (authorRating > 0) {
+        for (let i = 1; i <= 5; i++) {
+          if (authorRating >= i) {
+            starsHTML += '<i class="bi bi-star-fill"></i> ';
+          } else {
+            starsHTML += '<i class="bi bi-star"></i> ';
+          }
         }
       }
-    }
 
-    const commentHTML = `
-      <div class="comment-item mb-3 new-comment" data-comment-id="${commentData.id}">
+      const commentHTML = `
+      <div class="comment-item mb-3 new-comment"
+           data-comment-id="${commentData.id}"
+           data-created-at="${createdTs}"
+           data-like-count="0">
         <div class="d-flex">
           <div class="comment-avatar me-3">
             <div class="avatar-circle">${commentData.author.charAt(0).toUpperCase()}</div>
           </div>
           <div class="flex-grow-1">
             <div class="comment-header">
-              <strong class="comment-author" data-username="${commentData.author}">
-                ${commentData.author_display || commentData.author}
+              <strong class="comment-author text-white" data-username="${commentData.author}">
+                @${commentData.author_display || commentData.author}
               </strong>
-              <span class="text-muted small ms-2">just now</span>
+              <span class="user-rating-badge text-warning ms-2 small" data-username="${commentData.author}">
+                ${starsHTML}
+              </span>
+              <span class="text-white small ms-2" style="opacity: 0.6;">just now</span>
               ${commentData.can_delete ? `
-                <button class="btn btn-sm btn-link text-danger float-end delete-comment" data-comment-id="${commentData.id}">
+                <button class="btn btn-sm btn-link text-danger float-end delete-comment"
+                        data-comment-id="${commentData.id}">
                   <i class="bi bi-trash"></i>
                 </button>
               ` : ''}
             </div>
             <div class="comment-body">
               ${commentData.reply_to ? `<span class="mention-tag">@${commentData.reply_to}</span>` : ''}
-              <p>${commentData.content}</p>
+              <span class="text-white"
+                      style="opacity: 0.9; white-space: pre-line;">
+                  ${escapeHtml(commentData.content)}
+                </span>
             </div>
             <div class="comment-actions mt-2">
-              <button class="btn btn-sm btn-link like-btn" data-comment-id="${commentData.id}">
+              <button class="btn btn-sm btn-link glass-btn-like like-btn"
+                      data-comment-id="${commentData.id}">
                 <i class="bi bi-heart"></i>
                 <span class="like-count">0</span>
               </button>
-              <button class="btn btn-sm btn-link reply-btn" 
+              <button class="btn btn-sm btn-link glass-btn-reply reply-btn"
                       data-comment-id="${commentData.id}"
                       data-comment-author="${commentData.author}">
                 <i class="bi bi-reply"></i> Reply
@@ -874,47 +1924,57 @@
     `;
 
       const commentsContainer = document.getElementById('comments-list');
-      commentsContainer.insertAdjacentHTML('afterbegin', commentHTML);
+      commentsContainer.insertAdjacentHTML('beforeend', commentHTML);
 
-      // Re-attach event listeners to new elements
       const newComment = commentsContainer.querySelector('.new-comment');
       newComment.querySelector('.like-btn')?.addEventListener('click', handleLikeClick);
       newComment.querySelector('.reply-btn')?.addEventListener('click', handleReplyClick);
       newComment.querySelector('.delete-comment')?.addEventListener('click', handleDeleteClick);
 
-      // Remove the new-comment class after animation
       setTimeout(() => {
         newComment.classList.remove('new-comment');
       }, 1000);
+
+      updateCommentCount(1);
+      if (currentSort) {
+        sortComments(currentSort);
+      }
     }
 
     function addReplyToDOM(replyData) {
-      const parentComment = document.querySelector(`[data-comment-id="${replyData.parent_comment_id}"]`);
+      const parentComment = document.querySelector(
+        `[data-comment-id="${replyData.parent_comment_id}"]`
+      );
       if (!parentComment) return;
 
       let repliesSection = parentComment.querySelector('.replies-section');
       if (!repliesSection) {
-        // Create replies section if it doesn't exist
         const actionsDiv = parentComment.querySelector('.comment-actions');
         repliesSection = document.createElement('div');
         repliesSection.className = 'replies-section mt-3';
         actionsDiv.insertAdjacentElement('afterend', repliesSection);
       }
 
+      const createdTs = replyData.created_at || Math.floor(Date.now() / 1000);
+
       const replyHTML = `
-      <div class="reply-item mb-2 new-comment" data-reply-id="${replyData.id}" data-parent-comment="${replyData.parent_comment_id}">
+      <div class="reply-item mb-2 new-comment"
+           data-reply-id="${replyData.id}"
+           data-parent-comment="${replyData.parent_comment_id}"
+           data-created-at="${createdTs}"
+           data-like-count="${replyData.like_count || 0}">
         <div class="d-flex">
           <div class="reply-avatar me-2">
             <div class="avatar-circle-small">${replyData.author.charAt(0).toUpperCase()}</div>
           </div>
           <div class="flex-grow-1">
             <div class="reply-header">
-              <strong class="reply-author" data-username="${replyData.author}">
-                ${replyData.author}
+              <strong class="reply-author text-white" data-username="${replyData.author}">
+                @${replyData.author}
               </strong>
-              <span class="text-muted small ms-1">just now</span>
+              <span class="text-white small ms-1" style="opacity: 0.6;">just now</span>
               ${replyData.can_delete ? `
-                <button class="btn btn-sm btn-link text-danger float-end delete-reply" 
+                <button class="btn btn-sm btn-link text-danger float-end delete-reply"
                         data-reply-id="${replyData.id}">
                   <i class="bi bi-trash"></i>
                 </button>
@@ -922,14 +1982,18 @@
             </div>
             <div class="reply-content">
               ${replyData.reply_to ? `<span class="mention-tag">@${replyData.reply_to}</span>` : ''}
-              ${replyData.content}
-            </div>
+              <span class="text-white"
+                  style="opacity: 0.9; white-space: pre-line;">
+              ${escapeHtml(replyData.content)}
+            </span>
+           </div>
             <div class="reply-actions mt-1">
-              <button class="btn btn-sm btn-link like-reply-btn" data-reply-id="${replyData.id}">
+              <button class="btn btn-sm btn-link glass-btn-like like-reply-btn"
+                      data-reply-id="${replyData.id}">
                 <i class="bi bi-heart"></i>
                 <span class="reply-like-count">0</span>
               </button>
-              <button class="btn btn-sm btn-link reply-to-reply-btn" 
+              <button class="btn btn-sm btn-link glass-btn-reply reply-to-reply-btn"
                       data-parent-comment-id="${replyData.parent_comment_id}"
                       data-reply-author="${replyData.author}">
                 <i class="bi bi-reply"></i> Reply
@@ -942,14 +2006,19 @@
 
       repliesSection.insertAdjacentHTML('beforeend', replyHTML);
 
-      // Re-attach event listeners
       const newReply = repliesSection.querySelector('.new-comment');
       newReply.querySelector('.delete-reply')?.addEventListener('click', handleDeleteReplyClick);
       newReply.querySelector('.reply-to-reply-btn')?.addEventListener('click', handleReplyToReplyClick);
+      newReply.querySelector('.like-reply-btn')?.addEventListener('click', handleReplyLikeClick);
 
       setTimeout(() => {
         newReply.classList.remove('new-comment');
       }, 1000);
+
+      const toggleBtn = repliesSection.querySelector('.toggle-replies-btn');
+      if (toggleBtn) {
+        refreshSectionCollapse(repliesSection);
+      }
     }
 
     function updateCommentCount(change) {
@@ -963,7 +2032,7 @@
     function showNoCommentsMessage() {
       const container = document.getElementById('comments-list');
       container.innerHTML = `
-      <div class="text-center py-4 text-muted" id="no-comments-message">
+      <div class="text-center py-4 text-white" id="no-comments-message" style="opacity: 0.6%;">
         <i class="bi bi-chat-left-dots display-4"></i>
         <p class="mt-3">No comments yet. Be the first to share your thoughts!</p>
       </div>
@@ -990,26 +2059,30 @@
               if (data.rating_count > 0) {
                   overallRatingContainer.className = 'badge bg-warning text-dark ms-2';
 
-                  let starsHtml = '';
+                  let starsHTML = '';
                   const avg = parseFloat(data.average_rating);
                   for (let i = 1; i <= 5; i++) {
                       if (avg >= i) {
-                          starsHtml += '<i class="bi bi-star-fill"></i> ';
+                          starsHTML += '<i class="bi bi-star-fill"></i> ';
                       } else if (avg >= i - 0.5) {
-                          starsHtml += '<i class="bi bi-star-half"></i> ';
+                          starsHTML += '<i class="bi bi-star-half"></i> ';
                       } else {
-                          starsHtml += '<i class="bi bi-star"></i> ';
+                          starsHTML += '<i class="bi bi-star"></i> ';
                       }
                   }
 
                   overallRatingContainer.innerHTML = `
-                      ${starsHtml}
+                      ${starsHTML}
                       <small class="ms-1">(${data.rating_count})</small>
                   `;
                   overallRatingContainer.title = `${data.rating_count} ratings`;
               } else {
-                  overallRatingContainer.className = 'badge bg-secondary ms-2';
-                  overallRatingContainer.innerHTML = 'Unrated';
+                  overallRatingContainer.className = 'badge bg-warning text-dark ms-2';
+                  let emptyStars = '';
+                  for (let i = 1; i <= 5; i++) {
+                      emptyStars += '<i class="bi bi-star"></i> ';
+                  }
+                  overallRatingContainer.innerHTML = emptyStars;
                   overallRatingContainer.title = '';
               }
           }
@@ -1018,19 +2091,19 @@
       function updateUserCommentRatings(score) {
           const badges = document.querySelectorAll(`.user-rating-badge[data-username="${currentUser}"]`);
 
-          let starsHtml = '';
+          let starsHTML = '';
           if (score > 0) {
               for (let i = 1; i <= 5; i++) {
                   if (score >= i) {
-                      starsHtml += '<i class="bi bi-star-fill"></i> ';
+                      starsHTML += '<i class="bi bi-star-fill"></i> ';
                   } else {
-                      starsHtml += '<i class="bi bi-star"></i> ';
+                      starsHTML += '<i class="bi bi-star"></i> ';
                   }
               }
           }
 
           badges.forEach(badge => {
-              badge.innerHTML = starsHtml;
+              badge.innerHTML = starsHTML;
           });
       }
 
@@ -1113,8 +2186,92 @@
               alert('An error occurred while submitting your rating.');
           });
       }
+
+      function renderStars(container, rating, count) {
+        let html = '';
+        for (let i = 1; i <= 5; i++) {
+          if (rating >= i) {
+            html += '<i class="bi bi-star-fill"></i> ';
+          } else if (rating >= i - 0.5) {
+            html += '<i class="bi bi-star-half"></i> ';
+          } else {
+            html += '<i class="bi bi-star"></i> ';
+          }
+        }
+        container.innerHTML = html;
+      }
+
+      const badge = document.getElementById('overall-rating-badge');
+      if (badge) {
+        const avg = parseFloat(badge.dataset.averageRating);
+        renderStars(document.getElementById('overall-stars'), avg);
+      }
   }
 });
+    }
+
+  function sortReplies(order) {
+      const sections = document.querySelectorAll('.replies-section');
+      sections.forEach(section => {
+        const replies = Array.from(section.querySelectorAll('.reply-item'));
+        if (replies.length === 0) return;
+
+        replies.sort((a, b) => {
+          const ta = parseInt(a.dataset.createdAt || '0', 10);
+          const tb = parseInt(b.dataset.createdAt || '0', 10);
+          const la = parseInt(a.dataset.likeCount || '0', 10);
+          const lb = parseInt(b.dataset.likeCount || '0', 10);
+
+          if (order === 'newest') {
+            return tb - ta;
+          } else if (order === 'oldest') {
+            return ta - tb;
+          } else if (order === 'most_liked') {
+            if (lb !== la) {
+              return lb - la;
+            }
+            return tb - ta;
+          }
+          return 0;
+        });
+        const repliesList = section.querySelector('.replies-list') || section;
+        replies.forEach(r => section.appendChild(r));
+      });
+  }
+
+
+  function sortComments(order) {
+      const list = document.getElementById('comments-list');
+      if (!list) return;
+
+      const items = Array.from(list.querySelectorAll('.comment-item'));
+      if (items.length === 0) return;
+
+      items.sort((a, b) => {
+        const ta = parseInt(a.dataset.createdAt || '0', 10);
+        const tb = parseInt(b.dataset.createdAt || '0', 10);
+        const la = parseInt(a.dataset.likeCount || '0', 10);
+        const lb = parseInt(b.dataset.likeCount || '0', 10);
+
+        if (order === 'newest') {
+          return tb - ta;               // newest first
+        } else if (order === 'oldest') {
+          return ta - tb;               // oldest first
+        } else if (order === 'most_liked') {
+          if (lb !== la) {
+            return lb - la;             // higher likes first
+          }
+          return tb - ta;               // tie-break: newer first
+        }
+        return 0;
+      });
+
+      items.forEach(item => list.appendChild(item));
+
+      sortReplies(order);
+  }
+
+  });
 </script>
 {% endblock %}
 

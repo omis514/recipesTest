@@ -20,8 +20,9 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
-    preferred_spiciness = models.FloatField(
-        default=1.5, blank=False, help_text="The user's preferred spiciness level"
+    bio = models.CharField(max_length=500, blank=True)
+    preferred_spiceness = models.FloatField(
+        default=1.5, blank=False, help_text="The user's preferred spiceness level"
     )
     preferred_cuisine = models.FloatField(
         null=True, blank=True, help_text="The user's preferred cuisine id"
@@ -31,6 +32,8 @@ class User(AbstractUser):
         """Model options."""
 
         ordering = ["last_name", "first_name"]
+
+    # Helper methods
 
     def full_name(self):
         """Return a string containing the user's full name."""
@@ -48,3 +51,25 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
 
         return self.gravatar(size=60)
+
+    # Follow relationships
+
+    def followers(self):
+        """Return all of the accounts that follow this user."""
+        from .follow import Follow
+
+        return (
+            Follow.objects.filter(following=self)
+            .select_related("follower")
+            .order_by("follower__last_name", "follower__first_name")
+        )
+
+    def following(self):
+        """Return all of the accounts that this user follows themselves."""
+        from .follow import Follow
+
+        return (
+            Follow.objects.filter(follower=self)
+            .select_related("following")
+            .order_by("following__last_name", "following__first_name")
+        )

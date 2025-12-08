@@ -22,18 +22,28 @@ user_fixtures = [
         "email": "john.doe@example.org",
         "first_name": "John",
         "last_name": "Doe",
+        "bio": "BlueJ addict. Amateur chef. Kölling enthusiast.",
     },
     {
         "username": "@janedoe",
         "email": "jane.doe@example.org",
         "first_name": "Jane",
         "last_name": "Doe",
+        "bio": "Designer by day, baker by night.",
     },
     {
         "username": "@charlie",
         "email": "charlie.johnson@example.org",
         "first_name": "Charlie",
         "last_name": "Johnson",
+        "bio": "I love hiking, gaming, and cooking cool things.",
+    },
+    {
+        "username": "@FraserTest",
+        "email": "k23163980@kcl.ac.uk",
+        "first_name": "Fraser",
+        "last_name": "Shimmins",
+        "bio": "This is a test profile set up by Fraser to manually test features during development",
     },
 ]
 
@@ -112,12 +122,15 @@ class Command(BaseCommand):
         last_name = self.faker.last_name()
         email = create_email(first_name, last_name)
         username = create_username(first_name, last_name)
+        bio = self.faker.text(max_nb_chars=400)
+
         self.try_create_user(
             {
                 "username": username,
                 "email": email,
                 "first_name": first_name,
                 "last_name": last_name,
+                "bio": bio,
             }
         )
 
@@ -148,6 +161,7 @@ class Command(BaseCommand):
             password=Command.DEFAULT_PASSWORD,
             first_name=data["first_name"],
             last_name=data["last_name"],
+            bio=data["bio"],
         )
 
     def create_recipes_from_json(self):

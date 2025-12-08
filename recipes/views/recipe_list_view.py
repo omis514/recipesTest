@@ -3,8 +3,7 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Prefetch, Q, Avg, FloatField
-from django.db.models.functions import Cast
+from django.db.models import Count, Prefetch, Q, Avg
 from recipes.models import Recipe, Comment
 
 
@@ -27,7 +26,7 @@ def recipe_list(request):
         .prefetch_related(top_comment_prefetch, "comments", "ratings", "favorites")
         .annotate(
             total_comments=Count("comments", distinct=True),
-            average_rating=Avg(Cast("ratings__rating", FloatField())),
+            average_rating=Avg("ratings__rating"),
             rating_count=Count("ratings", distinct=True),
         )
     )

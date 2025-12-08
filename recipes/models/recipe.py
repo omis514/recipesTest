@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Recipe(models.Model):
@@ -47,6 +48,12 @@ class Recipe(models.Model):
             22,
             "South American 💃",
         )
+
+    servings = models.IntegerField(
+        default=4,
+        validators=[MinValueValidator(1), MaxValueValidator(50)],
+        help_text="Number of servings this recipe makes",
+    )
 
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="recipes"

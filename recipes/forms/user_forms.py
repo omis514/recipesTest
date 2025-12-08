@@ -13,11 +13,19 @@ class UserForm(forms.ModelForm):
     It is typically used in a profile settings or account management page.
     """
 
+    # Make the bio input field more appropriate for use
+    bio = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 4, "class": "form-control"}),
+        required=False,
+        max_length=500,
+        label="Bio",
+    )
+
     class Meta:
         """Form options."""
 
         model = User
-        fields = ["first_name", "last_name", "username", "email"]
+        fields = ["first_name", "last_name", "bio", "username", "email"]
 
 
 class NewPasswordMixin(forms.Form):

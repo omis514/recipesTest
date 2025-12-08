@@ -30,9 +30,24 @@ urlpatterns = [
     path("log_in/", views.LogInView.as_view(), name="log_in"),
     path("log_out/", views.log_out, name="log_out"),
     path("password/", views.PasswordView.as_view(), name="password"),
-    path("profile/", views.ProfileUpdateView.as_view(), name="profile"),
+    path("profile/edit/", views.ProfileUpdateView.as_view(), name="edit_profile"),
+    path("profile/view/self/", views.UserProfileView.as_view(), name="user_profile"),
+    path(
+        "profile/view/<str:username>/",
+        views.observeProfile,
+        name="observe_profile",
+    ),
     path("sign_up/", views.SignUpView.as_view(), name="sign_up"),
     path("users/", views.user_list, name="user_list"),
+    path("follow/<str:username>/", views.follow_user, name="follow_user"),
+    path("unfollow/<str:username>/", views.unfollow_user, name="unfollow_user"),
+    path(
+        "profile/remove_follower/<str:username>/",
+        views.remove_follower,
+        name="remove_follower",
+    ),
+    path("search_users/", views.search_users, name="search_users"),
+    path("recipe/create/", views.RecipeCreateView.as_view(), name="recipe_create"),
     path(
         "reported-recipes/", views.reported_recipes_list, name="reported_recipes_list"
     ),

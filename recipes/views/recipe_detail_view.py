@@ -7,8 +7,7 @@ from recipes.models import Recipe
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Prefetch, Q, Avg, FloatField
-from django.db.models.functions import Cast
+from django.db.models import Count, Prefetch, Q, Avg
 from recipes.models import Recipe, Comment, Rating
 
 
@@ -84,15 +83,21 @@ def recipe_detail_view(request, pk):
     recipe = get_object_or_404(
         Recipe.objects.prefetch_related(
             "ingredients",
-            Prefetch("instructions", queryset=Instruction.objects.order_by("step"))
-            )
-        .annotate(
-            average_rating=Avg(Cast("ratings__rating", FloatField())),
-            rating_count=Count("ratings")
-            ,
+            Prefetch("instructions", queryset=Instruction.objects.order_by("step")),
+            "ratings",
         ),
         pk=pk,
     )
+
+    ratings_list = recipe.ratings.all()
+    if ratings_list.exists():
+        recipe.average_rating = float(
+            ratings_list.aggregate(Avg("rating"))["rating__avg"] or 0.0
+        )
+        recipe.rating_count = ratings_list.count()
+    else:
+        recipe.average_rating = 0
+        recipe.rating_count = 0
 
     sort = request.GET.get("sort", "newest")
 

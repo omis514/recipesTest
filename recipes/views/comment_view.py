@@ -3,11 +3,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from recipes.models import Recipe, Comment
+from recipes.models import Recipe, Comment, Rating
 import json
 
 User = get_user_model()
@@ -22,10 +24,26 @@ def add_comment(request, recipe_pk):
     parent_comment_id = request.POST.get("parent_comment_id", "").strip()
     reply_to_username = request.POST.get("reply_to_user", "").strip()
 
+    # Validation
     if not content:
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({"success": False, "error": "Comment cannot be empty"})
+            return JsonResponse(
+                {"success": False, "error": "Comment cannot be empty"}, status=400
+            )
         messages.error(request, "Comment cannot be empty.")
+        return redirect("recipe_detail", pk=recipe_pk)
+
+    # Character limit validation (optional but recommended)
+    if len(content) > 1000:
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "Comment is too long (max 1000 characters)",
+                },
+                status=400,
+            )
+        messages.error(request, "Comment is too long.")
         return redirect("recipe_detail", pk=recipe_pk)
 
     comment_data = {
@@ -34,43 +52,68 @@ def add_comment(request, recipe_pk):
         "content": content,
     }
 
-    # Handle nested reply
+    # Handle nested reply with validation
     if parent_comment_id:
         try:
             parent = Comment.objects.get(pk=int(parent_comment_id))
+            # Ensure parent belongs to same recipe
+            if parent.recipe.pk != recipe.pk:
+                raise Comment.DoesNotExist
             comment_data["parent_comment"] = parent
         except (Comment.DoesNotExist, ValueError):
-            pass
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse(
+                    {"success": False, "error": "Invalid parent comment"}, status=400
+                )
+            messages.error(request, "Invalid parent comment.")
+            return redirect("recipe_detail", pk=recipe_pk)
 
-    # Handle @mention reply_to
+    # Handle @mention reply_to with improved logic
     if reply_to_username:
-        # Remove @ if present in username
-        clean_username = reply_to_username.lstrip("@")
-        target_user = User.objects.filter(username=clean_username).first()
-        if not target_user:
-            # Try with @ prefix (based on your model)
-            target_user = User.objects.filter(username=f"@{clean_username}").first()
-        if target_user:
+        # Clean username - remove @ and whitespace
+        clean_username = reply_to_username.lstrip("@").strip()
+
+        # Try to find user
+        try:
+            target_user = User.objects.get(username=clean_username)
             comment_data["reply_to"] = target_user
+        except User.DoesNotExist:
+            # Try with @ prefix if your usernames include it
+            try:
+                target_user = User.objects.get(username=f"@{clean_username}")
+                comment_data["reply_to"] = target_user
+            except User.DoesNotExist:
+                # Don't fail - just skip the mention
+                pass
 
-    comment = Comment.objects.create(**comment_data)
+    # Create comment with transaction for safety
+    try:
+        with transaction.atomic():
+            comment = Comment.objects.create(**comment_data)
+    except Exception as e:
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse(
+                {"success": False, "error": "Failed to create comment"}, status=500
+            )
+        messages.error(request, "Failed to create comment.")
+        return redirect("recipe_detail", pk=recipe_pk)
 
-    # For AJAX requests, return comprehensive data
+    author_rating = Rating.objects.filter(recipe=recipe, user=comment.author).first()
+
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         response_data = {
             "success": True,
             "comment": {
                 "id": comment.pk,
-                "author": comment.author.username.lstrip("@"),  # Remove @ for display
-                "author_display": comment.author.get_full_name()
-                or comment.author.username.lstrip("@"),
-                "content": content,
-                "formatted_content": (
-                    comment.get_formatted_content()
-                    if hasattr(comment, "get_formatted_content")
-                    else content
+                "author": comment.author.username.lstrip("@"),
+                "author_display": (
+                    comment.author.get_full_name()
+                    or comment.author.username.lstrip("@")
                 ),
-                "created_at": comment.created_at.strftime("%d %b %Y %H:%M"),
+                "content": content,
+                "created_at": int(
+                    comment.created_at.timestamp()
+                ),  # Unix timestamp for JS
                 "like_count": 0,
                 "is_liked": False,
                 "can_delete": True,  # User just created it
@@ -81,6 +124,7 @@ def add_comment(request, recipe_pk):
                 "parent_comment_id": (
                     comment.parent_comment.pk if comment.parent_comment else None
                 ),
+                "author_rating": author_rating.rating if author_rating else 0,
             },
         }
         return JsonResponse(response_data)
@@ -95,6 +139,7 @@ def like_comment(request, comment_pk):
     """Toggle like on a comment with proper response."""
     comment = get_object_or_404(Comment, pk=comment_pk)
 
+    # Toggle like
     if comment.likes.filter(pk=request.user.pk).exists():
         comment.likes.remove(request.user)
         liked = False
@@ -130,7 +175,7 @@ def delete_comment(request, comment_pk):
         messages.error(request, "You cannot delete this comment.")
         return redirect("recipe_detail", pk=recipe_pk)
 
-    # Delete the comment
+    # Delete the comment (CASCADE will delete replies)
     comment.delete()
 
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
@@ -140,15 +185,20 @@ def delete_comment(request, comment_pk):
     return redirect("recipe_detail", pk=recipe_pk)
 
 
+@require_http_methods(["GET"])
 def get_user_mentions(request):
     """API endpoint for @ mention autocomplete."""
-    query = request.GET.get("q", "")
+    query = request.GET.get("q", "").strip()
 
+    # Minimum query length
     if len(query) < 2:
         return JsonResponse({"users": []})
 
     # Search for users (handle both with and without @ prefix)
-    users = User.objects.filter(username__icontains=query).values(
+    # Remove @ from query if present
+    search_query = query.lstrip("@")
+
+    users = User.objects.filter(username__icontains=search_query).values(
         "username", "first_name", "last_name"
     )[:10]
 
@@ -166,6 +216,7 @@ def get_user_mentions(request):
     return JsonResponse({"users": user_list})
 
 
+@require_http_methods(["GET"])
 def recipe_comments_api(request, recipe_pk):
     """API endpoint to get all comments for a recipe."""
     recipe = get_object_or_404(Recipe, pk=recipe_pk)
@@ -195,19 +246,18 @@ def recipe_comments_api(request, recipe_pk):
             "author": author_username,
             "author_display": comment.author.get_full_name() or author_username,
             "content": comment.content,
-            "formatted_content": (
-                comment.get_formatted_content()
-                if hasattr(comment, "get_formatted_content")
-                else comment.content
-            ),
-            "created_at": comment.created_at.strftime("%d %b %Y %H:%M"),
+            "created_at": int(comment.created_at.timestamp()),  # Unix timestamp
             "like_count": comment.like_count,
             "is_liked": (
-                comment.is_liked_by(request.user)
+                comment.likes.filter(pk=request.user.pk).exists()
                 if request.user.is_authenticated
                 else False
             ),
-            "can_delete": comment.author == request.user or request.user.is_staff,
+            "can_delete": (
+                comment.author == request.user or request.user.is_staff
+                if request.user.is_authenticated
+                else False
+            ),
             "reply_to": (
                 comment.reply_to.username.lstrip("@") if comment.reply_to else None
             ),
@@ -216,7 +266,7 @@ def recipe_comments_api(request, recipe_pk):
         }
 
         # Add nested replies
-        for reply in comment.replies.all():
+        for reply in comment.replies.all().order_by("created_at"):
             reply_author = reply.author.username.lstrip("@")
             comment_dict["replies"].append(
                 {
@@ -224,19 +274,18 @@ def recipe_comments_api(request, recipe_pk):
                     "author": reply_author,
                     "author_display": reply.author.get_full_name() or reply_author,
                     "content": reply.content,
-                    "formatted_content": (
-                        reply.get_formatted_content()
-                        if hasattr(reply, "get_formatted_content")
-                        else reply.content
-                    ),
-                    "created_at": reply.created_at.strftime("%d %b %Y %H:%M"),
+                    "created_at": int(reply.created_at.timestamp()),
                     "like_count": reply.like_count,
                     "is_liked": (
-                        reply.is_liked_by(request.user)
+                        reply.likes.filter(pk=request.user.pk).exists()
                         if request.user.is_authenticated
                         else False
                     ),
-                    "can_delete": reply.author == request.user or request.user.is_staff,
+                    "can_delete": (
+                        reply.author == request.user or request.user.is_staff
+                        if request.user.is_authenticated
+                        else False
+                    ),
                     "reply_to": (
                         reply.reply_to.username.lstrip("@") if reply.reply_to else None
                     ),
@@ -244,8 +293,6 @@ def recipe_comments_api(request, recipe_pk):
                 }
             )
 
-        # Sort replies by created_at (oldest first for replies)
-        comment_dict["replies"].sort(key=lambda x: x["created_at"])
         comments_data.append(comment_dict)
 
     return JsonResponse(

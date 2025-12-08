@@ -32,14 +32,14 @@ def submit_rating(request, recipe_pk):
         rating_count=Count("ratings"),
     )
 
-    average_rating = recipe_metrics.get("average_rating") or 0.0
+    average_rating = float(recipe_metrics.get("average_rating") or 0.0)
     rating_count = recipe_metrics.get("rating_count") or 0
 
     return JsonResponse(
         {
             "success": True,
             "message": "Rating saved successfully.",
-            "average_rating": f"{average_rating:.2f}",
+            "average_rating": average_rating,
             "rating_count": rating_count,
             "user_rating": rating,
         }
@@ -59,14 +59,14 @@ def delete_rating(request, recipe_pk):
         rating_count=Count("ratings"),
     )
 
-    average_rating = recipe_metrics.get("average_rating") or 0.0
+    average_rating = float(recipe_metrics.get("average_rating") or 0.0)
     rating_count = recipe_metrics.get("rating_count") or 0
 
     return JsonResponse(
         {
             "success": True,
             "message": "Rating removed successfully.",
-            "average_rating": f"{average_rating:.2f}",
+            "average_rating": average_rating,
             "rating_count": rating_count,
         }
     )

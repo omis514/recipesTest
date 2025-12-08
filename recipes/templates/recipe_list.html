@@ -1,173 +1,130 @@
 {% extends "base_content.html" %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-  <div class="row justify-content-center">
-    <div class="col-12 col-xl-11">
+<div class="glass-background-wrapper">
+  <div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-xl-11">
 
-      {# Header Section #}
-      <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white">
-          <div class="row align-items-center">
-            <div class="col-md-6">
-              <h2 class="mb-0">
-                <i class="bi bi-journal-text me-2"></i>Recipe Gallery
-              </h2>
-            </div>
-            <div class="col-md-6">
-              {# Search Bar #}
-              <form method="get" class="d-flex">
-                <input type="text" name="search" class="form-control me-2" placeholder="Search recipes..."
-                  value="{{ search_term }}">
-                <button class="btn btn-light" type="submit">
-                  <i class="bi bi-search"></i>
-                </button>
-              </form>
+        {# Header Section #}
+        <div class="card glass-card shadow-sm mb-4">
+          <div class="card-header glass-header">
+            <div class="row align-items-center">
+              <div class="col-md-6">
+                <h2 class="mb-0 text-white">
+                  <i class="bi bi-journal-text me-2"></i>Recipe Gallery
+                </h2>
+              </div>
+              <div class="col-md-6">
+                {# Search Bar #}
+                <form method="get" class="d-flex">
+                  <input type="text" name="search" class="form-control glass-input me-2" placeholder="Search recipes..."
+                    value="{{ search_term }}">
+                  <button class="btn glass-btn-search" type="submit">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
 
-        {# Filter and Sort Bar #}
-        <div class="card-body py-2">
-          <div class="row">
-            <div class="col-md-8">
-              <div class="d-flex flex-wrap gap-2 align-items-center">
-                <span class="text-muted me-2">Difficulty:</span>
-                <a href="?{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}{% if sort_by %}sort={{ sort_by }}{% endif %}"
-                  class="btn btn-sm {% if not selected_difficulty %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                  All
-                </a>
-                {% for value, label in difficulties %}
-                <a href="?difficulty={{ value }}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
-                  class="btn btn-sm {% if selected_difficulty == value|stringformat:'s' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                  {{ label }}
-                </a>
-                {% endfor %}
-                <div class="w-100 d-flex flex-nowrap gap-2 align-items-center">
-                  <span class="text-muted me-2">Spiciness:</span>
-                  <a href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}{% if sort_by %}sort={{ sort_by }}{% endif %}"
-                    class="btn btn-sm {% if not selected_spiciness %}btn-primary{% else %}btn-outline-primary{% endif %}">
+          {# Filter and Sort Bar #}
+          <div class="card-body py-3">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                  <span class="text-white me-2 fw-bold">Difficulty:</span>
+                  <a href="?{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}{% if sort_by %}sort={{ sort_by }}{% endif %}"
+                    class="btn btn-sm glass-filter-btn {% if not selected_difficulty %}active{% endif %}">
                     All
                   </a>
-                  {% for value, label in spicinesses %}
-                  <a href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}spiciness={{ value }}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
-                    class="btn btn-sm {% if selected_spiciness == value|stringformat:'s' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                  {% for value, label in difficulties %}
+                  <a href="?difficulty={{ value }}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
+                    class="btn btn-sm glass-filter-btn {% if selected_difficulty == value|stringformat:'s' %}active{% endif %}">
                     {{ label }}
                   </a>
                   {% endfor %}
-                  <span class="text-muted me-2 ms-3">Cuisine:</span>
-                  <div class="dropdown d-inline-block">
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="cuisineDropdown"
-                      data-bs-toggle="dropdown" aria-expanded="false">
-                      {% if selected_cuisine %}
-                      {% for value, label in cuisines %}
-                      {% if value|stringformat:'s' == selected_cuisine %}{{ label }}{% endif %}
-                      {% endfor %}
-                      {% else %}
-                      All Cuisines
-                      {% endif %}
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="cuisineDropdown">
-                      <li><a class="dropdown-item {% if not selected_cuisine %}active{% endif %}"
-                          href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}{% if sort_by %}sort={{ sort_by }}{% endif %}">
-                          All Cuisines
-                        </a></li>
-                      {% for value, label in cuisines %}
-                      <li><a class="dropdown-item {% if selected_cuisine == value|stringformat:'s' %}active{% endif %}"
-                          href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}cuisine={{ value }}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
-                          {{ label }}
-                        </a></li>
-                      {% endfor %}
-                    </ul>
+                  <div class="w-100 d-flex flex-nowrap gap-2 align-items-center mt-2">
+                    <span class="text-white me-2 fw-bold">Spiciness:</span>
+                    <a href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}{% if sort_by %}sort={{ sort_by }}{% endif %}"
+                      class="btn btn-sm glass-filter-btn {% if not selected_spiciness %}active{% endif %}">
+                      All
+                    </a>
+                    {% for value, label in spicinesses %}
+                    <a href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}spiciness={{ value }}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
+                      class="btn btn-sm glass-filter-btn {% if selected_spiciness == value|stringformat:'s' %}active{% endif %}">
+                      {{ label }}
+                    </a>
+                    {% endfor %}
+                    <span class="text-white me-2 ms-3 fw-bold">Cuisine:</span>
+                    <div class="dropdown d-inline-block">
+                      <button class="btn btn-sm glass-filter-btn dropdown-toggle" type="button" id="cuisineDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if selected_cuisine %}
+                        {% for value, label in cuisines %}
+                        {% if value|stringformat:'s' == selected_cuisine %}{{ label }}{% endif %}
+                        {% endfor %}
+                        {% else %}
+                        All Cuisines
+                        {% endif %}
+                      </button>
+                      <ul class="dropdown-menu glass-dropdown" aria-labelledby="cuisineDropdown">
+                        <li><a class="dropdown-item glass-dropdown-item {% if not selected_cuisine %}active{% endif %}"
+                            href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}{% if sort_by %}sort={{ sort_by }}{% endif %}">
+                            All Cuisines
+                          </a></li>
+                        {% for value, label in cuisines %}
+                        <li><a class="dropdown-item glass-dropdown-item {% if selected_cuisine == value|stringformat:'s' %}active{% endif %}"
+                            href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}cuisine={{ value }}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                            {{ label }}
+                          </a></li>
+                        {% endfor %}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="col-md-4 text-end">
-              <div class="dropdown d-inline-block">
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown"
-                  data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="bi bi-sort-down"></i> Sort by
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortDropdown">
-                  <li><a class="dropdown-item {% if sort_by == 'newest' or not sort_by %}active{% endif %}"
-                      href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=newest">
-                      Newest First
-                    </a></li>
-                  <li><a class="dropdown-item {% if sort_by == 'popular' %}active{% endif %}"
-                      href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if selected
-                      Most Popular
-                    </a></li>
-                  <li><a class="dropdown-item {% if sort_by == 'top_rated' %}active{% endif %}"
-                      href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiceness %}spiceness={{ selected_spiceness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=top_rated">
-                      Top Rated
-                  <li><a class="dropdown-item {% if sort_by == 'oldest' %}active{% endif %}"
-                      href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=oldest">
-                      Oldest First
-                    </a></li>
-                </ul>
+              <div class="col-md-4 text-end mt-2 mt-md-0">
+                <div class="dropdown d-inline-block">
+                  <button class="btn btn-sm glass-filter-btn dropdown-toggle" type="button" id="sortDropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-sort-down"></i> Sort by
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end glass-dropdown" aria-labelledby="sortDropdown">
+                    <li><a class="dropdown-item glass-dropdown-item {% if sort_by == 'newest' or not sort_by %}active{% endif %}"
+                        href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=newest">
+                        Newest First
+                      </a></li>
+                    <li><a class="dropdown-item glass-dropdown-item {% if sort_by == 'popular' %}active{% endif %}"
+                        href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=popular">
+                        Most Popular
+                      </a></li>
+                    <li><a class="dropdown-item glass-dropdown-item {% if sort_by == 'oldest' %}active{% endif %}"
+                        href="?{% if selected_difficulty %}difficulty={{ selected_difficulty }}&{% endif %}{% if selected_spiciness %}spiciness={{ selected_spiciness }}&{% endif %}{% if selected_cuisine %}cuisine={{ selected_cuisine }}&{% endif %}{% if search_term %}search={{ search_term }}&{% endif %}sort=oldest">
+                        Oldest First
+                      </a></li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {# Recipe Grid - Enhanced with Comments #}
-      {% if recipes %}
-      <div class="recipe-grid">
-        {% for recipe in recipes %}
-        <div class="recipe-card">
-          {# Clickable recipe area #}
-          <div class="recipe-clickable" onclick="window.location.href='/recipes/{{ recipe.pk }}/'">
-            {# Recipe Image Section #}
-            <div class="recipe-image-wrapper">
-              {% if recipe.image %}
-              <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-image">
-              <div class="placeholder-badges-left">
-                {# spiciness badge #}
-                <span class="spiciness-badge"
-                  style="outline: 1px solid #000; {% if recipe.spiciness == 0 %}background-color: #b3d77f; color: #000;{% elif recipe.spiciness == 1 %}background-color: #88b54a; color: #000;{% elif recipe.spiciness == 2 %}background-color: #ffeaa7; color: #000;{% elif recipe.spiciness == 3 %}background-color: #ff7657; color: #000;{% elif recipe.spiciness == 4 %}background-color: #b21b1b; color: #fff;{% elif recipe.spiciness == 5 %}background-color: #000000; color: #fff;{% endif %}">
-                  {% if recipe.spiciness == 1 %} 🫑
-                  {% elif recipe.spiciness == 2 %} 🌶️
-                  {% elif recipe.spiciness == 3 %} 🔥
-                  {% elif recipe.spiciness == 4 %} 🔥🔥🔥
-                  {% elif recipe.spiciness == 5 %} ☠️
-                  {% endif %}
-                  {{ recipe.get_spiciness_display }}
-                </span>
-
-                {# Difficulty Badge #}
-                <span class="difficulty-badge 
-                  {% if recipe.difficulty == 1 %}badge-easy
-                  {% elif recipe.difficulty == 2 %}badge-medium
-                  {% else %}badge-hard{% endif %}" style="outline: 1px solid #000;">
-                  {{ recipe.get_difficulty_display }}
-                </span>
-              </div>
-              <div class="placeholder-badges-right">
-                {% if recipe.vegetarian %}
-                  {# vegetarian badge #}
-                  <span class="vegetarian-badge bg-success" style="outline: 1px solid #000;">
-                    Vegetarian
-                  </span>
-                {% endif %}
-
-                {# time badge #}
-                <span class="time-badge" style="outline: 1px solid #000;">
-                  <i class="bi bi-clock"></i> {{ recipe.get_time }}
-                </span>
-
-                {# cuisine badge #}
-                <span class="cuisine-badge bg-primary text-white"  style="outline: 1px solid #000;">
-                  {{ recipe.get_cuisine_display }}
-                </span>
-              </div>
-              {% else %}
-              <div class="recipe-placeholder">
+        {# Recipe Grid - Enhanced with Comments #}
+        {% if recipes %}
+        <div class="recipe-grid">
+          {% for recipe in recipes %}
+          <div class="recipe-card glass-card">
+            {# Clickable recipe area #}
+            <div class="recipe-clickable" onclick="window.location.href='/recipes/{{ recipe.pk }}/'">
+              {# Recipe Image Section #}
+              <div class="recipe-image-wrapper">
+                {% if recipe.image %}
+                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-image">
                 <div class="placeholder-badges-left">
                   {# spiciness badge #}
                   <span class="spiciness-badge"
-                    style="outline: 1px solid #000; {% if recipe.spiciness == 0 %}background-color: #b3d77f; color: #000;{% elif recipe.spiciness == 1 %}background-color: #88b54a; color: #000;{% elif recipe.spiciness == 2 %}background-color: #ffeaa7; color: #000;{% elif recipe.spiciness == 3 %}background-color: #ff7657; color: #000;{% elif recipe.spiciness == 4 %}background-color: #b21b1b; color: #fff;{% elif recipe.spiciness == 5 %}background-color: #000000; color: #fff;{% endif %}">
+                    style="{% if recipe.spiciness == 0 %}background-color: #b3d77f; color: #000;{% elif recipe.spiciness == 1 %}background-color: #88b54a; color: #fff;{% elif recipe.spiciness == 2 %}background-color: #ffeaa7; color: #545252;{% elif recipe.spiciness == 3 %}background-color: #ff7675; color: #2b2c2c;{% elif recipe.spiciness == 4 %}background-color: #b21b1b; color: #fff;{% elif recipe.spiciness == 5 %}background-color: #000000; color: #fff;{% endif %}">
                     {% if recipe.spiciness == 1 %} 🫑
                     {% elif recipe.spiciness == 2 %} 🌶️
                     {% elif recipe.spiciness == 3 %} 🔥
@@ -178,50 +135,91 @@
                   </span>
 
                   {# Difficulty Badge #}
-                  <span class="difficulty-badge 
+                  <span class="difficulty-badge
                     {% if recipe.difficulty == 1 %}badge-easy
                     {% elif recipe.difficulty == 2 %}badge-medium
-                    {% else %}badge-hard{% endif %}" style="outline: 1px solid #000;">
+                    {% else %}badge-hard{% endif %}">
                     {{ recipe.get_difficulty_display }}
                   </span>
                 </div>
                 <div class="placeholder-badges-right">
                   {% if recipe.vegetarian %}
-                  {# vegetarian badge #}
-                  <span class="vegetarian-badge bg-success" style="outline: 1px solid #000;">
-                    Vegetarian
-                  </span>
+                    {# vegetarian badge #}
+                    <span class="vegetarian-badge">
+                      🌱 Vegetarian
+                    </span>
                   {% endif %}
 
                   {# time badge #}
-                  <span class="time-badge" style="outline: 1px solid #000;">
+                  <span class="time-badge">
                     <i class="bi bi-clock"></i> {{ recipe.get_time }}
                   </span>
 
                   {# cuisine badge #}
-                  <span class="cuisine-badge bg-primary text-white" style="outline: 1px solid #000;">
+                  <span class="cuisine-badge">
                     {{ recipe.get_cuisine_display }}
                   </span>
                 </div>
-                <i class="bi bi-image display-1 text-muted"></i>
-              </div>
-              {% endif %}
-              <div class="favorite-badge-wrapper">
-                {% if user.is_authenticated %}
-                <form action="{% url 'toggle_favorite' recipe.pk %}" method="post" onsubmit="event.stopPropagation();">
-                  {% csrf_token %}
-                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                  <button type="submit" class="btn btn-light rounded-circle shadow-sm favorite-btn" onclick="event.stopPropagation();" title="{% if user in recipe.favorites.all %}Unfavorite{% else %}Favorite{% endif %}">
-                    {% if user in recipe.favorites.all %}
-                    <i class="bi bi-heart-fill text-danger"></i>
-                    {% else %}
-                    <i class="bi bi-heart text-danger"></i>
+                {% else %}
+                <div class="recipe-placeholder">
+                  <div class="placeholder-badges-left">
+                    {# spiciness badge #}
+                    <span class="spiciness-badge"
+                      style="{% if recipe.spiciness == 0 %}background-color: #b3d77f; color: #000;{% elif recipe.spiciness == 1 %}background-color: #88b54a; color: #fff;{% elif recipe.spiciness == 2 %}background-color: #ffeaa7; color: #545252;{% elif recipe.spiciness == 3 %}background-color: #ff7675; color: #2b2c2c;{% elif recipe.spiciness == 4 %}background-color: #b21b1b; color: #fff;{% elif recipe.spiciness == 5 %}background-color: #000000; color: #fff;{% endif %}">
+                      {% if recipe.spiciness == 1 %} 🫑
+                      {% elif recipe.spiciness == 2 %} 🌶️
+                      {% elif recipe.spiciness == 3 %} 🔥
+                      {% elif recipe.spiciness == 4 %} 🔥🔥🔥
+                      {% elif recipe.spiciness == 5 %} ☠️
+                      {% endif %}
+                      {{ recipe.get_spiciness_display }}
+                    </span>
+
+                    {# Difficulty Badge #}
+                    <span class="difficulty-badge
+                      {% if recipe.difficulty == 1 %}badge-easy
+                      {% elif recipe.difficulty == 2 %}badge-medium
+                      {% else %}badge-hard{% endif %}">
+                      {{ recipe.get_difficulty_display }}
+                    </span>
+                  </div>
+                  <div class="placeholder-badges-right">
+                    {% if recipe.vegetarian %}
+                    {# vegetarian badge #}
+                    <span class="vegetarian-badge">
+                      🌱 Vegetarian
+                    </span>
                     {% endif %}
-                  </button>
-                </form>
+
+                    {# time badge #}
+                    <span class="time-badge">
+                      <i class="bi bi-clock"></i> {{ recipe.get_time }}
+                    </span>
+
+                    {# cuisine badge #}
+                    <span class="cuisine-badge">
+                      {{ recipe.get_cuisine_display }}
+                    </span>
+                  </div>
+                  <i class="bi bi-image display-1 text-white" style="opacity: 0.3;"></i>
+                </div>
                 {% endif %}
+                <div class="favorite-badge-wrapper">
+                  {% if user.is_authenticated %}
+                  <form action="{% url 'toggle_favorite' recipe.pk %}" method="post" onsubmit="event.stopPropagation();">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="btn btn-light rounded-circle shadow-sm favorite-btn" onclick="event.stopPropagation();" title="{% if user in recipe.favorites.all %}Unfavorite{% else %}Favorite{% endif %}">
+                      {% if user in recipe.favorites.all %}
+                      <i class="bi bi-heart-fill text-danger"></i>
+                      {% else %}
+                      <i class="bi bi-heart text-danger"></i>
+                      {% endif %}
+                    </button>
+                  </form>
+                  {% endif %}
+                </div>
               </div>
-            </div>
 
             {# Recipe Content Section #}
             <div class="recipe-content">
@@ -229,165 +227,467 @@
                 <h5 class="recipe-title mb-0">{{ recipe.title }}</h5>
                 {# Rating Display #}
                 <div class="flex-shrink-0 ms-2">
-                  {% if recipe.average_rating %}
-                  <span class="badge bg-warning text-dark" title="{{ recipe.rating_count }} ratings">
-                    {% for i in "12345"|make_list %}
-                    {% with score=i|add:0 %}
-                      {% if recipe.average_rating >= score %}
-                        <i class="bi bi-star-fill"></i>
-                      {% elif recipe.average_rating >= score|add:"-0.5" %}
-                        <i class="bi bi-star-half"></i>
-                      {% else %}
-                        <i class="bi bi-star"></i>
-                      {% endif %}
-                    {% endwith %}
-                  {% endfor %}
-                  </span>
-                  {% else %}
-                  <span class="badge bg-light text-muted border" title="No ratings yet">
-                    {% for i in "12345"|make_list %}
-                      <i class="bi bi-star"></i>{% endfor %}
-                  </span>
-                  {% endif %}
+                  <span class="badge bg-warning text-dark recipe-rating-badge"
+                    data-average-rating="{{ recipe.average_rating }}"
+                    data-rating-count="{{ recipe.rating_count }}"
+                    title="{% if recipe.rating_count %}{{ recipe.rating_count }} ratings{% else %}No ratings yet{% endif %}">
+                  <span class="recipe-stars"></span>
+                </span>
                 </div>
               </div>
 
-              {% if recipe.description %}
-              <p class="recipe-description">{{ recipe.description|truncatewords:15 }}</p>
+                {% if recipe.description %}
+                <p class="recipe-description">{{ recipe.description|truncatewords:15 }}</p>
+                {% else %}
+                <p class="recipe-description text-white fst-italic" style="opacity: 0.5;">No description available</p>
+                {% endif %}
+
+                {# Meta Information #}
+                <div class="recipe-meta">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-white" style="opacity: 0.8;">
+                      <i class="bi bi-person"></i>
+                      {{ recipe.author.get_full_name|default:recipe.author.username }}
+                    </small>
+                    <small class="text-white" style="opacity: 0.8;">
+                      {{ recipe.created_at|date:"d M Y" }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {# Comments Section - Not clickable #}
+            <div class="recipe-comments">
+              {# Comment Stats Bar #}
+              <div class="comment-stats">
+                <span class="stats-item">
+                  <i class="bi bi-chat-dots"></i>
+                  <strong>{{ recipe.total_comments }}</strong> comment{{ recipe.total_comments|pluralize }}
+                </span>
+                <span class="stats-item">
+                  <i class="bi bi-bar-chart"></i>
+                  {{ recipe.ingredients.count }} ingredients
+                </span>
+                <span class="stats-item">
+                  <i class="bi bi-list-ol"></i>
+                  {{ recipe.instructions.count }} steps
+                </span>
+              </div>
+
+              {# Top Comment Preview #}
+              {% if recipe.top_comment %}
+              <div class="top-comment">
+                <div class="comment-header">
+                  <span class="comment-badge">
+                    <i class="bi bi-star-fill text-warning"></i> Top Comment
+                  </span>
+                  <span class="comment-likes">
+                    <i class="bi bi-heart-fill text-danger"></i>
+                    {{ recipe.top_comment.like_count }}
+                  </span>
+                </div>
+                <div class="comment-content">
+                  <strong class="comment-author">{{ recipe.top_comment.author.username }}:</strong>
+                  <span class="comment-text">{{ recipe.top_comment.get_display_content }}</span>
+                </div>
+              </div>
               {% else %}
-              <p class="recipe-description text-muted fst-italic">No description available</p>
+              <div class="no-comments">
+                <i class="bi bi-chat"></i>
+                <span>Be the first to comment!</span>
+              </div>
               {% endif %}
-
-              {# Meta Information #}
-              <div class="recipe-meta">
-                <div class="d-flex justify-content-between align-items-center">
-                  <small class="text-muted">
-                    <i class="bi bi-person"></i>
-                    {{ recipe.author.get_full_name|default:recipe.author.username }}
-                  </small>
-                  <small class="text-muted">
-                    {{ recipe.created_at|date:"d M Y" }}
-                  </small>
-                </div>
-              </div>
             </div>
           </div>
+          {% endfor %}
+        </div>
 
-          {# Comments Section - Not clickable #}
-          <div class="recipe-comments">
-            {# Comment Stats Bar #}
-            <div class="comment-stats">
-              <span class="stats-item">
-                <i class="bi bi-chat-dots"></i>
-                <strong>{{ recipe.total_comments }}</strong> comment{{ recipe.total_comments|pluralize }}
-              </span>
-              <span class="stats-item">
-                <i class="bi bi-bar-chart"></i>
-                {{ recipe.ingredients.count }} ingredients
-              </span>
-              <span class="stats-item">
-                <i class="bi bi-list-ol"></i>
-                {{ recipe.instructions.count }} steps
-              </span>
-            </div>
-
-            {# Top Comment Preview #}
-            {% if recipe.top_comment %}
-            <div class="top-comment">
-              <div class="comment-header">
-                <span class="comment-badge">
-                  <i class="bi bi-star-fill text-warning"></i> Top Comment
-                </span>
-                <span class="comment-likes">
-                  <i class="bi bi-heart-fill text-danger"></i>
-                  {{ recipe.top_comment.like_count }}
-                </span>
-              </div>
-              <div class="comment-content">
-                <strong class="comment-author">{{ recipe.top_comment.author.username }}:</strong>
-                <span class="comment-text">{{ recipe.top_comment.get_display_content }}</span>
-              </div>
-            </div>
-            {% else %}
-            <div class="no-comments">
-              <i class="bi bi-chat"></i>
-              <span>Be the first to comment!</span>
-            </div>
+        {# Pagination #}
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Recipe pagination" class="mt-4 mb-4">
+          <ul class="pagination justify-content-center glass-pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link glass-page-link"
+                href="?page=1{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                First
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link glass-page-link"
+                href="?page={{ page_obj.previous_page_number }}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                Previous
+              </a>
+            </li>
             {% endif %}
+
+            <li class="page-item active">
+              <span class="page-link glass-page-link active">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+              </span>
+            </li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link glass-page-link"
+                href="?page={{ page_obj.next_page_number }}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                Next
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link glass-page-link"
+                href="?page={{ page_obj.paginator.num_pages }}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                Last
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        {# Empty State #}
+        <div class="card glass-card shadow-sm mb-4">
+          <div class="card-body text-center py-5">
+            <i class="bi bi-journal-x display-1 text-white" style="opacity: 0.5;"></i>
+            <h3 class="mt-3 text-white">No Recipes Found</h3>
+            <p class="text-white" style="opacity: 0.7;">
+              {% if search_term %}
+              No recipes match your search "{{ search_term }}".
+              {% else %}
+              No recipes have been created yet. Be the first to share your culinary creation!
+              {% endif %}
+            </p>
+            <a href="{% url 'recipe_create' %}" class="btn glass-btn-primary mt-3">
+              <i class="bi bi-plus-circle me-2"></i>Create Recipe
+            </a>
           </div>
         </div>
-        {% endfor %}
+        {% endif %}
+
       </div>
-
-      {# Pagination #}
-      {% if page_obj.has_other_pages %}
-      <nav aria-label="Recipe pagination" class="mt-4">
-        <ul class="pagination justify-content-center">
-          {% if page_obj.has_previous %}
-          <li class="page-item">
-            <a class="page-link"
-              href="?page=1{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
-              First
-            </a>
-          </li>
-          <li class="page-item">
-            <a class="page-link"
-              href="?page={{ page_obj.previous_page_number }}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
-              Previous
-            </a>
-          </li>
-          {% endif %}
-
-          <li class="page-item active">
-            <span class="page-link">
-              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </span>
-          </li>
-
-          {% if page_obj.has_next %}
-          <li class="page-item">
-            <a class="page-link"
-              href="?page={{ page_obj.next_page_number }}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
-              Next
-            </a>
-          </li>
-          <li class="page-item">
-            <a class="page-link"
-              href="?page={{ page_obj.paginator.num_pages }}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
-              Last
-            </a>
-          </li>
-          {% endif %}
-        </ul>
-      </nav>
-      {% endif %}
-
-      {% else %}
-      {# Empty State #}
-      <div class="card shadow-sm">
-        <div class="card-body text-center py-5">
-          <i class="bi bi-journal-x display-1 text-muted"></i>
-          <h3 class="mt-3">No Recipes Found</h3>
-          <p class="text-muted">
-            {% if search_term %}
-            No recipes match your search "{{ search_term }}".
-            {% else %}
-            No recipes have been created yet. Be the first to share your culinary creation!
-            {% endif %}
-          </p>
-          <a href="{% url 'recipe_create' %}" class="btn btn-primary mt-3">
-            <i class="bi bi-plus-circle me-2"></i>Create Recipe
-          </a>
-        </div>
-      </div>
-      {% endif %}
-
     </div>
   </div>
 </div>
 
 <style>
-  /* TikTok-style Grid Layout */
+  /* Liquid Glass Background */
+  .glass-background-wrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    position: relative;
+    padding: 2rem 0;
+    overflow: hidden;
+  }
+
+  .glass-background-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+    background-size: 100% 100%;
+    filter: blur(60px);
+    z-index: 0;
+  }
+
+  .glass-background-wrapper > .container-fluid {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Glass Morphism Cards */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 16px !important;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.3s ease;
+  }
+
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-5px);
+  }
+
+  .glass-header {
+    background: rgba(13, 110, 253, 0.35) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 1.5rem !important;
+  }
+
+  .card-body {
+    background: transparent !important;
+  }
+
+  /* Form Controls */
+  .glass-input,
+  .form-control {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    transition: all 0.3s ease;
+  }
+
+  .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  .form-control:focus {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow:
+      0 0 0 0.2rem rgba(255, 255, 255, 0.2),
+      inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    outline: none;
+  }
+
+  /* Search Button */
+  .glass-btn-search {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+  }
+
+  .glass-btn-search:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    transform: scale(1.05);
+  }
+
+  /* Filter Buttons */
+  .glass-filter-btn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    min-height: 31px;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .glass-filter-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+  }
+
+  .glass-filter-btn.active {
+    background: rgba(13, 110, 253, 0.6) !important;
+    border-color: rgba(13, 110, 253, 0.8) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(13, 110, 253, 0.4);
+  }
+
+  /* Difficulty button colors */
+  a[href*="difficulty=1"].glass-filter-btn {
+    background: rgba(40, 167, 69, 0.2) !important;
+    border-color: rgba(40, 167, 69, 0.4) !important;
+  }
+
+  a[href*="difficulty=1"].glass-filter-btn:hover {
+    background: rgba(40, 167, 69, 0.4) !important;
+    border-color: rgba(40, 167, 69, 0.6) !important;
+  }
+
+  a[href*="difficulty=1"].glass-filter-btn.active {
+    background: rgba(40, 167, 69, 0.7) !important;
+    border-color: rgba(40, 167, 69, 0.9) !important;
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
+  }
+
+  a[href*="difficulty=2"].glass-filter-btn {
+    background: rgba(255, 193, 7, 0.2) !important;
+    border-color: rgba(255, 193, 7, 0.4) !important;
+  }
+
+  a[href*="difficulty=2"].glass-filter-btn:hover {
+    background: rgba(255, 193, 7, 0.4) !important;
+    border-color: rgba(255, 193, 7, 0.6) !important;
+  }
+
+  a[href*="difficulty=2"].glass-filter-btn.active {
+    background: rgba(255, 193, 7, 0.7) !important;
+    border-color: rgba(255, 193, 7, 0.9) !important;
+    color: #000000 !important;
+    box-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+  }
+
+  a[href*="difficulty=3"].glass-filter-btn {
+    background: rgba(220, 53, 69, 0.2) !important;
+    border-color: rgba(220, 53, 69, 0.4) !important;
+  }
+
+  a[href*="difficulty=3"].glass-filter-btn:hover {
+    background: rgba(220, 53, 69, 0.4) !important;
+    border-color: rgba(220, 53, 69, 0.6) !important;
+  }
+
+  a[href*="difficulty=3"].glass-filter-btn.active {
+    background: rgba(220, 53, 69, 0.7) !important;
+    border-color: rgba(220, 53, 69, 0.9) !important;
+    box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+  }
+
+  /* Spiciness button colors */
+  a[href*="spiciness=0"].glass-filter-btn {
+    background: rgba(179, 215, 127, 0.2) !important;
+    border-color: rgba(179, 215, 127, 0.4) !important;
+  }
+
+  a[href*="spiciness=0"].glass-filter-btn:hover {
+    background: rgba(179, 215, 127, 0.4) !important;
+    border-color: rgba(179, 215, 127, 0.6) !important;
+  }
+
+  a[href*="spiciness=0"].glass-filter-btn.active {
+    background: rgba(179, 215, 127, 0.7) !important;
+    border-color: rgba(179, 215, 127, 0.9) !important;
+    color: #000000 !important;
+    box-shadow: 0 0 15px rgba(179, 215, 127, 0.5);
+  }
+
+  a[href*="spiciness=1"].glass-filter-btn {
+    background: rgba(136, 181, 74, 0.2) !important;
+    border-color: rgba(136, 181, 74, 0.4) !important;
+  }
+
+  a[href*="spiciness=1"].glass-filter-btn:hover {
+    background: rgba(136, 181, 74, 0.4) !important;
+    border-color: rgba(136, 181, 74, 0.6) !important;
+  }
+
+  a[href*="spiciness=1"].glass-filter-btn.active {
+    background: rgba(136, 181, 74, 0.7) !important;
+    border-color: rgba(136, 181, 74, 0.9) !important;
+    box-shadow: 0 0 15px rgba(136, 181, 74, 0.5);
+  }
+
+  a[href*="spiciness=2"].glass-filter-btn {
+    background: rgba(255, 234, 167, 0.2) !important;
+    border-color: rgba(255, 234, 167, 0.4) !important;
+  }
+
+  a[href*="spiciness=2"].glass-filter-btn:hover {
+    background: rgba(255, 234, 167, 0.4) !important;
+    border-color: rgba(255, 234, 167, 0.6) !important;
+  }
+
+  a[href*="spiciness=2"].glass-filter-btn.active {
+    background: rgba(255, 234, 167, 0.7) !important;
+    border-color: rgba(255, 234, 167, 0.9) !important;
+    color: #545252 !important;
+    box-shadow: 0 0 15px rgba(255, 234, 167, 0.5);
+  }
+
+  a[href*="spiciness=3"].glass-filter-btn {
+    background: rgba(255, 118, 117, 0.2) !important;
+    border-color: rgba(255, 118, 117, 0.4) !important;
+  }
+
+  a[href*="spiciness=3"].glass-filter-btn:hover {
+    background: rgba(255, 118, 117, 0.4) !important;
+    border-color: rgba(255, 118, 117, 0.6) !important;
+  }
+
+  a[href*="spiciness=3"].glass-filter-btn.active {
+    background: rgba(255, 118, 117, 0.7) !important;
+    border-color: rgba(255, 118, 117, 0.9) !important;
+    color: #2b2c2c !important;
+    box-shadow: 0 0 15px rgba(255, 118, 117, 0.5);
+  }
+
+  a[href*="spiciness=4"].glass-filter-btn {
+    background: rgba(178, 27, 27, 0.2) !important;
+    border-color: rgba(178, 27, 27, 0.4) !important;
+  }
+
+  a[href*="spiciness=4"].glass-filter-btn:hover {
+    background: rgba(178, 27, 27, 0.4) !important;
+    border-color: rgba(178, 27, 27, 0.6) !important;
+  }
+
+  a[href*="spiciness=4"].glass-filter-btn.active {
+    background: rgba(178, 27, 27, 0.8) !important;
+    border-color: rgba(178, 27, 27, 1) !important;
+    box-shadow: 0 0 15px rgba(178, 27, 27, 0.6);
+  }
+
+  a[href*="spiciness=5"].glass-filter-btn {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(196, 26, 26, 0.4) !important;
+  }
+
+  a[href*="spiciness=5"].glass-filter-btn:hover {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border-color: rgba(196, 26, 26, 0.6) !important;
+  }
+
+  a[href*="spiciness=5"].glass-filter-btn.active {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border-color: rgba(196, 26, 26, 0.9) !important;
+    box-shadow: 0 0 15px rgba(196, 26, 26, 0.6);
+  }
+
+  /* Dropdown */
+  .glass-dropdown {
+    background: rgba(30, 30, 50, 0.95) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+    padding: 0.5rem;
+  }
+
+  .glass-dropdown-item {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease;
+    margin-bottom: 0.25rem;
+  }
+
+  .glass-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+  }
+
+  .glass-dropdown-item.active {
+    background: rgba(13, 110, 253, 0.7) !important;
+    color: #ffffff !important;
+  }
+
+  /* Recipe Grid */
   .recipe-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -396,19 +696,10 @@
   }
 
   .recipe-card {
-    background: white;
-    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
     position: relative;
     display: flex;
     flex-direction: column;
-  }
-
-  .recipe-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   }
 
   .recipe-clickable {
@@ -421,7 +712,8 @@
     width: 100%;
     height: 200px;
     overflow: hidden;
-    background: #f8f9fa;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px 16px 0 0;
   }
 
   .recipe-image {
@@ -441,7 +733,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
     position: relative;
   }
 
@@ -470,7 +762,7 @@
   .placeholder-badges-left .difficulty-badge,
   .placeholder-badges-left .spiciness-badge {
     position: static;
-    padding: 4px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 600;
@@ -478,21 +770,29 @@
     letter-spacing: 0.5px;
     width: fit-content;
     display: inline-block;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
 
   .placeholder-badges-right .time-badge,
   .placeholder-badges-right .vegetarian-badge,
   .placeholder-badges-right .cuisine-badge {
     position: static;
-    padding: 4px 12px;
-    background: rgba(255, 255, 255, 0.95);
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.15) !important;
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: 20px;
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
     width: fit-content;
     display: inline-block;
     text-align: right;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
 
   .spiciness-badge {
@@ -503,11 +803,15 @@
     text-transform: none;
   }
 
+  .vegetarian-badge {
+    background: rgba(40, 167, 69, 0.7) !important;
+  }
+
   .difficulty-badge {
     position: absolute;
     top: 10px;
     left: 10px;
-    padding: 4px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 600;
@@ -534,12 +838,13 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    padding: 4px 12px;
-    background: rgba(255, 255, 255, 0.95);
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
+    color: #ffffff;
   }
 
   .recipe-content {
@@ -550,7 +855,7 @@
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 8px;
-    color: #2c3e50;
+    color: #ffffff;
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -559,7 +864,7 @@
 
   .recipe-description {
     font-size: 0.9rem;
-    color: #6c757d;
+    color: rgba(255, 255, 255, 0.8);
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -571,21 +876,24 @@
 
   .recipe-meta {
     padding-top: 12px;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   /* Comments Section Styles */
   .recipe-comments {
-    background: linear-gradient(to bottom, #f8f9fa, #ffffff);
-    border-top: 1px solid #e9ecef;
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
     padding: 12px 16px;
+    border-radius: 0 0 16px 16px;
   }
 
   .comment-stats {
     display: flex;
     justify-content: space-around;
     padding: 8px 0;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     margin-bottom: 12px;
   }
 
@@ -594,16 +902,18 @@
     align-items: center;
     gap: 4px;
     font-size: 0.85rem;
-    color: #6c757d;
+    color: rgba(255, 255, 255, 0.8);
   }
 
   .stats-item i {
-    color: #007bff;
+    color: #4dabf7;
   }
 
   .top-comment {
-    background: #fff;
-    border: 1px solid #e9ecef;
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     padding: 10px;
     position: relative;
@@ -653,16 +963,17 @@
   .comment-content {
     font-size: 0.9rem;
     line-height: 1.4;
+    color: rgba(255, 255, 255, 0.9);
   }
 
   .comment-author {
-    color: #007bff;
+    color: #4dabf7;
     font-weight: 600;
     margin-right: 4px;
   }
 
   .comment-text {
-    color: #495057;
+    color: rgba(255, 255, 255, 0.85);
   }
 
   .no-comments {
@@ -671,13 +982,62 @@
     justify-content: center;
     gap: 8px;
     padding: 16px;
-    color: #adb5bd;
+    color: rgba(255, 255, 255, 0.5);
     font-style: italic;
     font-size: 0.9rem;
   }
 
   .no-comments i {
     font-size: 1.2rem;
+  }
+
+  /* Pagination */
+  .glass-pagination {
+    gap: 0.5rem;
+  }
+
+  .glass-page-link {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+
+  .glass-page-link:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+  }
+
+  .glass-page-link.active {
+    background: rgba(13, 110, 253, 0.7) !important;
+    border-color: rgba(13, 110, 253, 0.9) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(13, 110, 253, 0.5);
+  }
+
+  /* Primary Button */
+  .glass-btn-primary {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1.5rem;
+  }
+
+  .glass-btn-primary:hover {
+    background: linear-gradient(135deg, #34ce57 0%, #28a745 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
   }
 
   /* Responsive adjustments */
@@ -699,6 +1059,10 @@
       flex-direction: column;
       gap: 2px;
     }
+
+    .glass-background-wrapper {
+      padding: 1rem 0;
+    }
   }
 
   @media (max-width: 576px) {
@@ -707,21 +1071,7 @@
     }
   }
 
-  /* Dropdown menu active state */
-  .dropdown-item.active {
-    background-color: #007bff;
-    color: white;
-  }
-
-  /* Ensure consistent button heights in filter section */
-  .d-flex.flex-wrap.gap-2 .btn-sm,
-  .d-flex.flex-nowrap.gap-2 .btn-sm {
-    min-height: 31px;
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-  }
-
+  /* Ensure dropdowns work properly */
   .card {
     overflow: visible !important;
   }
@@ -743,6 +1093,11 @@
 
   .dropdown-toggle {
     pointer-events: auto !important;
+  }
+
+  /* Text Colors */
+  .text-white {
+    color: #ffffff !important;
   }
 
   .favorite-badge-wrapper {
@@ -774,6 +1129,27 @@
       window.location.reload();
     }
   });
+
+  function renderRecipeStars(container, rating, count) {
+    let html = '';
+    for (let i = 1; i <= 5; i++) {
+      if (rating >= i) {
+        html += '<i class="bi bi-star-fill"></i> ';
+      } else if (rating >= i - 0.5) {
+        html += '<i class="bi bi-star-half"></i> ';
+      } else {
+        html += '<i class="bi bi-star"></i> ';
+      }
+    }
+    container.innerHTML = html;
+  }
+
+  document.querySelectorAll('.recipe-rating-badge').forEach(badge => {
+    const avg = parseFloat(badge.dataset.averageRating) || 0;
+    const starsContainer = badge.querySelector('.recipe-stars');
+    renderRecipeStars(starsContainer, avg);
+  });
+
 </script>
 
 {% endblock %}

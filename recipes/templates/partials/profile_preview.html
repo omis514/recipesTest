@@ -1,0 +1,89 @@
+<div class="card shadow-sm mt-4" style="border-radius: 30px; overflow: hidden;">
+
+    <!-- HEADER -->
+    <div class="card-header bg-primary text-white text-center"
+        style="border-top-left-radius: 30px; border-top-right-radius: 30px;">
+        <h2>Hello I'm...</h2>
+    </div>
+
+    <!-- BODY -->
+    <div class="card-body text-center">
+
+        <!-- Profile Picture Preview -->
+        <img id="preview-pfp"
+            src="{{ user.gravatar }}"
+            class="rounded-circle mb-3"
+            style="width: 120px; height: 120px; object-fit: cover;">
+
+        <!-- Name -->
+        <h4 id="preview-name">{{ user.first_name }} {{ user.last_name }}</h4>
+
+        <!-- Username -->
+        <p class="text-muted mb-1" id="preview-username">{{ user.username }}</p>
+
+        <!-- Email -->
+        <p class="text-muted" id="preview-email">{{ user.email }}</p>
+
+        <!-- Email -->
+        <p class="text-muted" id="preview-bio">{{ user.bio }}</p>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="card-footer bg-primary"
+        style="padding: 15px 0; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;">
+    </div>
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Input elements from the edit form
+    const firstNameInput = document.getElementById("id_first_name");
+    const lastNameInput = document.getElementById("id_last_name");
+    const usernameInput = document.getElementById("id_username");
+    const emailInput = document.getElementById("id_email");
+    const pfpInput = document.getElementById("id_profile_image"); // if exists
+    const bioInput = document.getElementById("id_bio"); // if exists
+
+    // Preview elements
+    const previewName = document.getElementById("preview-name");
+    const previewUsername = document.getElementById("preview-username");
+    const previewEmail = document.getElementById("preview-email");
+    const previewPfp = document.getElementById("preview-pfp");
+    const previewBio = document.getElementById("preview-bio"); // if exists
+
+
+    // Update preview name
+    function updateName() {
+        const first = firstNameInput.value.trim();
+        const last  = lastNameInput.value.trim();
+        previewName.textContent = `${first} ${last}`.trim();
+    }
+
+    if (firstNameInput) firstNameInput.addEventListener("input", updateName);
+    if (lastNameInput)  lastNameInput.addEventListener("input", updateName);
+
+    // Update username
+    if (usernameInput) {
+        usernameInput.addEventListener("input", function () {
+            previewUsername.textContent = usernameInput.value.trim();
+        });
+    }
+
+    // Update email
+    if (emailInput) {
+        emailInput.addEventListener("input", function () {
+            previewEmail.textContent = emailInput.value;
+        });
+    }
+
+    // Update email
+    if (bioInput) {
+        bioInput.addEventListener("input", function () {
+            previewBio.textContent = bioInput.value;
+        });
+    }
+});
+</script>
