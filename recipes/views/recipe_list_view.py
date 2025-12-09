@@ -1,9 +1,14 @@
 # recipes/views/recipe_list_view.py
 
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Prefetch, Q, Avg
+from django.urls import reverse
+from django.contrib import messages
+from django.views.generic import UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
 from recipes.models import Recipe, Comment
 
 
@@ -90,3 +95,54 @@ def recipe_list(request):
         "sort_by": sort_by,
     }
     return render(request, "recipe_list.html", context)
+
+
+class RecipeUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """View for updating an existing recipe. Only author or staff can edit."""
+
+    model = Recipe
+    template_name = "recipe_create.html"
+    # FIXED: Remove prep_time fields that don't exist in your Recipe model
+    fields = [
+        "title",
+        "description",
+        "difficulty",
+        "spiciness",
+        "cuisine",
+        "vegetarian",
+        "image",
+    ]
+
+    def test_func(self):
+        """Check if user is the recipe author or staff"""
+        recipe = self.get_object()
+        return self.request.user == recipe.author or self.request.user.is_staff
+
+    def get_success_url(self):
+        """Redirect to recipe detail page after successful update"""
+        messages.success(
+            self.request, f'Recipe "{self.object.title}" has been updated!'
+        )
+        return reverse("recipe_detail", kwargs={"pk": self.object.pk})
+
+
+@login_required
+def delete_recipe(request, pk):
+    """Delete a recipe. Only author or staff can delete."""
+    recipe = get_object_or_404(Recipe, pk=pk)
+
+    # Check permissions
+    if request.user != recipe.author and not request.user.is_staff:
+        messages.error(request, "You don't have permission to delete this recipe.")
+        return redirect("recipe_detail", pk=pk)
+
+    # Only allow POST requests for deletion (security)
+    if request.method == "POST":
+        recipe_title = recipe.title
+        recipe.delete()
+        messages.success(request, f'Recipe "{recipe_title}" has been deleted.')
+        return redirect("recipe_list")
+
+    # If not POST, redirect to detail page
+    messages.warning(request, "Invalid request method.")
+    return redirect("recipe_detail", pk=pk)

@@ -21,6 +21,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
     bio = models.CharField(max_length=500, blank=True)
+    recipes_favourited_num = models.IntegerField(default=0, blank=False)
     preferred_spiceness = models.FloatField(
         default=1.5, blank=False, help_text="The user's preferred spiceness level"
     )

@@ -1,23 +1,194 @@
 {% extends 'base.html' %}
 {% block body %}
+<div class="glass-background-wrapper">
   <div class="container vh-100">
     <div class="row h-100">
-      <div class="col-12 my-auto">
-        <div class="card cover-card offset-sm-2 offset-md-4 offset-lg-7">
-          <h1 class="cover-heading">Recipify</h1>
-          <p class="cover-text">A recipe sharing app by Team <i>BRONZE-6</i></p>
-          <p>
-            <a href='{% url 'sign_up' %}' class="btn btn-lg btn-secondary">
-              Sign up
-            </a>
-          </p>
-          <p>
-            <a href='{% url 'log_in' %}' class="btn btn-lg btn-secondary">
-              Log in
-            </a>
-          </p>
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5 mx-auto my-auto">
+        <div class="card glass-card shadow-lg">
+          <div class="card-body text-center py-5 px-4">
+            <h1 class="cover-heading text-white mb-4">
+              <i class="bi bi-journal-text me-2"></i>Recipify
+            </h1>
+            <p class="cover-text text-white mb-5" style="opacity: 0.9; font-size: 1.1rem;">
+              A recipe sharing app by Team <i>BRONZE-6</i>
+            </p>
+            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+              <a href='{% url 'sign_up' %}' class="btn glass-btn-primary btn-lg">
+                <i class="bi bi-person-plus me-2"></i>Sign up
+              </a>
+              <a href='{% url 'log_in' %}' class="btn glass-btn-secondary btn-lg">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Log in
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
+</div>
+
+<style>
+  /* Liquid Glass Background */
+  .glass-background-wrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    position: relative;
+    padding: 2rem 0;
+    overflow: hidden;
+  }
+
+  .glass-background-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+    background-size: 100% 100%;
+    filter: blur(60px);
+    z-index: 0;
+  }
+
+  .glass-background-wrapper>.container {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Glass Morphism Card */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 24px !important;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.6s ease;
+  }
+
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-5px);
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .card-body {
+    background: transparent !important;
+  }
+
+  /* Heading Styles */
+  .cover-heading {
+    font-size: 3.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+  }
+
+  .cover-text {
+    font-size: 1.1rem;
+    font-weight: 400;
+  }
+
+  /* Primary Button */
+  .glass-btn-primary {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 12px !important;
+    transition: all 0.3s ease;
+    padding: 0.75rem 2rem;
+    min-width: 150px;
+  }
+
+  .glass-btn-primary:hover {
+    background: linear-gradient(135deg, #34ce57 0%, #28a745 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    color: white !important;
+  }
+
+  /* Secondary Button */
+  .glass-btn-secondary {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 12px !important;
+    transition: all 0.3s ease;
+    padding: 0.75rem 2rem;
+    min-width: 150px;
+  }
+
+  .glass-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
+    color: white !important;
+  }
+
+  /* Text Colors */
+  .text-white {
+    color: #ffffff !important;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .cover-heading {
+      font-size: 2.5rem;
+    }
+
+    .cover-text {
+      font-size: 1rem;
+    }
+
+    .glass-background-wrapper {
+      padding: 1rem 0;
+    }
+
+    .glass-card {
+      border-radius: 20px !important;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .cover-heading {
+      font-size: 2rem;
+    }
+
+    .d-flex.flex-column.flex-sm-row {
+      flex-direction: column !important;
+    }
+
+    .glass-btn-primary,
+    .glass-btn-secondary {
+      width: 100%;
+    }
+  }
+</style>
 {% endblock %}

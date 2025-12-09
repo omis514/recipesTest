@@ -7,6 +7,11 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.core.paginator import Paginator
 from recipes.models import Recipe, Comment
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.views.generic import UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 
 @login_required

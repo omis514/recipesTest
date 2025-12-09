@@ -164,7 +164,7 @@ class RecipeDetailViewTest(TestCase):
         """Test that cooking time is displayed"""
         url = reverse("recipe_detail", args=[self.recipe.pk])
         response = self.client.get(url)
-        self.assertContains(response, "60")
+        self.assertContains(response, "1.0 hrs")
 
     def test_recipe_detail_displays_servings(self):
         """Test that servings are displayed"""

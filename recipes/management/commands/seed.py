@@ -224,40 +224,55 @@ class Command(BaseCommand):
             title = recipe_data.get("title")
             existing_recipe = Recipe.objects.filter(title=title).first()
             if existing_recipe:
-                return existing_recipe
+                recipe = existing_recipe
+            else:
+                recipe = Recipe.objects.create(
+                    author=author,
+                    title=title,
+                    description=recipe_data.get("description", ""),
+                    vegetarian=recipe_data.get("vegetarian", False),
+                    difficulty=recipe_data.get("difficulty", Recipe.Difficulty.EASY),
+                    spiciness=recipe_data.get("spiciness", Recipe.Spiciness.NOT_SPICY),
+                    cuisine=recipe_data.get("cuisine", Recipe.Cuisine.World),
+                    time=recipe_data.get("time", 30),
+                )
 
-            recipe = Recipe.objects.create(
-                author=author,
-                title=title,
-                description=recipe_data.get("description", ""),
-                vegetarian=recipe_data.get("vegetarian", False),
-                difficulty=recipe_data.get("difficulty", Recipe.Difficulty.EASY),
-                spiciness=recipe_data.get("spiciness", Recipe.Spiciness.NOT_SPICY),
-                cuisine=recipe_data.get("cuisine", Recipe.Cuisine.World),
-                time=recipe_data.get("time", 30),
-            )
+                # Handle image if provided
+                image_filename = recipe_data.get("image")
+                if image_filename:
+                    self.add_recipe_image(recipe, image_filename)
 
-            # Handle image if provided
-            image_filename = recipe_data.get("image")
-            if image_filename:
-                self.add_recipe_image(recipe, image_filename)
-
-            # Add ingredients
+            # Add ingredients (only if they don't already exist)
             for ing_data in recipe_data.get("ingredients", []):
-                Ingredient.objects.create(
+                # Check if ingredient already exists
+                existing_ing = Ingredient.objects.filter(
                     recipe=recipe,
                     name=ing_data.get("name", ""),
                     quantity=ing_data.get("quantity"),
                     unit=ing_data.get("unit", ""),
-                )
+                ).first()
+                if not existing_ing:
+                    Ingredient.objects.create(
+                        recipe=recipe,
+                        name=ing_data.get("name", ""),
+                        quantity=ing_data.get("quantity"),
+                        unit=ing_data.get("unit", ""),
+                    )
 
-            # Add instructions
+            # Add instructions (only if they don't already exist)
             for inst_data in recipe_data.get("instructions", []):
-                Instruction.objects.create(
+                step = inst_data.get("step")
+                # Check if instruction for this step already exists
+                existing_inst = Instruction.objects.filter(
                     recipe=recipe,
-                    step=inst_data.get("step"),
-                    description=inst_data.get("description", ""),
-                )
+                    step=step,
+                ).first()
+                if not existing_inst:
+                    Instruction.objects.create(
+                        recipe=recipe,
+                        step=step,
+                        description=inst_data.get("description", ""),
+                    )
 
             return recipe
 

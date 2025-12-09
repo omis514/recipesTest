@@ -1,16 +1,187 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-sm-12 col-md-6 offset-md-3">
-      <h1>Log in</h1>
-      <form action="{% url 'log_in' %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="next" value="{{ next }}">
-        {% include 'partials/bootstrap_form.html' with form=form %}
-        <input type="submit" value="Log in" class="btn btn-primary">
-      </form>
+<div class="glass-background-wrapper">
+  <div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card glass-card shadow-lg">
+          <div class="card-header glass-header">
+            <h2 class="mb-0 text-white">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Log in
+            </h2>
+          </div>
+          <div class="card-body p-4">
+            <form action="{% url 'log_in' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ next }}">
+              {% include 'partials/bootstrap_form.html' with form=form %}
+              <div class="d-grid gap-2 mt-4">
+                <input type="submit" value="Log in" class="btn glass-btn-primary btn-lg">
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<style>
+  /* Liquid Glass Background */
+  .glass-background-wrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    position: relative;
+    padding: 2rem 0;
+    overflow: hidden;
+  }
+
+  .glass-background-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+    background-size: 100% 100%;
+    filter: blur(60px);
+    z-index: 0;
+  }
+
+  .glass-background-wrapper > .container-fluid {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Glass Morphism Cards */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 16px !important;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.3s ease;
+  }
+
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-5px);
+  }
+
+  .glass-header {
+    background: rgba(13, 110, 253, 0.35) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 1.5rem !important;
+  }
+
+  .card-body {
+    background: transparent !important;
+  }
+
+  /* Form Controls */
+  .glass-input,
+  .form-control {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    transition: all 0.3s ease;
+  }
+
+  .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  .form-control:focus {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow:
+      0 0 0 0.2rem rgba(255, 255, 255, 0.2),
+      inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    outline: none;
+  }
+
+  .form-control.is-invalid {
+    border-color: rgba(220, 53, 69, 0.6) !important;
+    background: rgba(220, 53, 69, 0.1) !important;
+  }
+
+  .form-control.is-valid {
+    border-color: rgba(40, 167, 69, 0.6) !important;
+    background: rgba(40, 167, 69, 0.1) !important;
+  }
+
+  /* Labels */
+  label {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Feedback Messages */
+  .valid-feedback {
+    color: rgba(40, 167, 69, 0.9) !important;
+  }
+
+  .invalid-feedback {
+    color: rgba(220, 53, 69, 0.9) !important;
+    display: block;
+  }
+
+  /* Primary Button */
+  .glass-btn-primary {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .glass-btn-primary:hover {
+    background: linear-gradient(135deg, #34ce57 0%, #28a745 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    color: white !important;
+  }
+
+  /* Text Colors */
+  .text-white {
+    color: #ffffff !important;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .glass-background-wrapper {
+      padding: 1rem 0;
+    }
+
+    .glass-card {
+      border-radius: 12px !important;
+    }
+
+    .glass-header {
+      padding: 1rem !important;
+    }
+  }
+</style>
 {% endblock %}

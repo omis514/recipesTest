@@ -1,0 +1,67 @@
+[
+    {
+        "model": "recipes.comment",
+        "pk": 1,
+        "fields": {
+            "recipe": 1,
+            "author": 1,
+            "content": "These buffalo chicken wings look absolutely amazing! I can't wait to try this recipe. The combination of hot sauce and butter is perfect.",
+            "parent_comment": null,
+            "reply_to": null,
+            "created_at": "2025-11-27T10:30:00Z",
+            "updated_at": "2025-11-27T10:30:00Z"
+        }
+    },
+    {
+        "model": "recipes.comment",
+        "pk": 2,
+        "fields": {
+            "recipe": 1,
+            "author": 2,
+            "content": "I made these last weekend and they were incredible! The crispy coating was perfect. Highly recommend serving with blue cheese dressing.",
+            "parent_comment": null,
+            "reply_to": null,
+            "created_at": "2025-11-27T11:15:00Z",
+            "updated_at": "2025-11-27T11:15:00Z"
+        }
+    },
+    {
+        "model": "recipes.comment",
+        "pk": 3,
+        "fields": {
+            "recipe": 1,
+            "author": 3,
+            "content": "@johndoe Thanks for sharing this recipe! I've been looking for a good buffalo wings recipe. How spicy would you say these are?",
+            "parent_comment": 1,
+            "reply_to": 1,
+            "created_at": "2025-11-27T12:00:00Z",
+            "updated_at": "2025-11-27T12:00:00Z"
+        }
+    },
+    {
+        "model": "recipes.comment",
+        "pk": 4,
+        "fields": {
+            "recipe": 1,
+            "author": 1,
+            "content": "@charlie They're definitely on the spicier side! If you want to tone it down, you can reduce the amount of hot sauce or add more butter. The recipe calls for hot level spiciness, so be prepared!",
+            "parent_comment": 3,
+            "reply_to": 3,
+            "created_at": "2025-11-27T12:30:00Z",
+            "updated_at": "2025-11-27T12:30:00Z"
+        }
+    },
+    {
+        "model": "recipes.comment",
+        "pk": 5,
+        "fields": {
+            "recipe": 2,
+            "author": 1,
+            "content": "This Full English Breakfast is the perfect way to start the day! All the classic components are here. The black pudding adds such a nice touch.",
+            "parent_comment": null,
+            "reply_to": null,
+            "created_at": "2025-11-27T08:00:00Z",
+            "updated_at": "2025-11-27T08:00:00Z"
+        }
+    }
+]

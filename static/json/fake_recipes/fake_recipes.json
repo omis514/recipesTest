@@ -941,5 +941,1155 @@
                 "description": "Serve with soy sauce, wasabi, and pickled ginger. Enjoy immediately for the best texture!"
             }
         ]
+    },
+    {
+        "title": "Bloody Mary",
+        "description": "A classic brunch cocktail made with vodka, tomato juice, and a blend of spices. Served with celery and various garnishes.",
+        "difficulty": 1,
+        "spiciness": 1,
+        "cuisine": 16,
+        "time": 5,
+        "vegetarian": true,
+        "author_username": "@johndoe",
+        "image": "bloody_mary_pexels-charlotte-may-5946667.jpg",
+        "ingredients": [
+            {
+                "name": "vodka",
+                "quantity": 50,
+                "unit": "ml"
+            },
+            {
+                "name": "tomato juice",
+                "quantity": 150,
+                "unit": "ml"
+            },
+            {
+                "name": "lemon juice",
+                "quantity": 15,
+                "unit": "ml"
+            },
+            {
+                "name": "Worcestershire sauce",
+                "quantity": 3,
+                "unit": "dashes"
+            },
+            {
+                "name": "Tabasco sauce",
+                "quantity": 2,
+                "unit": "dashes"
+            },
+            {
+                "name": "celery salt",
+                "quantity": 1,
+                "unit": "pinch"
+            },
+            {
+                "name": "black pepper",
+                "quantity": 1,
+                "unit": "pinch"
+            },
+            {
+                "name": "celery stalk",
+                "quantity": 1,
+                "unit": "piece"
+            },
+            {
+                "name": "lemon wedge",
+                "quantity": 1,
+                "unit": "piece"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Fill a shaker with ice. Add vodka, tomato juice, lemon juice, Worcestershire sauce, and Tabasco sauce."
+            },
+            {
+                "step": 2,
+                "description": "Shake well for 10-15 seconds until chilled."
+            },
+            {
+                "step": 3,
+                "description": "Strain into a tall glass filled with fresh ice."
+            },
+            {
+                "step": 4,
+                "description": "Season with celery salt and black pepper. Stir gently."
+            },
+            {
+                "step": 5,
+                "description": "Garnish with a celery stalk and lemon wedge. Serve immediately."
+            }
+        ]
+    },
+    {
+        "title": "Doner Kebab",
+        "description": "A popular Turkish street food featuring seasoned meat cooked on a vertical rotisserie, served in pita bread with fresh vegetables and sauces.",
+        "difficulty": 2,
+        "spiciness": 2,
+        "cuisine": 20,
+        "time": 90,
+        "vegetarian": false,
+        "author_username": "@johndoe",
+        "image": "doner_pexels-helen1-24550876.jpg",
+        "ingredients": [
+            {
+                "name": "lamb shoulder",
+                "quantity": 500,
+                "unit": "g"
+            },
+            {
+                "name": "onion",
+                "quantity": 1,
+                "unit": "piece"
+            },
+            {
+                "name": "garlic",
+                "quantity": 4,
+                "unit": "clove"
+            },
+            {
+                "name": "cumin",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "coriander",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "paprika",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "oregano",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "salt",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "black pepper",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "pita bread",
+                "quantity": 4,
+                "unit": "pieces"
+            },
+            {
+                "name": "lettuce",
+                "quantity": 100,
+                "unit": "g"
+            },
+            {
+                "name": "tomatoes",
+                "quantity": 2,
+                "unit": "pieces"
+            },
+            {
+                "name": "red onion",
+                "quantity": 1,
+                "unit": "piece"
+            },
+            {
+                "name": "tzatziki sauce",
+                "quantity": 4,
+                "unit": "tbsp"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Cut the lamb into thin slices. Grate the onion and mince the garlic."
+            },
+            {
+                "step": 2,
+                "description": "Mix lamb with onion, garlic, cumin, coriander, paprika, oregano, salt, and black pepper. Marinate for at least 2 hours."
+            },
+            {
+                "step": 3,
+                "description": "Stack the marinated meat slices on a vertical rotisserie or skewer. Cook for 60-90 minutes, rotating occasionally, until cooked through and crispy on the edges."
+            },
+            {
+                "step": 4,
+                "description": "While meat is cooking, prepare vegetables: shred lettuce, dice tomatoes, and slice red onion."
+            },
+            {
+                "step": 5,
+                "description": "Warm the pita bread in the oven or on a griddle for 1-2 minutes."
+            },
+            {
+                "step": 6,
+                "description": "Slice thin pieces of cooked meat from the rotisserie."
+            },
+            {
+                "step": 7,
+                "description": "Fill each pita with meat, lettuce, tomatoes, red onion, and drizzle with tzatziki sauce. Serve immediately."
+            }
+        ]
+    },
+    {
+        "title": "French Onion Soup",
+        "description": "A classic French soup featuring caramelized onions in a rich beef broth, topped with melted Gruyère cheese and toasted bread.",
+        "difficulty": 2,
+        "spiciness": 0,
+        "cuisine": 3,
+        "time": 75,
+        "vegetarian": false,
+        "author_username": "@johndoe",
+        "image": "french_onion_soup_pexels-laura-paredis-1047081-26424747.jpg",
+        "ingredients": [
+            {
+                "name": "yellow onions",
+                "quantity": 4,
+                "unit": "pieces"
+            },
+            {
+                "name": "butter",
+                "quantity": 3,
+                "unit": "tbsp"
+            },
+            {
+                "name": "beef stock",
+                "quantity": 1,
+                "unit": "l"
+            },
+            {
+                "name": "dry white wine",
+                "quantity": 125,
+                "unit": "ml"
+            },
+            {
+                "name": "thyme",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "bay leaf",
+                "quantity": 1,
+                "unit": "piece"
+            },
+            {
+                "name": "salt",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "black pepper",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "baguette",
+                "quantity": 4,
+                "unit": "slices"
+            },
+            {
+                "name": "Gruyère cheese",
+                "quantity": 100,
+                "unit": "g"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Slice the onions thinly. Melt butter in a large pot over medium-low heat."
+            },
+            {
+                "step": 2,
+                "description": "Add onions and cook slowly for 30-40 minutes, stirring occasionally, until deeply caramelized and golden brown."
+            },
+            {
+                "step": 3,
+                "description": "Add white wine and scrape up any browned bits from the bottom of the pot. Cook for 2-3 minutes."
+            },
+            {
+                "step": 4,
+                "description": "Add beef stock, thyme, and bay leaf. Bring to a simmer and cook for 20 minutes. Season with salt and pepper."
+            },
+            {
+                "step": 5,
+                "description": "While soup simmers, toast the baguette slices until golden brown."
+            },
+            {
+                "step": 6,
+                "description": "Preheat the broiler. Ladle soup into oven-safe bowls. Top each with a slice of toasted baguette."
+            },
+            {
+                "step": 7,
+                "description": "Sprinkle generously with grated Gruyère cheese. Place under broiler for 2-3 minutes until cheese is melted and bubbly. Serve hot."
+            }
+        ]
+    },
+    {
+        "title": "Greek Salad",
+        "description": "A fresh and vibrant Mediterranean salad with tomatoes, cucumbers, olives, feta cheese, and a simple olive oil dressing. Perfect as a side or light meal.",
+        "difficulty": 1,
+        "spiciness": 0,
+        "cuisine": 18,
+        "time": 15,
+        "vegetarian": true,
+        "author_username": "@johndoe",
+        "image": "greek_salad_pexels-iina-luoto-460132-1211887.jpg",
+        "ingredients": [
+            {
+                "name": "tomatoes",
+                "quantity": 4,
+                "unit": "pieces"
+            },
+            {
+                "name": "cucumber",
+                "quantity": 1,
+                "unit": "piece"
+            },
+            {
+                "name": "red onion",
+                "quantity": 1,
+                "unit": "piece"
+            },
+            {
+                "name": "Kalamata olives",
+                "quantity": 100,
+                "unit": "g"
+            },
+            {
+                "name": "feta cheese",
+                "quantity": 200,
+                "unit": "g"
+            },
+            {
+                "name": "olive oil",
+                "quantity": 3,
+                "unit": "tbsp"
+            },
+            {
+                "name": "red wine vinegar",
+                "quantity": 1,
+                "unit": "tbsp"
+            },
+            {
+                "name": "oregano",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "salt",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "black pepper",
+                "quantity": 1,
+                "unit": "tsp"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Cut tomatoes into wedges. Slice cucumber into thick rounds. Thinly slice red onion."
+            },
+            {
+                "step": 2,
+                "description": "Combine tomatoes, cucumber, and red onion in a large bowl."
+            },
+            {
+                "step": 3,
+                "description": "Add Kalamata olives and crumble feta cheese over the vegetables."
+            },
+            {
+                "step": 4,
+                "description": "In a small bowl, whisk together olive oil, red wine vinegar, oregano, salt, and black pepper."
+            },
+            {
+                "step": 5,
+                "description": "Drizzle the dressing over the salad and toss gently. Serve immediately."
+            }
+        ]
+    },
+    {
+        "title": "Gyudon",
+        "description": "A popular Japanese rice bowl dish featuring thinly sliced beef and onions simmered in a sweet and savory sauce, served over steamed rice.",
+        "difficulty": 1,
+        "spiciness": 1,
+        "cuisine": 8,
+        "time": 20,
+        "vegetarian": false,
+        "author_username": "@johndoe",
+        "image": "gyudon_pexels-cohesion-singapore-492300417-16569555.jpg",
+        "ingredients": [
+            {
+                "name": "beef sirloin",
+                "quantity": 300,
+                "unit": "g"
+            },
+            {
+                "name": "onion",
+                "quantity": 1,
+                "unit": "piece"
+            },
+            {
+                "name": "soy sauce",
+                "quantity": 3,
+                "unit": "tbsp"
+            },
+            {
+                "name": "mirin",
+                "quantity": 2,
+                "unit": "tbsp"
+            },
+            {
+                "name": "sake",
+                "quantity": 2,
+                "unit": "tbsp"
+            },
+            {
+                "name": "sugar",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "dashi stock",
+                "quantity": 100,
+                "unit": "ml"
+            },
+            {
+                "name": "steamed rice",
+                "quantity": 400,
+                "unit": "g"
+            },
+            {
+                "name": "scallions",
+                "quantity": 2,
+                "unit": "pieces"
+            },
+            {
+                "name": "pickled ginger",
+                "quantity": 2,
+                "unit": "tbsp"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Slice the beef very thinly. Slice the onion into thin half-moons."
+            },
+            {
+                "step": 2,
+                "description": "In a large pan, combine soy sauce, mirin, sake, sugar, and dashi stock. Bring to a simmer."
+            },
+            {
+                "step": 3,
+                "description": "Add the sliced onion and cook for 3-4 minutes until softened."
+            },
+            {
+                "step": 4,
+                "description": "Add the beef slices and cook for 2-3 minutes until just cooked through."
+            },
+            {
+                "step": 5,
+                "description": "Divide steamed rice among serving bowls. Top with the beef and onion mixture."
+            },
+            {
+                "step": 6,
+                "description": "Garnish with sliced scallions and pickled ginger. Serve immediately."
+            }
+        ]
+    },
+    {
+        "title": "Ham and Mushroom Pizza",
+        "description": "A classic Italian-style pizza topped with ham, mushrooms, mozzarella cheese, and tomato sauce. Perfect for a family dinner or gathering.",
+        "difficulty": 2,
+        "spiciness": 0,
+        "cuisine": 4,
+        "time": 45,
+        "vegetarian": false,
+        "author_username": "@johndoe",
+        "image": "ham_and_mushroom_pizza_pexels-muffin-1653877.jpg",
+        "ingredients": [
+            {
+                "name": "pizza dough",
+                "quantity": 300,
+                "unit": "g"
+            },
+            {
+                "name": "tomato sauce",
+                "quantity": 100,
+                "unit": "ml"
+            },
+            {
+                "name": "mozzarella cheese",
+                "quantity": 200,
+                "unit": "g"
+            },
+            {
+                "name": "ham",
+                "quantity": 150,
+                "unit": "g"
+            },
+            {
+                "name": "button mushrooms",
+                "quantity": 200,
+                "unit": "g"
+            },
+            {
+                "name": "olive oil",
+                "quantity": 1,
+                "unit": "tbsp"
+            },
+            {
+                "name": "oregano",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "salt",
+                "quantity": 1,
+                "unit": "pinch"
+            },
+            {
+                "name": "black pepper",
+                "quantity": 1,
+                "unit": "pinch"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Preheat oven to 475°F (245°C). Roll out the pizza dough on a floured surface to form a 12-inch circle."
+            },
+            {
+                "step": 2,
+                "description": "Transfer the dough to a pizza pan or baking sheet. Brush lightly with olive oil."
+            },
+            {
+                "step": 3,
+                "description": "Spread tomato sauce evenly over the dough, leaving a small border for the crust."
+            },
+            {
+                "step": 4,
+                "description": "Slice the mushrooms and ham. Arrange ham and mushrooms evenly over the sauce."
+            },
+            {
+                "step": 5,
+                "description": "Top with shredded mozzarella cheese. Sprinkle with oregano, salt, and black pepper."
+            },
+            {
+                "step": 6,
+                "description": "Bake for 12-15 minutes until the crust is golden and cheese is bubbly and slightly browned."
+            },
+            {
+                "step": 7,
+                "description": "Remove from oven and let rest for 2-3 minutes before slicing and serving."
+            }
+        ]
+    },
+    {
+        "title": "Khinkali",
+        "description": "Traditional Georgian dumplings filled with spiced meat and broth. These delicate parcels are a beloved dish from the Caucasus region.",
+        "difficulty": 3,
+        "spiciness": 1,
+        "cuisine": 21,
+        "time": 90,
+        "vegetarian": false,
+        "author_username": "@johndoe",
+        "image": "hinkali_istockphoto-1195104000-2048x2048.jpg",
+        "ingredients": [
+            {
+                "name": "all-purpose flour",
+                "quantity": 300,
+                "unit": "g"
+            },
+            {
+                "name": "water",
+                "quantity": 150,
+                "unit": "ml"
+            },
+            {
+                "name": "salt",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "ground beef",
+                "quantity": 300,
+                "unit": "g"
+            },
+            {
+                "name": "onion",
+                "quantity": 1,
+                "unit": "piece"
+            },
+            {
+                "name": "garlic",
+                "quantity": 2,
+                "unit": "clove"
+            },
+            {
+                "name": "beef broth",
+                "quantity": 200,
+                "unit": "ml"
+            },
+            {
+                "name": "cilantro",
+                "quantity": 2,
+                "unit": "tbsp"
+            },
+            {
+                "name": "cumin",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "black pepper",
+                "quantity": 1,
+                "unit": "tsp"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Make the dough: mix flour, water, and salt. Knead until smooth. Let rest for 30 minutes."
+            },
+            {
+                "step": 2,
+                "description": "For the filling: finely chop onion and mince garlic. Mix with ground beef, cilantro, cumin, and black pepper."
+            },
+            {
+                "step": 3,
+                "description": "Chill the beef broth until it becomes gelatinous. Mix small pieces into the meat mixture."
+            },
+            {
+                "step": 4,
+                "description": "Roll out the dough thinly and cut into 4-inch circles."
+            },
+            {
+                "step": 5,
+                "description": "Place a spoonful of filling in the center of each circle. Gather the edges and twist to seal, creating a topknot."
+            },
+            {
+                "step": 6,
+                "description": "Bring a large pot of salted water to a boil. Add khinkali and cook for 8-10 minutes until they float to the surface."
+            },
+            {
+                "step": 7,
+                "description": "Remove with a slotted spoon. Serve hot with black pepper. Eat by holding the topknot and taking a bite from the side."
+            }
+        ]
+    },
+    {
+        "title": "Naan Bread",
+        "description": "Soft and fluffy Indian flatbread cooked in a tandoor or on a hot griddle. Perfect for scooping up curries and sauces.",
+        "difficulty": 2,
+        "spiciness": 0,
+        "cuisine": 10,
+        "time": 60,
+        "vegetarian": true,
+        "author_username": "@johndoe",
+        "image": "naan_pexels-marina-zasorina-9419194.jpg",
+        "ingredients": [
+            {
+                "name": "all-purpose flour",
+                "quantity": 400,
+                "unit": "g"
+            },
+            {
+                "name": "yeast",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "sugar",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "warm water",
+                "quantity": 150,
+                "unit": "ml"
+            },
+            {
+                "name": "yogurt",
+                "quantity": 100,
+                "unit": "ml"
+            },
+            {
+                "name": "milk",
+                "quantity": 50,
+                "unit": "ml"
+            },
+            {
+                "name": "vegetable oil",
+                "quantity": 2,
+                "unit": "tbsp"
+            },
+            {
+                "name": "salt",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "butter",
+                "quantity": 2,
+                "unit": "tbsp"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Dissolve yeast and sugar in warm water. Let stand for 5 minutes until foamy."
+            },
+            {
+                "step": 2,
+                "description": "In a large bowl, mix flour and salt. Add yeast mixture, yogurt, milk, and oil. Knead until smooth."
+            },
+            {
+                "step": 3,
+                "description": "Cover and let rise in a warm place for 1 hour until doubled in size."
+            },
+            {
+                "step": 4,
+                "description": "Divide dough into 6 equal portions. Roll each into an oval or round shape, about 1/4 inch thick."
+            },
+            {
+                "step": 5,
+                "description": "Heat a cast-iron skillet or griddle over high heat. Cook each naan for 2-3 minutes per side until puffed and golden."
+            },
+            {
+                "step": 6,
+                "description": "Brush with melted butter while still hot. Serve immediately."
+            }
+        ]
+    },
+    {
+        "title": "Pasta Amatriciana",
+        "description": "A classic Italian pasta dish from Amatrice featuring guanciale, tomatoes, and pecorino cheese. Simple yet incredibly flavorful.",
+        "difficulty": 2,
+        "spiciness": 2,
+        "cuisine": 4,
+        "time": 30,
+        "vegetarian": false,
+        "author_username": "@johndoe",
+        "image": "pasta_amatriciana_istockphoto.jpg",
+        "ingredients": [
+            {
+                "name": "spaghetti",
+                "quantity": 400,
+                "unit": "g"
+            },
+            {
+                "name": "guanciale",
+                "quantity": 150,
+                "unit": "g"
+            },
+            {
+                "name": "canned tomatoes",
+                "quantity": 400,
+                "unit": "g"
+            },
+            {
+                "name": "red chili flakes",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "pecorino romano",
+                "quantity": 100,
+                "unit": "g"
+            },
+            {
+                "name": "white wine",
+                "quantity": 50,
+                "unit": "ml"
+            },
+            {
+                "name": "salt",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "black pepper",
+                "quantity": 1,
+                "unit": "tsp"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Cut guanciale into small cubes. Heat a large pan and cook guanciale until crispy and golden, about 5 minutes."
+            },
+            {
+                "step": 2,
+                "description": "Add red chili flakes and cook for 30 seconds. Add white wine and let it evaporate."
+            },
+            {
+                "step": 3,
+                "description": "Add canned tomatoes, breaking them up with a spoon. Simmer for 15 minutes until sauce thickens."
+            },
+            {
+                "step": 4,
+                "description": "Meanwhile, cook spaghetti in salted boiling water until al dente. Reserve 1 cup of pasta water."
+            },
+            {
+                "step": 5,
+                "description": "Drain pasta and add to the sauce. Toss together, adding pasta water as needed to create a creamy consistency."
+            },
+            {
+                "step": 6,
+                "description": "Remove from heat and stir in grated pecorino cheese. Season with black pepper. Serve immediately."
+            }
+        ]
+    },
+    {
+        "title": "Pierogi",
+        "description": "Traditional Polish dumplings filled with potatoes and cheese, boiled and then pan-fried until golden. A comfort food favorite.",
+        "difficulty": 2,
+        "spiciness": 0,
+        "cuisine": 13,
+        "time": 60,
+        "vegetarian": true,
+        "author_username": "@johndoe",
+        "image": "pierogi_pexels-karola-g-4084936.jpg",
+        "ingredients": [
+            {
+                "name": "all-purpose flour",
+                "quantity": 300,
+                "unit": "g"
+            },
+            {
+                "name": "eggs",
+                "quantity": 1,
+                "unit": "piece"
+            },
+            {
+                "name": "water",
+                "quantity": 100,
+                "unit": "ml"
+            },
+            {
+                "name": "salt",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "potatoes",
+                "quantity": 500,
+                "unit": "g"
+            },
+            {
+                "name": "onion",
+                "quantity": 1,
+                "unit": "piece"
+            },
+            {
+                "name": "butter",
+                "quantity": 2,
+                "unit": "tbsp"
+            },
+            {
+                "name": "cheddar cheese",
+                "quantity": 100,
+                "unit": "g"
+            },
+            {
+                "name": "sour cream",
+                "quantity": 4,
+                "unit": "tbsp"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Make the dough: mix flour, egg, water, and salt. Knead until smooth. Let rest for 30 minutes."
+            },
+            {
+                "step": 2,
+                "description": "Boil potatoes until tender. Mash them while hot. Finely dice and sauté onion in butter until golden."
+            },
+            {
+                "step": 3,
+                "description": "Mix mashed potatoes with sautéed onion and grated cheddar cheese. Season with salt and pepper."
+            },
+            {
+                "step": 4,
+                "description": "Roll out the dough thinly and cut into 3-inch circles."
+            },
+            {
+                "step": 5,
+                "description": "Place a spoonful of filling in the center of each circle. Fold in half and seal edges tightly."
+            },
+            {
+                "step": 6,
+                "description": "Boil pierogi in salted water for 3-4 minutes until they float to the surface."
+            },
+            {
+                "step": 7,
+                "description": "Pan-fry in butter until golden brown on both sides. Serve hot with sour cream."
+            }
+        ]
+    },
+    {
+        "title": "Shawarma",
+        "description": "A Middle Eastern street food favorite featuring marinated meat cooked on a vertical rotisserie, served in pita bread with tahini sauce and fresh vegetables.",
+        "difficulty": 2,
+        "spiciness": 2,
+        "cuisine": 19,
+        "time": 120,
+        "vegetarian": false,
+        "author_username": "@johndoe",
+        "image": "shawarma_pexels-rdne-5779364.jpg",
+        "ingredients": [
+            {
+                "name": "chicken thighs",
+                "quantity": 600,
+                "unit": "g"
+            },
+            {
+                "name": "yogurt",
+                "quantity": 200,
+                "unit": "ml"
+            },
+            {
+                "name": "lemon juice",
+                "quantity": 2,
+                "unit": "tbsp"
+            },
+            {
+                "name": "garlic",
+                "quantity": 4,
+                "unit": "clove"
+            },
+            {
+                "name": "cumin",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "coriander",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "paprika",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "turmeric",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "salt",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "pita bread",
+                "quantity": 4,
+                "unit": "pieces"
+            },
+            {
+                "name": "tahini sauce",
+                "quantity": 4,
+                "unit": "tbsp"
+            },
+            {
+                "name": "lettuce",
+                "quantity": 100,
+                "unit": "g"
+            },
+            {
+                "name": "tomatoes",
+                "quantity": 2,
+                "unit": "pieces"
+            },
+            {
+                "name": "pickles",
+                "quantity": 50,
+                "unit": "g"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Cut chicken into thin strips. Mix yogurt, lemon juice, minced garlic, cumin, coriander, paprika, turmeric, and salt."
+            },
+            {
+                "step": 2,
+                "description": "Marinate chicken in the mixture for at least 2 hours, preferably overnight."
+            },
+            {
+                "step": 3,
+                "description": "Thread marinated chicken onto skewers or stack on a vertical rotisserie. Cook for 60-90 minutes, rotating until cooked through and crispy."
+            },
+            {
+                "step": 4,
+                "description": "While meat cooks, prepare vegetables: shred lettuce, dice tomatoes, and slice pickles."
+            },
+            {
+                "step": 5,
+                "description": "Warm pita bread. Slice thin pieces of cooked chicken from the rotisserie."
+            },
+            {
+                "step": 6,
+                "description": "Fill each pita with chicken, lettuce, tomatoes, pickles, and drizzle with tahini sauce. Serve immediately."
+            }
+        ]
+    },
+    {
+        "title": "Spicy Tuna Steak",
+        "description": "A flavorful Japanese-inspired dish featuring seared tuna steak with a spicy glaze. Perfect for a special dinner.",
+        "difficulty": 2,
+        "spiciness": 3,
+        "cuisine": 8,
+        "time": 20,
+        "vegetarian": false,
+        "author_username": "@johndoe",
+        "image": "spicy_tuna_steak_pexels-nadin-sh-78971847-27672713.jpg",
+        "ingredients": [
+            {
+                "name": "tuna steaks",
+                "quantity": 400,
+                "unit": "g"
+            },
+            {
+                "name": "soy sauce",
+                "quantity": 3,
+                "unit": "tbsp"
+            },
+            {
+                "name": "sesame oil",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "sriracha sauce",
+                "quantity": 2,
+                "unit": "tbsp"
+            },
+            {
+                "name": "honey",
+                "quantity": 1,
+                "unit": "tbsp"
+            },
+            {
+                "name": "ginger",
+                "quantity": 1,
+                "unit": "piece"
+            },
+            {
+                "name": "garlic",
+                "quantity": 2,
+                "unit": "clove"
+            },
+            {
+                "name": "vegetable oil",
+                "quantity": 2,
+                "unit": "tbsp"
+            },
+            {
+                "name": "scallions",
+                "quantity": 2,
+                "unit": "pieces"
+            },
+            {
+                "name": "sesame seeds",
+                "quantity": 1,
+                "unit": "tsp"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Mix soy sauce, sesame oil, sriracha, honey, minced ginger, and minced garlic to create a marinade."
+            },
+            {
+                "step": 2,
+                "description": "Marinate tuna steaks for 15-20 minutes, turning once."
+            },
+            {
+                "step": 3,
+                "description": "Heat vegetable oil in a heavy skillet over high heat until very hot."
+            },
+            {
+                "step": 4,
+                "description": "Sear tuna steaks for 2-3 minutes per side for medium-rare, or longer for well-done."
+            },
+            {
+                "step": 5,
+                "description": "Remove from heat and let rest for 2 minutes. Slice against the grain."
+            },
+            {
+                "step": 6,
+                "description": "Garnish with sliced scallions and sesame seeds. Serve immediately with rice or vegetables."
+            }
+        ]
+    },
+    {
+        "title": "Toum",
+        "description": "A creamy Lebanese garlic sauce made with garlic, lemon juice, and oil. Perfect as a dip or condiment for grilled meats and vegetables.",
+        "difficulty": 1,
+        "spiciness": 1,
+        "cuisine": 19,
+        "time": 10,
+        "vegetarian": true,
+        "author_username": "@johndoe",
+        "image": "toum_istockphoto-2030133425-1024x1024.jpg",
+        "ingredients": [
+            {
+                "name": "garlic",
+                "quantity": 8,
+                "unit": "clove"
+            },
+            {
+                "name": "lemon juice",
+                "quantity": 3,
+                "unit": "tbsp"
+            },
+            {
+                "name": "vegetable oil",
+                "quantity": 200,
+                "unit": "ml"
+            },
+            {
+                "name": "salt",
+                "quantity": 1,
+                "unit": "tsp"
+            },
+            {
+                "name": "ice water",
+                "quantity": 2,
+                "unit": "tbsp"
+            }
+        ],
+        "instructions": [
+            {
+                "step": 1,
+                "description": "Peel and mince the garlic cloves very finely. Add salt and continue mincing until it forms a paste."
+            },
+            {
+                "step": 2,
+                "description": "Transfer garlic paste to a food processor. Add lemon juice and process for 30 seconds."
+            },
+            {
+                "step": 3,
+                "description": "With the processor running, slowly drizzle in the vegetable oil in a thin stream until the mixture emulsifies and becomes creamy."
+            },
+            {
+                "step": 4,
+                "description": "Add ice water and continue processing until the sauce is smooth and fluffy, about 2-3 minutes."
+            },
+            {
+                "step": 5,
+                "description": "Transfer to a container and refrigerate for at least 1 hour before serving. Store in the refrigerator for up to 2 weeks."
+            }
+        ]
     }
 ]

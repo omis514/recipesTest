@@ -1,4 +1,18 @@
 {% extends "base_content.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/recipe_details_glass_texture.css' %}">
+<style>
+
+  .glass-header {
+    background: linear-gradient(135deg, rgba(56, 89, 138, 0.9) 0%, rgba(70, 130, 180, 0.8) 100%) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="glass-background-wrapper">
@@ -115,7 +129,6 @@
                     </div>
                   </div>
 
-                {# if your bug-fixed version uses ingredient_set, change to recipe.ingredient_set.all here #}
                 {% with ingredients=recipe.ingredients.all %}
                 {% if ingredients %}
                 <ul class="list-group list-group-flush glass-list" id="ingredients-list">
@@ -208,7 +221,7 @@
                 {% endif %}
               </form>
               <div class="rating-widget" data-user-rating="{{ user_rating_score }}" data-recipe-pk="{{ recipe.pk }}">
-                {% for i in "54321"|make_list %}
+                {% for i in "12345"|make_list %}
                 <i class="bi bi-star-fill rating-star" data-score="{{ i }}"></i>
                 {% endfor %}
                 <span class="ms-3 text-muted small" id="rating-message">
@@ -376,7 +389,7 @@
                         </div>
 
                         {% if comment.replies.exists %}
-                        <div class="replies-section mt-3" data-parent-id="{{ comment.pk }}">
+                        <div class="replies-section mt-2" data-parent-id="{{ comment.pk }}">
                           <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="d-flex align-items-center">
                               <span class="text-white small" style="opacity: 0.7;">Sort replies</span>
@@ -410,8 +423,10 @@
 
                             <button type="button"
                                     class="btn btn-sm glass-filter-btn toggle-replies-btn"
-                                    data-expanded="false">
-                              Show top replies ({{ comment.replies.count }})
+                                    data-parent-id="{{ comment.pk }}"
+                                    data-expanded="true">
+                              <i class="bi bi-chevron-up me-1"></i>
+                              <span class="toggle-text">Hide replies</span>
                             </button>
                           </div>
 
@@ -478,11 +493,11 @@
                         </div>
                         {% endif %}
 
-              </div>
-            </div>
-          </div>
-          {% endif %}
-        {% empty %}
+                      </div>
+                    </div>
+                  </div>
+                  {% endif %}
+                {% empty %}
         <div class="text-center py-4 text-white" id="no-comments-message"
              style="opacity: 0.6%;">
           <i class="bi bi-chat-left-dots display-4"></i>
@@ -522,7 +537,6 @@
 </div>
 
 <style>
-
   .glass-background-wrapper {
     min-height: 100vh;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -1303,7 +1317,7 @@
   .rating-widget {
       display: flex;
       align-items: center;
-      direction: rtl;
+      direction: ltr;
   }
 
   .rating-star {
@@ -1321,17 +1335,18 @@
   .rating-widget > .rating-star {
       order: 1;
   }
-  .rating-star[data-score="5"] { order: 1; }
-  .rating-star[data-score="4"] { order: 2; }
+  .rating-star[data-score="5"] { order: 5; }
+  .rating-star[data-score="4"] { order: 4; }
   .rating-star[data-score="3"] { order: 3; }
-  .rating-star[data-score="2"] { order: 4; }
-  .rating-star[data-score="1"] { order: 5; }
+  .rating-star[data-score="2"] { order: 2; }
+  .rating-star[data-score="1"] { order: 1; }
 
 </style>
 
 {% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+  // Ingredient scaling
   const scaleCurrentBtn = document.getElementById('current-scale');
   const scaleDecreaseBtn = document.getElementById('scale-decrease');
   const scaleIncreaseBtn = document.getElementById('scale-increase');
@@ -1432,79 +1447,6 @@
     });
   }
 
-  const MAX_VISIBLE_REPLIES = 2;
-
-  function collapseReplies(section, toggleBtn) {
-    const replies = Array.from(section.querySelectorAll('.reply-item'));
-    if (!toggleBtn || replies.length === 0) return;
-
-    if (replies.length <= MAX_VISIBLE_REPLIES) {
-      toggleBtn.classList.add('d-none');
-      replies.forEach(r => r.classList.remove('d-none'));
-      toggleBtn.dataset.expanded = 'true';
-      return;
-    }
-
-    const sortedByLikes = [...replies].sort((a, b) => {
-      const la = parseInt(a.dataset.likeCount || '0', 10);
-      const lb = parseInt(b.dataset.likeCount || '0', 10);
-      return lb - la;
-    });
-
-    const keepIds = new Set(
-      sortedByLikes.slice(0, MAX_VISIBLE_REPLIES).map(el => el.dataset.replyId)
-    );
-
-    replies.forEach(r => {
-      if (keepIds.has(r.dataset.replyId)) {
-        r.classList.remove('d-none');
-      } else {
-        r.classList.add('d-none');
-      }
-    });
-
-    toggleBtn.dataset.expanded = 'false';
-    toggleBtn.textContent = `Show all replies (${replies.length})`;
-  }
-
-  function expandReplies(section, toggleBtn) {
-    const replies = section.querySelectorAll('.reply-item');
-    replies.forEach(r => r.classList.remove('d-none'));
-    if (toggleBtn) {
-      toggleBtn.dataset.expanded = 'true';
-      toggleBtn.textContent = 'Hide extra replies';
-    }
-  }
-
-  function refreshSectionCollapse(section) {
-    const toggleBtn = section.querySelector('.toggle-replies-btn');
-    if (!toggleBtn) return;
-    const expanded = toggleBtn.dataset.expanded === 'true';
-    if (expanded) {
-      expandReplies(section, toggleBtn);
-    } else {
-      collapseReplies(section, toggleBtn);
-    }
-  }
-
-  function initReplyCollapse() {
-    document.querySelectorAll('.replies-section').forEach(section => {
-      const toggleBtn = section.querySelector('.toggle-replies-btn');
-      if (!toggleBtn) return;
-
-      collapseReplies(section, toggleBtn);
-
-      toggleBtn.addEventListener('click', function () {
-        const isExpanded = this.dataset.expanded === 'true';
-        if (isExpanded) {
-          collapseReplies(section, this);
-        } else {
-          expandReplies(section, this);
-        }
-      });
-    });
-  }
-
   function formatQuantity(v) {
     if (v >= 100) return Math.round(v).toString();
     if (v >= 10)  return v.toFixed(1).replace(/\.0$/, '');
@@ -1512,208 +1454,308 @@
     return v.toFixed(2);
   }
 
-    function escapeHtml(str) {
-        return (str || '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;');
-    }
+  function escapeHtml(str) {
+    return (str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
 
-    const currentUser = "{{ user.username }}";
-    const sortButton = document.getElementById('commentSortDropdown');
-    let currentSort = 'newest';
+  const currentUser = "{{ user.username }}";
+  const sortButton = document.getElementById('commentSortDropdown');
+  let currentSort = 'newest';
 
-    initializeEventListeners();
-    initSortDropdown();
-    initReplySortDropdowns();
-    initReplyCollapse();
-
+  initializeEventListeners();
+  initSortDropdown();
+  initReplySortDropdowns();
+  initReplyCollapse();
 
   function initSortDropdown() {
-      const options = document.querySelectorAll('.sort-option');
-      options.forEach(btn => {
-        btn.addEventListener('click', function () {
-          const value = this.dataset.sort;       // newest / oldest / most_liked
-          currentSort = value;
-          sortComments(value);
+    const options = document.querySelectorAll('.sort-option');
+    options.forEach(btn => {
+      btn.addEventListener('click', function () {
+        const value = this.dataset.sort;
+        currentSort = value;
+        sortComments(value);
 
-          if (sortButton) {
-            sortButton.textContent = this.textContent.trim();
+        if (sortButton) {
+          sortButton.textContent = this.textContent.trim();
+        }
+      });
+    });
+
+    sortComments(currentSort);
+  }
+
+  function initReplySortDropdowns() {
+    document.querySelectorAll('.reply-sort-option').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const order = this.dataset.sort;
+        const section = this.closest('.replies-section');
+        const dropdown = section.querySelector('.reply-sort-dropdown');
+
+        if (dropdown) {
+          dropdown.textContent = this.textContent.trim();
+        }
+
+        const replies = Array.from(section.querySelectorAll('.reply-item'));
+        replies.sort((a, b) => {
+          const ta = parseInt(a.dataset.createdAt || '0', 10);
+          const tb = parseInt(b.dataset.createdAt || '0', 10);
+          const la = parseInt(a.dataset.likeCount || '0', 10);
+          const lb = parseInt(b.dataset.likeCount || '0', 10);
+
+          if (order === 'newest') {
+            return tb - ta;
+          } else if (order === 'oldest') {
+            return ta - tb;
+          } else if (order === 'most_liked') {
+            if (lb !== la) return lb - la;
+            return tb - ta;
           }
+          return 0;
         });
+
+        const repliesList = section.querySelector('.replies-list');
+        if (repliesList) {
+          replies.forEach(r => repliesList.appendChild(r));
+        }
+
+        // After sorting, refresh collapse state
+        const toggleBtn = section.querySelector('.toggle-replies-btn');
+        if (toggleBtn && toggleBtn.dataset.expanded === 'false') {
+          // Re-apply the collapsed state with newly sorted replies
+          refreshCollapseState(section, toggleBtn);
+        }
       });
+    });
+  }
 
-      sortComments(currentSort);
-    }
+  // Initialize toggle buttons - show top 2 most-liked when collapsed
+  function initReplyCollapse() {
+    const MAX_VISIBLE_REPLIES = 2;
 
-    function initReplySortDropdowns() {
-      document.querySelectorAll('.reply-sort-option').forEach(btn => {
-        btn.addEventListener('click', function () {
-          const order = this.dataset.sort;
-          const section = this.closest('.replies-section');
-          const dropdown = section.querySelector('.reply-sort-dropdown');
+    document.querySelectorAll('.toggle-replies-btn').forEach(toggleBtn => {
+      const parentId = toggleBtn.dataset.parentId;
+      const section = document.querySelector(`.replies-section[data-parent-id="${parentId}"]`);
 
-          if (dropdown) {
-            dropdown.textContent = this.textContent.trim();
-          }
+      if (!section) return;
 
-          const replies = Array.from(section.querySelectorAll('.reply-item'));
-          replies.sort((a, b) => {
-            const ta = parseInt(a.dataset.createdAt || '0', 10);
-            const tb = parseInt(b.dataset.createdAt || '0', 10);
-            const la = parseInt(a.dataset.likeCount || '0', 10);
-            const lb = parseInt(b.dataset.likeCount || '0', 10);
+      const repliesList = section.querySelector('.replies-list');
+      if (!repliesList) return;
 
-            if (order === 'newest') {
-              return tb - ta;
-            } else if (order === 'oldest') {
-              return ta - tb;
-            } else if (order === 'most_liked') {
-              if (lb !== la) return lb - la;
-              return tb - ta;
-            }
-            return 0;
-          });
+      const replies = Array.from(repliesList.querySelectorAll('.reply-item'));
 
-          const repliesList = section.querySelector('.replies-list') || section;
-          replies.forEach(r => section.appendChild(r));
-
-          const toggleBtn = section.querySelector('.toggle-replies-btn');
-          if (toggleBtn && toggleBtn.dataset.expanded === 'false') {
-            collapseReplies(section, toggleBtn);
-          }
-        });
-      });
-    }
-
-
-    function initializeEventListeners() {
-      document.querySelectorAll('.reply-btn').forEach(btn => {
-        btn.addEventListener('click', handleReplyClick);
-      });
-
-      document.querySelectorAll('.reply-to-reply-btn').forEach(btn => {
-        btn.addEventListener('click', handleReplyToReplyClick);
-      });
-
-      document.querySelectorAll('.like-btn').forEach(btn => {
-        btn.addEventListener('click', handleLikeClick);
-      });
-
-      document.querySelectorAll('.delete-comment').forEach(btn => {
-        btn.addEventListener('click', handleDeleteClick);
-      });
-
-      document.querySelectorAll('.delete-reply').forEach(btn => {
-        btn.addEventListener('click', handleDeleteReplyClick);
-      });
-
-      document.querySelectorAll('.like-reply-btn').forEach(btn => {
-        btn.addEventListener('click', handleReplyLikeClick);
-      });
-    }
-
-    function handleReplyClick(e) {
-      const commentId = this.dataset.commentId;
-      const commentAuthor = this.dataset.commentAuthor;
-      setReplyTo(commentId, commentAuthor, null);
-    }
-
-    function handleReplyToReplyClick(e) {
-      const parentId = this.dataset.parentCommentId;
-      const replyAuthor = this.dataset.replyAuthor;
-      setReplyTo(parentId, replyAuthor, replyAuthor);
-    }
-
-    function setReplyTo(commentId, authorName, replyToUser) {
-      document.getElementById('parent-comment-id').value = commentId;
-      document.getElementById('reply-to-user').value = replyToUser || '';
-
-      const indicator = document.getElementById('reply-indicator');
-      const replyToName = document.getElementById('reply-to-name');
-      indicator.classList.remove('d-none');
-      replyToName.textContent = authorName;
-
-      const textarea = document.getElementById('comment-textarea');
-      textarea.placeholder = `Reply to ${authorName}...`;
-      textarea.focus();
-
-      document.querySelectorAll('.comment-item').forEach(item => {
-        item.classList.remove('reply-target');
-      });
-      const targetComment = document.querySelector(`[data-comment-id="${commentId}"]`);
-      if (targetComment) {
-        targetComment.classList.add('reply-target');
-        targetComment.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // If 2 or fewer replies, hide the button
+      if (replies.length <= MAX_VISIBLE_REPLIES) {
+        toggleBtn.classList.add('d-none');
+        return;
       }
 
-      replyingTo = { commentId, authorName, replyToUser };
+      // Initial state: Show all replies
+      section.classList.remove('d-none');
+      toggleBtn.dataset.expanded = 'true';
+      const icon = toggleBtn.querySelector('i');
+      const text = toggleBtn.querySelector('.toggle-text');
+      if (icon) icon.className = 'bi bi-chevron-up me-1';
+      if (text) text.textContent = 'Hide replies';
+
+      // Click event
+      toggleBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const isExpanded = this.dataset.expanded === 'true';
+
+        if (isExpanded) {
+          // Collapse: Show only top 2 most-liked
+          collapseToTopReplies(section, this, MAX_VISIBLE_REPLIES);
+        } else {
+          // Expand: Show all replies
+          expandAllReplies(section, this);
+        }
+      });
+    });
+  }
+
+  function collapseToTopReplies(section, toggleBtn, maxVisible) {
+    const repliesList = section.querySelector('.replies-list');
+    if (!repliesList) return;
+
+    const allReplies = Array.from(repliesList.querySelectorAll('.reply-item'));
+    const totalCount = allReplies.length;
+
+    // Sort by like count (descending)
+    const sortedByLikes = [...allReplies].sort((a, b) => {
+      const la = parseInt(a.dataset.likeCount || '0', 10);
+      const lb = parseInt(b.dataset.likeCount || '0', 10);
+      return lb - la;
+    });
+
+    const topReplyIds = new Set(
+      sortedByLikes.slice(0, maxVisible).map(r => r.dataset.replyId)
+    );
+
+    // Hide all except top N
+    allReplies.forEach(reply => {
+      if (topReplyIds.has(reply.dataset.replyId)) {
+        reply.classList.remove('d-none');
+      } else {
+        reply.classList.add('d-none');
+      }
+    });
+
+    const icon = toggleBtn.querySelector('i');
+    const text = toggleBtn.querySelector('.toggle-text');
+    if (icon) icon.className = 'bi bi-chevron-down me-1';
+    if (text) text.textContent = `Show all replies (${totalCount})`;
+    toggleBtn.dataset.expanded = 'false';
+  }
+
+  function expandAllReplies(section, toggleBtn) {
+    const repliesList = section.querySelector('.replies-list');
+    if (!repliesList) return;
+
+    const allReplies = repliesList.querySelectorAll('.reply-item');
+    allReplies.forEach(reply => reply.classList.remove('d-none'));
+
+    const icon = toggleBtn.querySelector('i');
+    const text = toggleBtn.querySelector('.toggle-text');
+    if (icon) icon.className = 'bi bi-chevron-up me-1';
+    if (text) text.textContent = 'Hide replies';
+    toggleBtn.dataset.expanded = 'true';
+  }
+
+  function refreshCollapseState(section, toggleBtn) {
+    const MAX_VISIBLE_REPLIES = 2;
+    const isExpanded = toggleBtn.dataset.expanded === 'true';
+
+    if (isExpanded) {
+      expandAllReplies(section, toggleBtn);
+    } else {
+      collapseToTopReplies(section, toggleBtn, MAX_VISIBLE_REPLIES);
+    }
+  }
+
+  function initializeEventListeners() {
+    document.querySelectorAll('.reply-btn').forEach(btn => {
+      btn.addEventListener('click', handleReplyClick);
+    });
+
+    document.querySelectorAll('.reply-to-reply-btn').forEach(btn => {
+      btn.addEventListener('click', handleReplyToReplyClick);
+    });
+
+    document.querySelectorAll('.like-btn').forEach(btn => {
+      btn.addEventListener('click', handleLikeClick);
+    });
+
+    document.querySelectorAll('.delete-comment').forEach(btn => {
+      btn.addEventListener('click', handleDeleteClick);
+    });
+
+    document.querySelectorAll('.delete-reply').forEach(btn => {
+      btn.addEventListener('click', handleDeleteReplyClick);
+    });
+
+    document.querySelectorAll('.like-reply-btn').forEach(btn => {
+      btn.addEventListener('click', handleReplyLikeClick);
+    });
+  }
+
+  function handleReplyClick(e) {
+    const commentId = this.dataset.commentId;
+    const commentAuthor = this.dataset.commentAuthor;
+    setReplyTo(commentId, commentAuthor, null);
+  }
+
+  function handleReplyToReplyClick(e) {
+    const parentId = this.dataset.parentCommentId;
+    const replyAuthor = this.dataset.replyAuthor;
+    setReplyTo(parentId, replyAuthor, replyAuthor);
+  }
+
+  function setReplyTo(commentId, authorName, replyToUser) {
+    document.getElementById('parent-comment-id').value = commentId;
+    document.getElementById('reply-to-user').value = replyToUser || '';
+
+    const indicator = document.getElementById('reply-indicator');
+    const replyToName = document.getElementById('reply-to-name');
+    indicator.classList.remove('d-none');
+    replyToName.textContent = authorName;
+
+    const textarea = document.getElementById('comment-textarea');
+    textarea.placeholder = `Reply to ${authorName}...`;
+    textarea.focus();
+
+    document.querySelectorAll('.comment-item').forEach(item => {
+      item.classList.remove('reply-target');
+    });
+    const targetComment = document.querySelector(`[data-comment-id="${commentId}"]`);
+    if (targetComment) {
+      targetComment.classList.add('reply-target');
+      targetComment.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    window.cancelReply = function () {
-      document.getElementById('parent-comment-id').value = '';
-      document.getElementById('reply-to-user').value = '';
-      document.getElementById('reply-indicator').classList.add('d-none');
+    replyingTo = { commentId, authorName, replyToUser };
+  }
 
-      const textarea = document.getElementById('comment-textarea');
-      textarea.placeholder = 'Share your thoughts about this recipe...';
-      textarea.value = '';
+  window.cancelReply = function () {
+    document.getElementById('parent-comment-id').value = '';
+    document.getElementById('reply-to-user').value = '';
+    document.getElementById('reply-indicator').classList.add('d-none');
 
-      document.querySelectorAll('.comment-item').forEach(item => {
-        item.classList.remove('reply-target');
-      });
+    const textarea = document.getElementById('comment-textarea');
+    textarea.placeholder = 'Share your thoughts about this recipe...';
+    textarea.value = '';
 
-      replyingTo = null;
-    };
+    document.querySelectorAll('.comment-item').forEach(item => {
+      item.classList.remove('reply-target');
+    });
+
+    replyingTo = null;
+  };
 
   function handleLikeClick(e) {
     const commentId = this.dataset.commentId;
     const btn = this;
 
     fetch(`/recipes/comment/${commentId}/like/`, {
-        method: 'POST',
-        headers: {
+      method: 'POST',
+      headers: {
         'X-CSRFToken': '{{ csrf_token }}',
         'X-Requested-With': 'XMLHttpRequest'
-        }
+      }
     })
-        .then(response => response.json())
-        .then(data => {
-      if (data.success) {
-        const icon = btn.querySelector('i');
-        const count = btn.querySelector('.like-count');
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const icon = btn.querySelector('i');
+          const count = btn.querySelector('.like-count');
 
-        if (data.liked) {
-          icon.classList.remove('bi-heart');
-          icon.classList.add('bi-heart-fill', 'text-danger');
-          btn.classList.add('liked');
-        } else {
-          icon.classList.remove('bi-heart-fill', 'text-danger');
-          icon.classList.add('bi-heart');
-          btn.classList.remove('liked');
-        }
-        count.textContent = data.like_count;
-
-        const replyElement = btn.closest('.reply-item');
-        if (replyElement) {
-          replyElement.dataset.likeCount = data.like_count;
-          if (currentSort === 'most_liked') {
-            sortComments('most_liked');
+          if (data.liked) {
+            icon.classList.remove('bi-heart');
+            icon.classList.add('bi-heart-fill', 'text-danger');
+            btn.classList.add('liked');
+          } else {
+            icon.classList.remove('bi-heart-fill', 'text-danger');
+            icon.classList.add('bi-heart');
+            btn.classList.remove('liked');
           }
-        }
+          count.textContent = data.like_count;
 
-        const commentElement = btn.closest('.comment-item');
-        if (commentElement) {
-          commentElement.dataset.likeCount = data.like_count;
-          if (currentSort === 'most_liked') {
+          const commentElement = btn.closest('.comment-item');
+          if (commentElement) {
+            commentElement.dataset.likeCount = data.like_count;
+            if (currentSort === 'most_liked') {
               sortComments('most_liked');
+            }
           }
-        }
         }
       });
-    }
+  }
 
-    function handleReplyLikeClick(e) {
+  function handleReplyLikeClick(e) {
     const replyId = this.dataset.replyId;
     const btn = this;
 
@@ -1740,303 +1782,385 @@
             btn.classList.remove('liked');
           }
           count.textContent = data.like_count;
+
+          // IMPORTANT: Update data attribute
+          const replyElement = btn.closest('.reply-item');
+          if (replyElement) {
+            replyElement.dataset.likeCount = data.like_count;
+
+            // If collapsed, refresh to show new top 2
+            const section = replyElement.closest('.replies-section');
+            if (section) {
+              const toggleBtn = section.querySelector('.toggle-replies-btn');
+              if (toggleBtn && toggleBtn.dataset.expanded === 'false') {
+                refreshCollapseState(section, toggleBtn);
+              }
+            }
+          }
         }
       });
-    }
+  }
 
+  function handleDeleteClick(e) {
+    if (confirm('Are you sure you want to delete this comment?')) {
+      const commentId = this.dataset.commentId;
+      const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
 
-    function handleDeleteClick(e) {
-      if (confirm('Are you sure you want to delete this comment?')) {
-        const commentId = this.dataset.commentId;
-        const commentElement = document.querySelector(
-          `[data-comment-id="${commentId}"]`
-        );
+      const replyCount = commentElement.querySelectorAll('.reply-item').length;
+      const totalDeleted = 1 + replyCount;
 
-        const replyCount = commentElement.querySelectorAll('.reply-item').length;
-        const totalDeleted = 1 + replyCount;
-
-        fetch(`/recipes/comment/${commentId}/delete/`, {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              commentElement.style.opacity = '0';
-              commentElement.style.transform = 'translateX(-100%)';
-              setTimeout(() => {
-                commentElement.remove();
-
-                updateCommentCount(-totalDeleted);
-
-                if (document.querySelectorAll('.comment-item').length === 0) {
-                  showNoCommentsMessage();
-                }
-              }, 300);
-            }
-          });
-      }
-    }
-
-    function handleDeleteReplyClick(e) {
-      if (confirm('Are you sure you want to delete this reply?')) {
-        const replyId = this.dataset.replyId;
-        const replyElement = document.querySelector(`[data-reply-id="${replyId}"]`);
-
-        fetch(`/recipes/comment/${replyId}/delete/`, {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              replyElement.style.opacity = '0';
-              setTimeout(() => {
-                replyElement.remove();
-                updateCommentCount(-1);
-              }, 300);
-            }
-          });
-      }
-    }
-
-    document.getElementById('main-comment-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const formData = new FormData(this);
-      const textarea = document.getElementById('comment-textarea');
-      const submitBtn = document.getElementById('submit-comment-btn');
-
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Posting...';
-
-      fetch(this.action, {
+      fetch(`/recipes/comment/${commentId}/delete/`, {
         method: 'POST',
-        body: formData,
         headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
           'X-Requested-With': 'XMLHttpRequest'
         }
       })
         .then(response => response.json())
         .then(data => {
-          if (data.success && data.comment) {
-            textarea.value = '';
-            cancelReply();
-
-            const noCommentsMsg = document.getElementById('no-comments-message');
-            if (noCommentsMsg) {
-              noCommentsMsg.remove();
-            }
-
-            if (data.comment.is_reply && data.comment.parent_comment_id) {
-              addReplyToDOM(data.comment);
-              updateCommentCount(1);
-            } else {
-              addCommentToDOM(data.comment);
-            }
-
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="bi bi-send"></i> Post';
-          } else {
-            alert(data.error || 'Error posting comment');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="bi bi-send"></i> Post';
+          if (data.success) {
+            commentElement.style.opacity = '0';
+            commentElement.style.transform = 'translateX(-100%)';
+            setTimeout(() => {
+              commentElement.remove();
+              updateCommentCount(-totalDeleted);
+              if (document.querySelectorAll('.comment-item').length === 0) {
+                showNoCommentsMessage();
+              }
+            }, 300);
           }
-        })
-        .catch(error => {
-          console.error('Error:', error);
+        });
+    }
+  }
+
+  function handleDeleteReplyClick(e) {
+    if (confirm('Are you sure you want to delete this reply?')) {
+      const replyId = this.dataset.replyId;
+      const replyElement = document.querySelector(`[data-reply-id="${replyId}"]`);
+      const section = replyElement.closest('.replies-section');
+
+      fetch(`/recipes/comment/${replyId}/delete/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            replyElement.style.opacity = '0';
+            setTimeout(() => {
+              replyElement.remove();
+              updateCommentCount(-1);
+
+              // Update toggle button visibility
+              if (section) {
+                const remaining = section.querySelectorAll('.reply-item').length;
+                const toggleBtn = section.querySelector('.toggle-replies-btn');
+                if (toggleBtn && remaining <= 2) {
+                  toggleBtn.classList.add('d-none');
+                  // Show all remaining
+                  section.querySelectorAll('.reply-item').forEach(r => r.classList.remove('d-none'));
+                }
+              }
+            }, 300);
+          }
+        });
+    }
+  }
+
+  document.getElementById('main-comment-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const textarea = document.getElementById('comment-textarea');
+    const submitBtn = document.getElementById('submit-comment-btn');
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Posting...';
+
+    fetch(this.action, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.comment) {
+          textarea.value = '';
+          cancelReply();
+
+          const noCommentsMsg = document.getElementById('no-comments-message');
+          if (noCommentsMsg) {
+            noCommentsMsg.remove();
+          }
+
+          if (data.comment.is_reply && data.comment.parent_comment_id) {
+            addReplyToDOM(data.comment);
+            updateCommentCount(1);
+          } else {
+            addCommentToDOM(data.comment);
+          }
+
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<i class="bi bi-send"></i> Post';
-        });
-    });
-
-    function addCommentToDOM(commentData) {
-      const createdTs = commentData.created_at || Math.floor(Date.now() / 1000);
-
-
-      let starsHTML = '';
-      const authorRating = commentData.author_rating || 0;
-
-      if (authorRating > 0) {
-        for (let i = 1; i <= 5; i++) {
-          if (authorRating >= i) {
-            starsHTML += '<i class="bi bi-star-fill"></i> ';
-          } else {
-            starsHTML += '<i class="bi bi-star"></i> ';
-          }
+        } else {
+          alert(data.error || 'Error posting comment');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="bi bi-send"></i> Post';
         }
-      }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-send"></i> Post';
+      });
+  });
 
-      const commentHTML = `
-      <div class="comment-item mb-3 new-comment"
-           data-comment-id="${commentData.id}"
-           data-created-at="${createdTs}"
-           data-like-count="0">
-        <div class="d-flex">
-          <div class="comment-avatar me-3">
-            <div class="avatar-circle">${commentData.author.charAt(0).toUpperCase()}</div>
-          </div>
-          <div class="flex-grow-1">
-            <div class="comment-header">
-              <strong class="comment-author text-white" data-username="${commentData.author}">
-                @${commentData.author_display || commentData.author}
-              </strong>
-              <span class="user-rating-badge text-warning ms-2 small" data-username="${commentData.author}">
-                ${starsHTML}
-              </span>
-              <span class="text-white small ms-2" style="opacity: 0.6;">just now</span>
-              ${commentData.can_delete ? `
-                <button class="btn btn-sm btn-link text-danger float-end delete-comment"
-                        data-comment-id="${commentData.id}">
-                  <i class="bi bi-trash"></i>
-                </button>
-              ` : ''}
-            </div>
-            <div class="comment-body">
-              ${commentData.reply_to ? `<span class="mention-tag">@${commentData.reply_to}</span>` : ''}
-              <span class="text-white"
-                      style="opacity: 0.9; white-space: pre-line;">
-                  ${escapeHtml(commentData.content)}
-                </span>
-            </div>
-            <div class="comment-actions mt-2">
-              <button class="btn btn-sm btn-link glass-btn-like like-btn"
+  function addCommentToDOM(commentData) {
+    const createdTs = commentData.created_at || Math.floor(Date.now() / 1000);
+
+    const commentHTML = `
+    <div class="comment-item mb-3 new-comment"
+         data-comment-id="${commentData.id}"
+         data-created-at="${createdTs}"
+         data-like-count="0">
+      <div class="d-flex">
+        <div class="comment-avatar me-3">
+          <div class="avatar-circle">${commentData.author.charAt(0).toUpperCase()}</div>
+        </div>
+        <div class="flex-grow-1">
+          <div class="comment-header">
+            <strong class="comment-author text-white" data-username="${commentData.author}">
+              @${commentData.author_display || commentData.author}
+            </strong>
+            <span class="text-white small ms-2" style="opacity: 0.6;">just now</span>
+            ${commentData.can_delete ? `
+              <button class="btn btn-sm btn-link text-danger float-end delete-comment"
                       data-comment-id="${commentData.id}">
-                <i class="bi bi-heart"></i>
-                <span class="like-count">0</span>
+                <i class="bi bi-trash"></i>
               </button>
-              <button class="btn btn-sm btn-link glass-btn-reply reply-btn"
-                      data-comment-id="${commentData.id}"
-                      data-comment-author="${commentData.author}">
-                <i class="bi bi-reply"></i> Reply
-              </button>
-            </div>
-            <div class="replies-section mt-3"></div>
+            ` : ''}
           </div>
-        </div>
-      </div>
-    `;
-
-      const commentsContainer = document.getElementById('comments-list');
-      commentsContainer.insertAdjacentHTML('beforeend', commentHTML);
-
-      const newComment = commentsContainer.querySelector('.new-comment');
-      newComment.querySelector('.like-btn')?.addEventListener('click', handleLikeClick);
-      newComment.querySelector('.reply-btn')?.addEventListener('click', handleReplyClick);
-      newComment.querySelector('.delete-comment')?.addEventListener('click', handleDeleteClick);
-
-      setTimeout(() => {
-        newComment.classList.remove('new-comment');
-      }, 1000);
-
-      updateCommentCount(1);
-      if (currentSort) {
-        sortComments(currentSort);
-      }
-    }
-
-    function addReplyToDOM(replyData) {
-      const parentComment = document.querySelector(
-        `[data-comment-id="${replyData.parent_comment_id}"]`
-      );
-      if (!parentComment) return;
-
-      let repliesSection = parentComment.querySelector('.replies-section');
-      if (!repliesSection) {
-        const actionsDiv = parentComment.querySelector('.comment-actions');
-        repliesSection = document.createElement('div');
-        repliesSection.className = 'replies-section mt-3';
-        actionsDiv.insertAdjacentElement('afterend', repliesSection);
-      }
-
-      const createdTs = replyData.created_at || Math.floor(Date.now() / 1000);
-
-      const replyHTML = `
-      <div class="reply-item mb-2 new-comment"
-           data-reply-id="${replyData.id}"
-           data-parent-comment="${replyData.parent_comment_id}"
-           data-created-at="${createdTs}"
-           data-like-count="${replyData.like_count || 0}">
-        <div class="d-flex">
-          <div class="reply-avatar me-2">
-            <div class="avatar-circle-small">${replyData.author.charAt(0).toUpperCase()}</div>
-          </div>
-          <div class="flex-grow-1">
-            <div class="reply-header">
-              <strong class="reply-author text-white" data-username="${replyData.author}">
-                @${replyData.author}
-              </strong>
-              <span class="text-white small ms-1" style="opacity: 0.6;">just now</span>
-              ${replyData.can_delete ? `
-                <button class="btn btn-sm btn-link text-danger float-end delete-reply"
-                        data-reply-id="${replyData.id}">
-                  <i class="bi bi-trash"></i>
-                </button>
-              ` : ''}
-            </div>
-            <div class="reply-content">
-              ${replyData.reply_to ? `<span class="mention-tag">@${replyData.reply_to}</span>` : ''}
-              <span class="text-white"
-                  style="opacity: 0.9; white-space: pre-line;">
-              ${escapeHtml(replyData.content)}
+          <div class="comment-body">
+            ${commentData.reply_to ? `<span class="mention-tag">@${commentData.reply_to}</span>` : ''}
+            <span class="text-white" style="opacity: 0.9; white-space: pre-line;">
+              ${escapeHtml(commentData.content)}
             </span>
-           </div>
-            <div class="reply-actions mt-1">
-              <button class="btn btn-sm btn-link glass-btn-like like-reply-btn"
-                      data-reply-id="${replyData.id}">
-                <i class="bi bi-heart"></i>
-                <span class="reply-like-count">0</span>
-              </button>
-              <button class="btn btn-sm btn-link glass-btn-reply reply-to-reply-btn"
-                      data-parent-comment-id="${replyData.parent_comment_id}"
-                      data-reply-author="${replyData.author}">
-                <i class="bi bi-reply"></i> Reply
-              </button>
-            </div>
+          </div>
+          <div class="comment-actions mt-2">
+            <button class="btn btn-sm btn-link glass-btn-like like-btn"
+                    data-comment-id="${commentData.id}">
+              <i class="bi bi-heart"></i>
+              <span class="like-count">0</span>
+            </button>
+            <button class="btn btn-sm btn-link glass-btn-reply reply-btn"
+                    data-comment-id="${commentData.id}"
+                    data-comment-author="${commentData.author}">
+              <i class="bi bi-reply"></i> Reply
+            </button>
           </div>
         </div>
       </div>
-    `;
+    </div>
+  `;
 
-      repliesSection.insertAdjacentHTML('beforeend', replyHTML);
+    const commentsContainer = document.getElementById('comments-list');
+    commentsContainer.insertAdjacentHTML('beforeend', commentHTML);
 
-      const newReply = repliesSection.querySelector('.new-comment');
-      newReply.querySelector('.delete-reply')?.addEventListener('click', handleDeleteReplyClick);
-      newReply.querySelector('.reply-to-reply-btn')?.addEventListener('click', handleReplyToReplyClick);
-      newReply.querySelector('.like-reply-btn')?.addEventListener('click', handleReplyLikeClick);
+    const newComment = commentsContainer.querySelector('.new-comment');
+    newComment.querySelector('.like-btn')?.addEventListener('click', handleLikeClick);
+    newComment.querySelector('.reply-btn')?.addEventListener('click', handleReplyClick);
+    newComment.querySelector('.delete-comment')?.addEventListener('click', handleDeleteClick);
 
-      setTimeout(() => {
-        newReply.classList.remove('new-comment');
-      }, 1000);
+    setTimeout(() => {
+      newComment.classList.remove('new-comment');
+    }, 1000);
 
+    updateCommentCount(1);
+    if (currentSort) {
+      sortComments(currentSort);
+    }
+  }
+
+  function addReplyToDOM(replyData) {
+    const parentComment = document.querySelector(`[data-comment-id="${replyData.parent_comment_id}"]`);
+    if (!parentComment) return;
+
+    let repliesSection = parentComment.querySelector('.replies-section');
+
+    // If no section exists, create full structure
+    if (!repliesSection) {
+      const actionsDiv = parentComment.querySelector('.comment-actions');
+      const sectionHTML = `
+        <div class="replies-section mt-2" data-parent-id="${replyData.parent_comment_id}">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex align-items-center">
+              <span class="text-white small" style="opacity: 0.7;">Sort replies</span>
+              <div class="dropdown d-inline-block ms-2">
+                <button class="btn btn-sm glass-filter-btn dropdown-toggle reply-sort-dropdown"
+                        type="button" data-bs-toggle="dropdown">
+                  Newest first
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end glass-dropdown">
+                  <li><button class="dropdown-item glass-dropdown-item reply-sort-option" type="button" data-sort="newest">Newest first</button></li>
+                  <li><button class="dropdown-item glass-dropdown-item reply-sort-option" type="button" data-sort="oldest">Oldest first</button></li>
+                  <li><button class="dropdown-item glass-dropdown-item reply-sort-option" type="button" data-sort="most_liked">Most liked</button></li>
+                </ul>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm glass-filter-btn toggle-replies-btn d-none"
+                    data-parent-id="${replyData.parent_comment_id}" data-expanded="true">
+              <i class="bi bi-chevron-up me-1"></i>
+              <span class="toggle-text">Hide replies</span>
+            </button>
+          </div>
+          <div class="replies-list"></div>
+        </div>
+      `;
+
+      actionsDiv.insertAdjacentHTML('afterend', sectionHTML);
+      repliesSection = parentComment.querySelector('.replies-section');
+
+      // Bind new toggle button
       const toggleBtn = repliesSection.querySelector('.toggle-replies-btn');
       if (toggleBtn) {
-        refreshSectionCollapse(repliesSection);
+        toggleBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const isExpanded = this.dataset.expanded === 'true';
+          const section = this.closest('.replies-section');
+          if (isExpanded) {
+            collapseToTopReplies(section, this, 2);
+          } else {
+            expandAllReplies(section, this);
+          }
+        });
       }
+
+      // Bind sort events
+      repliesSection.querySelectorAll('.reply-sort-option').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const order = this.dataset.sort;
+          const section = this.closest('.replies-section');
+          const dropdown = section.querySelector('.reply-sort-dropdown');
+          if (dropdown) dropdown.textContent = this.textContent.trim();
+
+          const replies = Array.from(section.querySelectorAll('.reply-item'));
+          replies.sort((a, b) => {
+            const ta = parseInt(a.dataset.createdAt || '0', 10);
+            const tb = parseInt(b.dataset.createdAt || '0', 10);
+            const la = parseInt(a.dataset.likeCount || '0', 10);
+            const lb = parseInt(b.dataset.likeCount || '0', 10);
+            if (order === 'newest') return tb - ta;
+            if (order === 'oldest') return ta - tb;
+            if (order === 'most_liked') return (lb !== la) ? (lb - la) : (tb - ta);
+            return 0;
+          });
+
+          const list = section.querySelector('.replies-list');
+          if (list) replies.forEach(r => list.appendChild(r));
+
+          const toggleBtn = section.querySelector('.toggle-replies-btn');
+          if (toggleBtn && toggleBtn.dataset.expanded === 'false') {
+            refreshCollapseState(section, toggleBtn);
+          }
+        });
+      });
     }
 
-    function updateCommentCount(change) {
-      const countBadge = document.getElementById('comment-count');
-      if (countBadge) {
-        const currentCount = parseInt(countBadge.textContent) || 0;
-        countBadge.textContent = Math.max(0, currentCount + change);
-      }
+    let repliesList = repliesSection.querySelector('.replies-list');
+    if (!repliesList) {
+      repliesList = document.createElement('div');
+      repliesList.className = 'replies-list';
+      repliesSection.appendChild(repliesList);
     }
 
-    function showNoCommentsMessage() {
-      const container = document.getElementById('comments-list');
-      container.innerHTML = `
-      <div class="text-center py-4 text-white" id="no-comments-message" style="opacity: 0.6%;">
-        <i class="bi bi-chat-left-dots display-4"></i>
-        <p class="mt-3">No comments yet. Be the first to share your thoughts!</p>
+    const createdTs = replyData.created_at || Math.floor(Date.now() / 1000);
+
+    const replyHTML = `
+    <div class="reply-item mb-2 new-comment"
+         data-reply-id="${replyData.id}"
+         data-parent-comment="${replyData.parent_comment_id}"
+         data-created-at="${createdTs}"
+         data-like-count="${replyData.like_count || 0}">
+      <div class="d-flex">
+        <div class="reply-avatar me-2">
+          <div class="avatar-circle-small">${replyData.author.charAt(0).toUpperCase()}</div>
+        </div>
+        <div class="flex-grow-1">
+          <div class="reply-header">
+            <strong class="reply-author text-white" data-username="${replyData.author}">
+              @${replyData.author}
+            </strong>
+            <span class="text-white small ms-1" style="opacity: 0.6;">just now</span>
+            ${replyData.can_delete ? `
+              <button class="btn btn-sm btn-link text-danger float-end delete-reply"
+                      data-reply-id="${replyData.id}">
+                <i class="bi bi-trash"></i>
+              </button>
+            ` : ''}
+          </div>
+          <div class="reply-content">
+            ${replyData.reply_to ? `<span class="mention-tag">@${replyData.reply_to}</span>` : ''}
+            <span class="text-white" style="opacity: 0.9; white-space: pre-line;">
+              ${escapeHtml(replyData.content)}
+            </span>
+          </div>
+          <div class="reply-actions mt-1">
+            <button class="btn btn-sm btn-link glass-btn-like like-reply-btn"
+                    data-reply-id="${replyData.id}">
+              <i class="bi bi-heart"></i>
+              <span class="reply-like-count">0</span>
+            </button>
+            <button class="btn btn-sm btn-link glass-btn-reply reply-to-reply-btn"
+                    data-parent-comment-id="${replyData.parent_comment_id}"
+                    data-reply-author="${replyData.author}">
+              <i class="bi bi-reply"></i> Reply
+            </button>
+          </div>
+        </div>
       </div>
-    `;
+    </div>
+  `;
+
+    repliesList.insertAdjacentHTML('beforeend', replyHTML);
+
+    const newReply = repliesList.querySelector('.new-comment');
+    newReply.querySelector('.delete-reply')?.addEventListener('click', handleDeleteReplyClick);
+    newReply.querySelector('.reply-to-reply-btn')?.addEventListener('click', handleReplyToReplyClick);
+    newReply.querySelector('.like-reply-btn')?.addEventListener('click', handleReplyLikeClick);
+
+    setTimeout(() => newReply.classList.remove('new-comment'), 1000);
+
+    // Show toggle button if we now have >2 replies
+    const toggleBtn = repliesSection.querySelector('.toggle-replies-btn');
+    const totalReplies = repliesList.querySelectorAll('.reply-item').length;
+    if (toggleBtn && totalReplies > 2) {
+      toggleBtn.classList.remove('d-none');
+    }
+
+    repliesSection.classList.remove('d-none');
+  }
+
+  function updateCommentCount(change) {
+    const countBadge = document.getElementById('comment-count');
+    if (countBadge) {
+      const currentCount = parseInt(countBadge.textContent) || 0;
+      countBadge.textContent = Math.max(0, currentCount + change);
+    }
+  }
+
+  function showNoCommentsMessage() {
+    const container = document.getElementById('comments-list');
+    container.innerHTML = `
+    <div class="text-center py-4 text-white" id="no-comments-message" style="opacity: 0.6%;">
+      <i class="bi bi-chat-left-dots display-4"></i>
+      <p class="mt-3">No comments yet. Be the first to share your thoughts!</p>
+    </div>
+  `;
   }
 
   const ratingWidget = document.querySelector('.rating-widget');
@@ -2049,7 +2173,11 @@
       function updateStars(score) {
           stars.forEach(star => {
               const starScore = parseInt(star.dataset.score);
-              star.style.color = starScore <= score ? '#ffc107' : '#e9ecef';
+              if (score === 0) {
+                star.style.color = '#e9ecef';
+              } else {
+                star.style.color = starScore <= score ? '#ffc107' : '#e9ecef';
+              }
           });
       }
 
@@ -2207,72 +2335,63 @@
         renderStars(document.getElementById('overall-stars'), avg);
       }
   }
-});
-    }
 
   function sortReplies(order) {
-      const sections = document.querySelectorAll('.replies-section');
-      sections.forEach(section => {
-        const replies = Array.from(section.querySelectorAll('.reply-item'));
-        if (replies.length === 0) return;
+    const sections = document.querySelectorAll('.replies-section');
+    sections.forEach(section => {
+      const replies = Array.from(section.querySelectorAll('.reply-item'));
+      if (replies.length === 0) return;
 
-        replies.sort((a, b) => {
-          const ta = parseInt(a.dataset.createdAt || '0', 10);
-          const tb = parseInt(b.dataset.createdAt || '0', 10);
-          const la = parseInt(a.dataset.likeCount || '0', 10);
-          const lb = parseInt(b.dataset.likeCount || '0', 10);
-
-          if (order === 'newest') {
-            return tb - ta;
-          } else if (order === 'oldest') {
-            return ta - tb;
-          } else if (order === 'most_liked') {
-            if (lb !== la) {
-              return lb - la;
-            }
-            return tb - ta;
-          }
-          return 0;
-        });
-        const repliesList = section.querySelector('.replies-list') || section;
-        replies.forEach(r => section.appendChild(r));
-      });
-  }
-
-
-  function sortComments(order) {
-      const list = document.getElementById('comments-list');
-      if (!list) return;
-
-      const items = Array.from(list.querySelectorAll('.comment-item'));
-      if (items.length === 0) return;
-
-      items.sort((a, b) => {
+      replies.sort((a, b) => {
         const ta = parseInt(a.dataset.createdAt || '0', 10);
         const tb = parseInt(b.dataset.createdAt || '0', 10);
         const la = parseInt(a.dataset.likeCount || '0', 10);
         const lb = parseInt(b.dataset.likeCount || '0', 10);
 
-        if (order === 'newest') {
-          return tb - ta;               // newest first
-        } else if (order === 'oldest') {
-          return ta - tb;               // oldest first
-        } else if (order === 'most_liked') {
-          if (lb !== la) {
-            return lb - la;             // higher likes first
-          }
-          return tb - ta;               // tie-break: newer first
+        if (order === 'newest') return tb - ta;
+        if (order === 'oldest') return ta - tb;
+        if (order === 'most_liked') {
+          if (lb !== la) return lb - la;
+          return tb - ta;
         }
         return 0;
       });
 
-      items.forEach(item => list.appendChild(item));
-
-      sortReplies(order);
+      const repliesList = section.querySelector('.replies-list');
+      if (repliesList) {
+        replies.forEach(r => repliesList.appendChild(r));
+      }
+    });
   }
 
-  });
+  function sortComments(order) {
+    const list = document.getElementById('comments-list');
+    if (!list) return;
+
+    const items = Array.from(list.querySelectorAll('.comment-item'));
+    if (items.length === 0) return;
+
+    items.sort((a, b) => {
+      const ta = parseInt(a.dataset.createdAt || '0', 10);
+      const tb = parseInt(b.dataset.createdAt || '0', 10);
+      const la = parseInt(a.dataset.likeCount || '0', 10);
+      const lb = parseInt(b.dataset.likeCount || '0', 10);
+
+      if (order === 'newest') return tb - ta;
+      if (order === 'oldest') return ta - tb;
+      if (order === 'most_liked') {
+        if (lb !== la) return lb - la;
+        return tb - ta;
+      }
+      return 0;
+    });
+
+    items.forEach(item => list.appendChild(item));
+    sortReplies(order);
+  }
+
+});
+
 </script>
 {% endblock %}
-
 {% endblock %}
