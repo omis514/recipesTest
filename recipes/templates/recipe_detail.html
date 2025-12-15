@@ -1,21 +1,7 @@
 {% extends "base_content.html" %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/recipe_details_glass_texture.css' %}">
-<style>
-
-  .glass-header {
-    background: linear-gradient(135deg, rgba(56, 89, 138, 0.9) 0%, rgba(70, 130, 180, 0.8) 100%) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
-  }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="glass-background-wrapper">
   <div class="container mt-4">
     <div class="row justify-content-center">
       <div class="col-lg-10 col-xl-8">
@@ -52,10 +38,39 @@
           <div class="card-body p-4">
             <div class="row g-3">
               <div class="col-md-7">
-                <p class="text-white small mb-2" style="opacity: 0.8;">
-                  By <strong>{{ recipe.author.get_full_name|default:recipe.author.username }}</strong>
-                  · Created on {{ recipe.created_at|date:"d M Y" }}
-                </p>
+                {# Author Info with Profile Picture and Follow Button #}
+                <div class="d-flex align-items-center mb-3">
+                  <a href="{% url 'observe_profile' recipe.author.username %}" class="text-decoration-none">
+                    <img src="{{ recipe.author.mini_gravatar }}" alt="{{ recipe.author.username }}"
+                         class="author-avatar-lg me-3"
+                         style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3);">
+                  </a>
+                  <div class="flex-grow-1">
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                      <a href="{% url 'observe_profile' recipe.author.username %}" class="text-decoration-none">
+                        <strong class="text-white" style="font-size: 1.1rem;">{{ recipe.author.get_full_name|default:recipe.author.username }}</strong>
+                      </a>
+                      {% if user.is_authenticated and user != recipe.author %}
+                        {% if is_following_author %}
+                        <form method="post" action="{% url 'unfollow_user' recipe.author.username %}" class="d-inline">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-sm glass-follow-btn following">
+                            <i class="bi bi-person-check-fill me-1"></i>Following
+                          </button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="{% url 'follow_user' recipe.author.username %}" class="d-inline">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-sm glass-follow-btn">
+                            <i class="bi bi-person-plus-fill me-1"></i>Follow
+                          </button>
+                        </form>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                    <small class="text-white" style="opacity: 0.7;">Created on {{ recipe.created_at|date:"d M Y" }}</small>
+                  </div>
+                </div>
                 {% if recipe.description %}
                 <p class="mb-0 text-white">{{ recipe.description }}</p>
                 {% else %}
@@ -202,9 +217,9 @@
 
         {# User Rating #}
         {% if user.is_authenticated %}
-        <div class="card shadow-sm mb-4">
+        <div class="card rating-card-glass shadow-sm mb-4">
           <div class="card-body d-flex align-items-center justify-content-between">
-            <h5 class="mb-0 text-muted">
+            <h5 class="mb-0">
               <i class="bi bi-star me-2"></i>Rate this recipe
             </h5>
             <div class="d-flex align-items-center gap-3">
@@ -220,11 +235,12 @@
                 </button>
                 {% endif %}
               </form>
+            <div class="rating-widget-container">
               <div class="rating-widget" data-user-rating="{{ user_rating_score }}" data-recipe-pk="{{ recipe.pk }}">
                 {% for i in "12345"|make_list %}
                 <i class="bi bi-star-fill rating-star" data-score="{{ i }}"></i>
                 {% endfor %}
-                <span class="ms-3 text-muted small" id="rating-message">
+                <span class="ms-3 small" id="rating-message">
                   {% if user_rating_score %}
                     Your rating: <strong>{{ user_rating_score }}</strong> stars
                   {% else %}
@@ -232,6 +248,7 @@
                   {% endif %}
                 </span>
               </div>
+            </div>
             </div>
           </div>
         </div>
@@ -328,7 +345,7 @@
                        data-like-count="{{ comment.like_count }}">
                     <div class="d-flex">
                       <div class="comment-avatar me-3">
-                        <div class="avatar-circle">{{ comment.author.username|first|upper }}</div>
+                        <img src="{{ comment.author.mini_gravatar }}" alt="{{ comment.author.username }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
                       </div>
                       <div class="flex-grow-1">
                         <div class="comment-header">
@@ -439,9 +456,7 @@
                                  data-like-count="{{ reply.like_count }}">
                               <div class="d-flex">
                                 <div class="reply-avatar me-2">
-                                  <div class="avatar-circle-small">
-                                    {{ reply.author.username|first|upper }}
-                                  </div>
+                                  <img src="{{ reply.author.mini_gravatar }}" alt="{{ reply.author.username }}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                                 </div>
                                 <div class="flex-grow-1">
                                   <div class="reply-header">
@@ -523,9 +538,17 @@
         </a>
 
       {% if user.is_authenticated %}
-      <a href="{% url 'report_recipe' recipe.pk %}" class="btn glass-btn-warning me-md-2">
-        <i class="bi bi-flag me-2"></i>Report Recipe
-      </a>
+        {% if user == recipe.author %}
+          <a href="{% url 'edit_recipe' recipe.pk %}" class="btn glass-btn-info me-md-2"
+             style="background-color: rgba(13, 202, 240, 0.2); border-color: rgba(13, 202, 240, 0.4); color: white;">
+            <i class="bi bi-pencil-square me-2"></i>Edit Recipe
+          </a>
+        {% endif %}
+        {% if user != recipe.author %}
+          <a href="{% url 'report_recipe' recipe.pk %}" class="btn glass-btn-warning me-md-2">
+            <i class="bi bi-flag me-2"></i>Report Recipe
+          </a>
+        {% endif %}
       {% endif %}
 
       <a href="{% url 'recipe_create' %}" class="btn glass-btn-success">
@@ -533,820 +556,10 @@
       </a>
     </div>
     </div>
-  </div>
-</div>
-
-<style>
-  .glass-background-wrapper {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    position: relative;
-    padding: 2rem 0;
-    overflow: hidden;
-  }
-
-  .glass-background-wrapper::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image:
-      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
-    background-size: 100% 100%;
-    filter: blur(60px);
-    z-index: 0;
-  }
-
-  .glass-background-wrapper>.container {
-    position: relative;
-    z-index: 1;
-  }
-
-  .glass-card {
-    background: rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-radius: 16px !important;
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-    transition: all 0.3s ease;
-  }
-
-  .glass-card:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
-    box-shadow:
-      0 12px 40px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
-    transform: translateY(-2px);
-  }
-
-  .glass-header {
-    background: rgba(40, 167, 69, 0.25) !important;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 16px 16px 0 0 !important;
-    padding: 1.5rem !important;
-  }
-
-  .glass-subheader {
-    background: rgba(255, 255, 255, 0.1) !important;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 16px 16px 0 0 !important;
-    padding: 1.25rem !important;
-  }
-
-  .card-body {
-    background: transparent !important;
-  }
-
-  .recipe-image {
-    border-radius: 12px !important;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  }
-
-  .glass-placeholder {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 2px dashed rgba(255, 255, 255, 0.2) !important;
-    border-radius: 12px !important;
-  }
-
-  .difficulty-badge {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 0.5rem 1rem;
-    font-weight: 600;
-    border-radius: 0.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-
-  .difficulty-easy {
-    background: rgba(40, 167, 69, 0.8) !important;
-    color: white !important;
-  }
-
-  .difficulty-medium {
-    background: rgba(255, 193, 7, 0.8) !important;
-    color: #000 !important;
-  }
-
-  .difficulty-hard {
-    background: rgba(220, 53, 69, 0.8) !important;
-    color: white !important;
-  }
-
-  .difficulty-default {
-    background: rgba(108, 117, 125, 0.8) !important;
-    color: white !important;
-  }
-
-  .glass-list {
-    background: transparent !important;
-  }
-
-  .glass-list-item {
-    background: rgba(255, 255, 255, 0.06) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    margin-bottom: 0.5rem;
-    border-radius: 8px !important;
-    transition: all 0.2s ease;
-  }
-
-  .glass-list-item:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    transform: translateX(5px);
-  }
-
-  .glass-badge {
-    background: rgba(13, 110, 253, 0.6) !important;
-    color: white !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0.4rem 0.8rem;
-    font-weight: 600;
-  }
-
-  .glass-badge-secondary {
-    background: rgba(108, 117, 125, 0.6) !important;
-    color: white !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0.4rem 0.8rem;
-    font-weight: 600;
-  }
-
-  .glass-badge-count {
-    background: rgba(13, 110, 253, 0.7) !important;
-    color: white !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-
-  /* Ingredient scaling styles */
-    .scaling-controls {
-      user-select: none;
-    }
-
-    .scaling-controls .btn {
-      min-width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .glass-scale-btn {
-      background: rgba(255, 255, 255, 0.1) !important;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3) !important;
-      color: white !important;
-      transition: all 0.3s ease;
-      border-radius: 8px !important;
-    }
-
-    .glass-scale-btn:hover {
-      background: rgba(255, 255, 255, 0.2) !important;
-      transform: scale(1.05);
-    }
-
-    .glass-scale-btn-current {
-      min-width: 45px;
-      font-weight: 600;
-      background: rgba(13, 110, 253, 0.6) !important;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3) !important;
-      color: white !important;
-      border-radius: 8px !important;
-    }
-
-    .glass-scale-reset {
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      border-radius: 999px !important;
-
-      background: rgba(255, 255, 255, 0.12) !important;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.35) !important;
-
-      color: rgba(255, 255, 255, 0.85) !important;
-      transition: all 0.3s ease;
-    }
-
-    .glass-scale-reset:hover {
-      background: rgba(255, 255, 255, 0.22) !important;
-      border-color: rgba(255, 255, 255, 0.6) !important;
-      color: #ffffff !important;
-      transform: rotate(180deg) scale(1.05);
-    }
-
-    .glass-quick-scale {
-      background: rgba(255, 255, 255, 0.1) !important;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2) !important;
-      color: rgba(255, 255, 255, 0.9) !important;
-      transition: all 0.3s ease;
-      border-radius: 6px !important;
-    }
-
-    .glass-quick-scale:hover {
-      background: rgba(255, 255, 255, 0.2) !important;
-      border-color: rgba(255, 255, 255, 0.3) !important;
-      color: white !important;
-    }
-
-    .ingredient-quantity {
-      transition: all 0.3s ease;
-      font-size: 0.9rem;
-      padding: 0.4rem 0.6rem;
-    }
-
-    .ingredient-quantity.scaled {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-      color: white !important;
-      font-weight: 600;
-      animation: pulse 0.5s ease;
-    }
-
-    .ingredient-item.updating .ingredient-quantity {
-      animation: pulse 0.5s ease;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.08); }
-    }
-
-    .glass-alert-scaling {
-      background: rgba(13, 202, 240, 0.2) !important;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(13, 202, 240, 0.4) !important;
-      border-left: 3px solid #0dcaf0 !important;
-      color: #ffffff !important;
-      border-radius: 8px;
-      animation: slideDown 0.3s ease;
-    }
-
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .quick-scale-buttons {
-      padding-top: 10px;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-    }
-
-    .toggle-replies-btn {
-      white-space: nowrap;
-    }
-
-    .reply-item.collapsed-hidden {
-      display: none !important;
-    }
-
-  .glass-badge-info {
-    background: rgba(13, 202, 240, 0.7) !important;
-    color: white !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 8px 12px;
-    font-size: 0.9rem;
-  }
-
-  .glass-input,
-  .form-control {
-    background: rgba(255, 255, 255, 0.1) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 8px !important;
-    color: #ffffff !important;
-    transition: all 0.3s ease;
-  }
-
-  .glass-select-sort {
-  background: rgba(255, 255, 255, 0.12) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 999px !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  color: #ffffff !important;
-  padding: 0.25rem 0.9rem;
-  width: auto;
-  min-width: 150px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-  }
-
-  .glass-select-sort:focus {
-    background: rgba(255, 255, 255, 0.18) !important;
-    border-color: rgba(255, 255, 255, 0.8) !important;
-    box-shadow:
-      0 0 0 0.15rem rgba(255, 255, 255, 0.35),
-      0 6px 20px rgba(0, 0, 0, 0.45);
-    outline: none;
-  }
-
-  /* Dark dropdown panel and text for options */
-  .glass-select-sort option {
-    background-color: rgba(10, 25, 47, 0.96);
-    color: #ffffff;
-  }
-
-  /* Remove Bootstrap default background/outline on the select itself */
-  .form-select.glass-select-sort,
-  .form-select-sm.glass-select-sort {
-    background-color: rgba(15, 52, 96, 0.6) !important;
-    color: #ffffff !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
-  }
-
-  .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.5) !important;
-  }
-
-  .form-control:focus {
-    background: rgba(255, 255, 255, 0.15) !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    box-shadow:
-      0 0 0 0.2rem rgba(255, 255, 255, 0.2),
-      inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
-    color: #ffffff !important;
-    outline: none;
-  }
-
-  .glass-btn-primary {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-    color: white !important;
-    font-weight: 600;
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
-  }
-
-  .glass-btn-primary:hover {
-    background: linear-gradient(135deg, #0069d9 0%, #004085 100%) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
-  }
-
-  .comment-input-container .input-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .comment-input-container .input-group > .glass-btn-primary {
-    border-radius: 999px !important;
-    margin-left: 6px;
-  }
-
-  .comment-input-container .input-group > .form-control {
-    flex: 1 1 auto;
-    margin-right: 1.5rem;
-    max-width: calc(100% - 110px);
-  }
-
-  .comment-input-container .input-group > .glass-btn-primary {
-    margin-left: auto;
-  }
-
-  .glass-btn-secondary {
-    background: rgba(108, 117, 125, 0.6) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-    color: white !important;
-    font-weight: 600;
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
-  }
-
-  .glass-btn-secondary:hover {
-    background: rgba(108, 117, 125, 0.8) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
-  }
-
-  .glass-btn-success {
-    background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-    color: white !important;
-    font-weight: 600;
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
-  }
-
-  .glass-btn-success:hover {
-    background: linear-gradient(135deg, #34ce57 0%, #28a745 100%) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-  }
-
-  .glass-btn-danger {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-    color: white !important;
-    font-weight: 600;
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
-  }
-
-  .glass-btn-danger:hover {
-    background: linear-gradient(135deg, #e74c3c 0%, #dc3545 100%) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
-  }
-
-  .glass-btn-danger-outline {
-    background: rgba(220, 53, 69, 0.2) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid rgba(220, 53, 69, 0.6) !important;
-    color: white !important;
-    font-weight: 600;
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
-  }
-
-  .glass-btn-danger-outline:hover {
-    background: rgba(220, 53, 69, 0.4) !important;
-    border-color: rgba(220, 53, 69, 0.8) !important;
-    transform: translateY(-2px);
-  }
-
-  .glass-btn-warning {
-    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-    color: #000 !important;
-    font-weight: 600;
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
-  }
-
-  .glass-btn-warning:hover {
-    background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
-  }
-
-  .glass-btn-like,
-  .glass-btn-reply {
-    color: rgba(255, 255, 255, 0.8) !important;
-    transition: all 0.2s ease;
-  }
-
-  .glass-btn-like:hover,
-  .glass-btn-reply:hover {
-    color: rgba(255, 255, 255, 1) !important;
-    transform: translateY(-1px);
-  }
-
-  .glass-btn-like.liked {
-    color: #dc3545 !important;
-  }
-
-  .comment-item {
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.06) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-  }
-
-  .comment-item:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-
-  .comment-item.new-comment {
-    animation: slideIn 0.5s ease;
-    background: rgba(13, 110, 253, 0.2) !important;
-  }
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .avatar-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-  }
-
-  .avatar-circle-small {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-  }
-
-  .replies-section {
-    margin-left: 48px;
-    border-left: 2px solid rgba(255, 255, 255, 0.2);
-    padding-left: 15px;
-  }
-
-  .reply-item {
-    background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.2s ease;
-  }
-
-  .reply-item:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(255, 255, 255, 0.15);
-  }
-
-  .mention-tag {
-    color: #4dabf7;
-    font-weight: 600;
-    cursor: pointer;
-    margin-right: 5px;
-  }
-
-  .mention-tag:hover {
-    text-decoration: underline;
-    color: #74c0fc;
-  }
-
-  .reply-indicator {
-    animation: slideDown 0.3s ease;
-  }
-
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .btn-close-white {
-    filter: brightness(0) invert(1);
-    width: 0.5em;
-    height: 0.5em;
-    padding: 0;
-  }
-
-  .comment-input-container {
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-  }
-
-  .glass-alert-info {
-    background: rgba(13, 202, 240, 0.2) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(13, 202, 240, 0.4) !important;
-    color: #ffffff !important;
-    border-radius: 8px;
-  }
-
-  .glass-alert-info a {
-    color: #ffffff !important;
-    text-decoration: underline;
-  }
-
-  .comment-item.reply-target {
-    background: rgba(255, 243, 205, 0.15) !important;
-    border-color: rgba(255, 193, 7, 0.5) !important;
-    animation: highlight 2s ease;
-  }
-
-
-    .comments-scroll {
-      max-height: 420px;
-      overflow-y: auto;
-      padding-right: 0.5rem;
-
-      border-radius: 12px;
-    }
-
-    .comments-scroll::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .comments-scroll::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 999px;
-    }
-
-    .comments-scroll::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.35);
-      border-radius: 999px;
-    }
-
-    .comments-scroll::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.6);
-    }
-
-    @media (max-width: 768px) {
-      .comments-scroll {
-        max-height: 55vh;
-      }
-    }
-
-
-  @keyframes highlight {
-    0% {
-      background: rgba(255, 243, 205, 0.25) !important;
-    }
-
-    100% {
-      background: rgba(255, 255, 255, 0.06) !important;
-    }
-  }
-
-  .text-white {
-    color: #ffffff !important;
-  }
-
-  @media (max-width: 768px) {
-    .glass-background-wrapper {
-      padding: 1rem 0;
-    }
-
-    .card {
-      margin-bottom: 1rem;
-    }
-
-    .replies-section {
-      margin-left: 20px;
-      padding-left: 10px;
-    }
-  }
-
-    .dropdown {
-      position: relative;
-    }
-
-    .glass-dropdown-item.active {
-      background: rgba(13, 110, 253, 0.7) !important;
-      color: #ffffff !important;
-    }
-
-    .glass-subheader {
-      position: relative;
-      z-index: 20;
-    }
-
-    .glass-subheader .dropdown-menu {
-      position: absolute;
-      right: 0;
-      margin-top: 0.35rem;
-      z-index: 3000;
-    }
-
-    .glass-filter-btn {
-      background: rgba(15, 52, 96, 0.7) !important;
-      color: #ffffff !important;
-      border-radius: 999px !important;
-      border: 1px solid rgba(255, 255, 255, 0.4) !important;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-
-    .glass-filter-btn:focus,
-    .glass-filter-btn:hover {
-      background: rgba(15, 52, 96, 0.9) !important;
-      box-shadow: 0 0 0 0.12rem rgba(255, 255, 255, 0.35);
-      color: #ffffff !important;
-    }
-
-    .glass-dropdown {
-      background: rgba(34, 38, 54, 0.89) !important;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.25) !important;
-      border-radius: 12px !important;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
-      padding: 0.5rem;
-      z-index: 3000 !important;
-    }
-
-    .glass-dropdown-item {
-      background: transparent !important;
-      color: rgba(255, 255, 255, 0.9) !important;
-      border-radius: 8px !important;
-      transition: all 0.2s ease;
-      margin-bottom: 0.25rem;
-    }
-
-    .glass-dropdown-item:hover {
-      background: rgba(255, 255, 255, 0.18) !important;
-      color: #ffffff !important;
-    }
-
-
-    .glass-dropdown-item.active {
-      background: rgba(13, 110, 253, 0.7) !important;
-      color: #ffffff !important;
-    }
-
-
-  }
-
-  .rating-widget {
-      display: flex;
-      align-items: center;
-      direction: ltr;
-  }
-
-  .rating-star {
-      font-size: 1.8rem;
-      color: #e9ecef;
-      cursor: pointer;
-      transition: color 0.2s;
-      margin-right: 2px;
-  }
-
-  .rating-widget .ms-3 {
-      direction: ltr;
-  }
-
-  .rating-widget > .rating-star {
-      order: 1;
-  }
-  .rating-star[data-score="5"] { order: 5; }
-  .rating-star[data-score="4"] { order: 4; }
-  .rating-star[data-score="3"] { order: 3; }
-  .rating-star[data-score="2"] { order: 2; }
-  .rating-star[data-score="1"] { order: 1; }
-
-</style>
 
 {% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-  // Ingredient scaling
   const scaleCurrentBtn = document.getElementById('current-scale');
   const scaleDecreaseBtn = document.getElementById('scale-decrease');
   const scaleIncreaseBtn = document.getElementById('scale-increase');
@@ -1521,17 +734,14 @@
           replies.forEach(r => repliesList.appendChild(r));
         }
 
-        // After sorting, refresh collapse state
         const toggleBtn = section.querySelector('.toggle-replies-btn');
         if (toggleBtn && toggleBtn.dataset.expanded === 'false') {
-          // Re-apply the collapsed state with newly sorted replies
           refreshCollapseState(section, toggleBtn);
         }
       });
     });
   }
 
-  // Initialize toggle buttons - show top 2 most-liked when collapsed
   function initReplyCollapse() {
     const MAX_VISIBLE_REPLIES = 2;
 
@@ -1546,13 +756,11 @@
 
       const replies = Array.from(repliesList.querySelectorAll('.reply-item'));
 
-      // If 2 or fewer replies, hide the button
       if (replies.length <= MAX_VISIBLE_REPLIES) {
         toggleBtn.classList.add('d-none');
         return;
       }
 
-      // Initial state: Show all replies
       section.classList.remove('d-none');
       toggleBtn.dataset.expanded = 'true';
       const icon = toggleBtn.querySelector('i');
@@ -1560,7 +768,6 @@
       if (icon) icon.className = 'bi bi-chevron-up me-1';
       if (text) text.textContent = 'Hide replies';
 
-      // Click event
       toggleBtn.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -1568,10 +775,8 @@
         const isExpanded = this.dataset.expanded === 'true';
 
         if (isExpanded) {
-          // Collapse: Show only top 2 most-liked
           collapseToTopReplies(section, this, MAX_VISIBLE_REPLIES);
         } else {
-          // Expand: Show all replies
           expandAllReplies(section, this);
         }
       });
@@ -1585,7 +790,6 @@
     const allReplies = Array.from(repliesList.querySelectorAll('.reply-item'));
     const totalCount = allReplies.length;
 
-    // Sort by like count (descending)
     const sortedByLikes = [...allReplies].sort((a, b) => {
       const la = parseInt(a.dataset.likeCount || '0', 10);
       const lb = parseInt(b.dataset.likeCount || '0', 10);
@@ -1596,7 +800,6 @@
       sortedByLikes.slice(0, maxVisible).map(r => r.dataset.replyId)
     );
 
-    // Hide all except top N
     allReplies.forEach(reply => {
       if (topReplyIds.has(reply.dataset.replyId)) {
         reply.classList.remove('d-none');
@@ -1783,12 +986,10 @@
           }
           count.textContent = data.like_count;
 
-          // IMPORTANT: Update data attribute
           const replyElement = btn.closest('.reply-item');
           if (replyElement) {
             replyElement.dataset.likeCount = data.like_count;
 
-            // If collapsed, refresh to show new top 2
             const section = replyElement.closest('.replies-section');
             if (section) {
               const toggleBtn = section.querySelector('.toggle-replies-btn');
@@ -1854,13 +1055,11 @@
               replyElement.remove();
               updateCommentCount(-1);
 
-              // Update toggle button visibility
               if (section) {
                 const remaining = section.querySelectorAll('.reply-item').length;
                 const toggleBtn = section.querySelector('.toggle-replies-btn');
                 if (toggleBtn && remaining <= 2) {
                   toggleBtn.classList.add('d-none');
-                  // Show all remaining
                   section.querySelectorAll('.reply-item').forEach(r => r.classList.remove('d-none'));
                 }
               }
@@ -1930,7 +1129,7 @@
          data-like-count="0">
       <div class="d-flex">
         <div class="comment-avatar me-3">
-          <div class="avatar-circle">${commentData.author.charAt(0).toUpperCase()}</div>
+          <img src="${commentData.author_gravatar}" alt="${commentData.author}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
         </div>
         <div class="flex-grow-1">
           <div class="comment-header">
@@ -1992,7 +1191,6 @@
 
     let repliesSection = parentComment.querySelector('.replies-section');
 
-    // If no section exists, create full structure
     if (!repliesSection) {
       const actionsDiv = parentComment.querySelector('.comment-actions');
       const sectionHTML = `
@@ -2025,7 +1223,6 @@
       actionsDiv.insertAdjacentHTML('afterend', sectionHTML);
       repliesSection = parentComment.querySelector('.replies-section');
 
-      // Bind new toggle button
       const toggleBtn = repliesSection.querySelector('.toggle-replies-btn');
       if (toggleBtn) {
         toggleBtn.addEventListener('click', function(e) {
@@ -2040,7 +1237,6 @@
         });
       }
 
-      // Bind sort events
       repliesSection.querySelectorAll('.reply-sort-option').forEach(btn => {
         btn.addEventListener('click', function() {
           const order = this.dataset.sort;
@@ -2088,7 +1284,7 @@
          data-like-count="${replyData.like_count || 0}">
       <div class="d-flex">
         <div class="reply-avatar me-2">
-          <div class="avatar-circle-small">${replyData.author.charAt(0).toUpperCase()}</div>
+          <img src="${replyData.author_gravatar}" alt="${replyData.author}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
         </div>
         <div class="flex-grow-1">
           <div class="reply-header">
@@ -2135,7 +1331,6 @@
 
     setTimeout(() => newReply.classList.remove('new-comment'), 1000);
 
-    // Show toggle button if we now have >2 replies
     const toggleBtn = repliesSection.querySelector('.toggle-replies-btn');
     const totalReplies = repliesList.querySelectorAll('.reply-item').length;
     if (toggleBtn && totalReplies > 2) {
@@ -2251,10 +1446,8 @@
               const newScore = parseInt(this.dataset.score);
 
               if (newScore === currentRating) {
-                  // If clicking the same star, remove the rating
                   deleteRating();
               } else {
-                  // Otherwise, submit the new rating
                   submitRating(newScore);
               }
           });

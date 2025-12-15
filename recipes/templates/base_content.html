@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% block body %}
   {% include 'partials/navbar.html' %}
-  {% include 'partials/messages.html' %}
-  {% block content %}
-  {% endblock %}
+  <div class="glass-background-wrapper">
+    {% include 'partials/messages.html' %}
+    {% block content %}
+    {% endblock %}
+  </div>
 {% endblock %}

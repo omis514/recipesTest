@@ -39,6 +39,11 @@ urlpatterns = [
     ),
     path("sign_up/", views.SignUpView.as_view(), name="sign_up"),
     path("users/", views.user_list, name="user_list"),
+    path(
+        "users/<int:user_id>/toggle-active/",
+        views.toggle_user_active_status,
+        name="toggle_user_active",
+    ),
     path("follow/<str:username>/", views.follow_user, name="follow_user"),
     path("unfollow/<str:username>/", views.unfollow_user, name="unfollow_user"),
     path(
@@ -58,6 +63,16 @@ urlpatterns = [
     ),
     path("recipe/create/", views.RecipeCreateView.as_view(), name="recipe_create"),
     path("recipes/<int:pk>/", views.recipe_detail_view, name="recipe_detail"),
+    path(
+        "recipes/<int:pk>/edit/",
+        views.recipe_list_view.RecipeUpdateView.as_view(),
+        name="edit_recipe",
+    ),
+    path(
+        "recipes/<int:pk>/delete/",
+        views.recipe_list_view.delete_recipe,
+        name="delete_recipe",
+    ),
     path("recipes/<int:pk>/report/", views.report_recipe, name="report_recipe"),
     path("recipes/", views.recipe_list_view.recipe_list, name="recipe_list"),
     path(
@@ -81,7 +96,11 @@ urlpatterns = [
     path(
         "api/users/mentions/", comment_view.get_user_mentions, name="get_user_mentions"
     ),
-    path("recipes/<int:pk>/favorite/", views.toggle_favorite, name="toggle_favorite"),
+    path(
+        "recipes/<int:pk>/favorite/",
+        views.recipe_list_view.toggle_favorite,
+        name="toggle_favorite",
+    ),
     path(
         "recipes/<int:recipe_pk>/rate/", rating_view.submit_rating, name="submit_rating"
     ),

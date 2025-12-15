@@ -23,6 +23,7 @@ class RecipeCreateViewTestCase(TestCase, LogInTester):
             "spiciness": Recipe.Spiciness.NOT_SPICY,
             "cuisine": Recipe.Cuisine.World,
             "vegetarian": True,
+            "visibility": Recipe.Visibility.PUBLIC,
             "time": "45",
             "ingredients-TOTAL_FORMS": "1",
             "ingredients-INITIAL_FORMS": "0",

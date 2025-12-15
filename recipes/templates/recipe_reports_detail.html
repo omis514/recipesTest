@@ -1,110 +1,182 @@
 {% extends 'base_content.html' %}
 
 {% block content %}
-  <div class="container" role="main">
-    <div class="row">
+  <div class="container mt-4">
+
+    <div class="row mb-4">
       <div class="col-12">
-        <h1>Reports for Recipe</h1>
+        <h1 class="text-white fw-bold">Recipe Report Details</h1>
         <p class="text-muted">
-          All reports submitted for this recipe
+          Reviewing reports submitted for this recipe
         </p>
       </div>
     </div>
 
-    {# Recipe Information Card #}
-    <div class="row mt-4">
+    <div class="row">
       <div class="col-12">
-        <div class="card mb-4">
-          <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">
-              <i class="bi bi-journal-text me-2"></i>{{ recipe.title }}
-            </h5>
+
+        <div class="card glass-card shadow-sm mb-4">
+          <div class="card-header glass-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0 text-white">
+              <i class="bi bi-journal-text me-2 text-info"></i>{{ recipe.title }}
+            </h4>
+            <div class="d-flex gap-2">
+              <a href="{% url 'recipe_detail' recipe.pk %}" class="btn btn-sm btn-outline-primary glass-btn-primary">
+                <i class="bi bi-eye me-2"></i>View Recipe
+              </a>
+              <form method="post" action="{% url 'delete_recipe' recipe.pk %}"
+                    onsubmit="return confirm('Are you sure you want to delete this recipe?');" style="display: inline;">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger glass-btn-danger">
+                  <i class="bi bi-trash-fill me-2"></i>Delete Recipe
+                </button>
+              </form>
+            </div>
           </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-md-6">
-                <p class="mb-2">
-                  <strong>Author:</strong>
-                  {{ recipe.author.get_full_name|default:recipe.author.username }}
-                  <small class="text-muted">({{ recipe.author.username }})</small>
-                </p>
-                <p class="mb-2">
-                  <strong>Created:</strong>
-                  {{ recipe.created_at|date:"d M Y" }}
-                </p>
+          <div class="card-body p-4">
+            <div class="row align-items-center">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <h6 class="text-muted text-uppercase small fw-bold mb-2">Author</h6>
+                <div class="d-flex align-items-center">
+                  <div
+                      class="avatar-placeholder me-3 rounded-circle bg-light bg-opacity-10 d-flex align-items-center justify-content-center"
+                      style="width: 40px; height: 40px;">
+                    <i class="bi bi-person-fill text-white"></i>
+                  </div>
+                  <div>
+                    <div
+                        class="text-white fw-bold">{{ recipe.author.get_full_name|default:recipe.author.username }}</div>
+                    <div class="text-muted small">{{ recipe.author.username }}</div>
+                  </div>
+                </div>
               </div>
-              <div class="col-md-6 text-end">
-                <a href="{% url 'recipe_detail' recipe.pk %}" class="btn btn-primary">
-                  <i class="bi bi-eye me-2"></i>View Recipe
-                </a>
+              <div class="col-md-6">
+                <h6 class="text-muted text-uppercase small fw-bold mb-2">Created On</h6>
+                <div class="text-white">
+                  <i class="bi bi-calendar3 me-2"></i>{{ recipe.created_at|date:"d M Y" }}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    {# Reports Table #}
-    <div class="row">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header bg-warning text-dark">
-            <h5 class="mb-0">
-              <i class="bi bi-flag me-2"></i>
-              Reports ({{ reports.count }})
-            </h5>
+        <div class="card glass-card shadow-sm">
+          <div class="card-header glass-header">
+            <h4 class="mb-0 text-white">
+              <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
+              Reports
+              {% if page_obj.paginator.count %}
+                <span class="badge glass-badge ms-2">{{ page_obj.paginator.count }}</span>
+              {% endif %}
+            </h4>
           </div>
-          <div class="card-body">
-            {% if reports %}
+          <div class="card-body p-4">
+            {% if page_obj %}
               <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                  <thead class="table-dark">
-                    <tr>
-                      <th scope="col">Reporter</th>
-                      <th scope="col">Report Summary</th>
-                      <th scope="col">Date Reported</th>
-                    </tr>
+                <table class="table glass-table align-middle">
+                  <thead>
+                  <tr>
+                    <th scope="col" style="width: 25%;">Reporter</th>
+                    <th scope="col" style="width: 55%;">Report Summary</th>
+                    <th scope="col" style="width: 20%;">Date Reported</th>
+                  </tr>
                   </thead>
                   <tbody>
-                    {% for report in reports %}
-                      <tr>
-                        <td>
-                          <strong>{{ report.reporter.get_full_name|default:report.reporter.username }}</strong>
-                          <br>
-                          <small class="text-muted">{{ report.reporter.username }}</small>
-                        </td>
-                        <td>
-                          <div style="max-width: 500px;">
-                            {{ report.summary|linebreaks }}
-                          </div>
-                        </td>
-                        <td>
-                          {{ report.created_at|date:"d M Y" }}<br>
-                          <small class="text-muted">{{ report.created_at|time:"g:i a"|lower }}</small>
-                        </td>
-                      </tr>
-                    {% endfor %}
+                  {% for report in page_obj %}
+                    <tr>
+                      <td>
+                        <div
+                            class="fw-bold text-white">{{ report.reporter.get_full_name|default:report.reporter.username }}</div>
+                        <div class="text-muted small">{{ report.reporter.username }}</div>
+                      </td>
+                      <td>
+                        <div
+                            class="text-white bg-dark bg-opacity-25 p-3 rounded-3 border border-light border-opacity-10">
+                          {{ report.summary|linebreaks }}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="text-white">{{ report.created_at|date:"d M Y" }}</div>
+                        <div class="text-muted small">{{ report.created_at|time:"g:i a"|lower }}</div>
+                      </td>
+                    </tr>
+                  {% endfor %}
                   </tbody>
                 </table>
               </div>
+
+              {% if page_obj.has_other_pages %}
+                <nav aria-label="Reports pagination">
+                  <ul class="pagination justify-content-center mt-4 glass-pagination">
+                    {% if page_obj.has_previous %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page=1">&laquo; First</a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Prev</a>
+                      </li>
+                    {% else %}
+                      <li class="page-item disabled">
+                        <span class="page-link">&laquo; First</span>
+                      </li>
+                      <li class="page-item disabled">
+                        <span class="page-link">Prev</span>
+                      </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                      <span class="page-link">
+                        {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                      </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                      </li>
+                    {% else %}
+                      <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                      </li>
+                      <li class="page-item disabled">
+                        <span class="page-link">Last &raquo;</span>
+                      </li>
+                    {% endif %}
+                  </ul>
+                </nav>
+              {% endif %}
+
             {% else %}
-              <p class="text-muted">No reports found for this recipe.</p>
+              <div class="text-center p-5 text-muted">
+                <i class="bi bi-check-circle display-1 mb-3 text-success"></i>
+                <p>No reports found for this recipe.</p>
+              </div>
             {% endif %}
           </div>
+
+          <div class="card-footer glass-footer border-top-0 p-4">
+            <div class="d-flex gap-2">
+              <a href="{% url 'reported_recipes_list' %}" class="btn text-white cancel-btn">
+                <i class="bi bi-arrow-left me-2"></i>Back to List
+              </a>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
-
-    <div class="row mt-3">
-      <div class="col-12">
-        <a href="{% url 'reported_recipes_list' %}" class="btn btn-outline-secondary">
-          <i class="bi bi-arrow-left me-2"></i>Back to Reported Recipes
-        </a>
-        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary ms-2">
-          <i class="bi bi-house me-2"></i>Dashboard
-        </a>
-      </div>
-    </div>
   </div>
-{% endblock %}
 
+  <style>
+    .glass-table tbody td {
+      vertical-align: top;
+    }
+
+    .glass-badge {
+      padding: 0.3em 0.8em;
+    }
+  </style>
+{% endblock %}

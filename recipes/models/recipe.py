@@ -20,34 +20,33 @@ class Recipe(models.Model):
         ULTRA_HOT = 5, "ULTRA Hot"
 
     class Cuisine(models.IntegerChoices):
-        World = 1, "World 🗺️"
-        BRITISH = 2, "British 🇬🇧"
-        FRENCH = 3, "French 🇫🇷"
-        ITALIAN = 4, "Italian 🇮🇹"
-        MEXICAN = 5, "Mexican 🇲🇽"
-        SPANISH = 6, "Spanish 🇪🇸"
-        Chinese = 7, "Chinese 🇨🇳"
-        Japanese = 8, "Japanese 🇯🇵"
-        Korean = 9, "Korean 🇰🇷"
-        Indian = 10, "Indian 🇮🇳"
-        Thai = 11, "Thai 🇹🇭"
-        Vietnamese = 12, "Vietnamese 🇻🇳"
-        Eastern_European = 13, "Eastern European 🍲"
-        African = 14, "African 🌍"
-        Carribbean = 15, "Carribbean 🍍"
-        American = 16, "American 🍔"
-        German = 17, "German 🇩🇪"
-        Greek = 18, "Greek 🇬🇷"
-        Middle_Eastern = 19, "Middle Eastern 🍛"
-        Turkish = 20, "Turkish 🇹🇷"
-        Caucasian = (
-            21,
-            "Caucasian 🏔️",
-        )
-        South_American = (
-            22,
-            "South American 💃",
-        )
+        World = 1, "World"
+        BRITISH = 2, "British"
+        FRENCH = 3, "French"
+        ITALIAN = 4, "Italian"
+        MEXICAN = 5, "Mexican"
+        SPANISH = 6, "Spanish"
+        Chinese = 7, "Chinese"
+        Japanese = 8, "Japanese"
+        Korean = 9, "Korean"
+        Indian = 10, "Indian"
+        Thai = 11, "Thai"
+        Vietnamese = 12, "Vietnamese"
+        Eastern_European = 13, "Eastern European"
+        African = 14, "African"
+        Carribbean = 15, "Carribbean"
+        American = 16, "American"
+        German = 17, "German"
+        Greek = 18, "Greek"
+        Middle_Eastern = 19, "Middle Eastern"
+        Turkish = 20, "Turkish"
+        Caucasian = 21, "Caucasian️"
+        South_American = 22, "South American",
+
+
+    class Visibility(models.IntegerChoices):
+        PUBLIC = 0, "Public"
+        PRIVATE = 1, "Private"
 
     servings = models.IntegerField(
         default=4,
@@ -60,6 +59,11 @@ class Recipe(models.Model):
     )
     title = models.CharField(max_length=100, blank=False)
     description = models.TextField(blank=True, help_text="A description of the recipe.")
+    visibility = models.IntegerField(
+        choices=Visibility.choices,
+        default=Visibility.PUBLIC,
+        help_text="Visibility of the recipe",
+    )
     difficulty = models.IntegerField(
         blank=False,
         choices=Difficulty.choices,

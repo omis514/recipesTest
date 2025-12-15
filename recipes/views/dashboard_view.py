@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.db.models import Count, Prefetch, F
+from django.db.models import Count, Prefetch, F, Q, Avg
 from django.db.models.functions import Abs
+from django.shortcuts import render
+
 from recipes.models import Recipe, Comment
 
 
@@ -27,31 +28,35 @@ def dashboard(request):
         to_attr="top_comment_list",
     )
 
-    # Get user's preferred spiceness
     preferred_spiceness = current_user.preferred_spiceness
 
-    # Get recipes sorted by proximity to user's preferred spiceness
-    # Calculate absolute difference between recipe spiciness and preferred spiceness
     feed_recipes = (
         Recipe.objects.select_related("author")
         .prefetch_related(
-            top_comment_prefetch, "comments"  # Also get all comments for counting
+            top_comment_prefetch,
+            "comments",  # for counting comments
+            "ratings",  # for consistency / potential template usage
+            "favorites",  # if template checks favorites/all
         )
         .annotate(
             total_comments=Count("comments", distinct=True),
             spiciness_diff=Abs(F("spiciness") - preferred_spiceness),
+            # --- ADD THESE TWO to match recipe_list ---
+            average_rating=Avg("ratings__rating"),
+            rating_count=Count("ratings", distinct=True),
         )
-        # Sort by spiciness proximity, then by newest
+        .filter(Q(visibility=Recipe.Visibility.PUBLIC) | Q(author=current_user))
         .order_by("spiciness_diff", "-created_at")[:6]
     )
 
-    # Process recipes to add top comment
+    # Add top_comment + is_favorited (to match recipe_list behaviour)
     for recipe in feed_recipes:
         recipe.top_comment = (
             recipe.top_comment_list[0]
-            if hasattr(recipe, "top_comment_list") and recipe.top_comment_list
+            if getattr(recipe, "top_comment_list", None)
             else None
         )
+        recipe.is_favorited = current_user in recipe.favorites.all()
 
     return render(
         request,

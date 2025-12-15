@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+
 from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -144,3 +145,6 @@ REDIRECT_URL_WHEN_LOGGED_IN = "dashboard"
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
+
+# Session settings
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

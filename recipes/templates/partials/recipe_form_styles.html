@@ -1,0 +1,303 @@
+<style>
+  /* Liquid Glass Background */
+  .glass-background-wrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    position: relative;
+    padding: 2rem 0;
+    overflow: hidden;
+  }
+
+  .glass-background-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+    background-size: 100% 100%;
+    filter: blur(60px);
+    z-index: 0;
+  }
+
+  .glass-background-wrapper>.container {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Glass Morphism Cards */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 16px !important;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.3s ease;
+  }
+
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-2px);
+  }
+
+  .glass-header {
+    background: rgba(102, 16, 242, 0.25) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 1.5rem !important;
+  }
+
+  .glass-subheader {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 1.25rem !important;
+  }
+
+  .card-body {
+    background: transparent !important;
+  }
+
+  /* Form Controls with Glass Effect */
+  .glass-input,
+  .form-control,
+  .form-select {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    transition: all 0.3s ease;
+  }
+
+  .form-control::placeholder,
+  .form-select::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow:
+      0 0 0 0.2rem rgba(255, 255, 255, 0.2),
+      inset 0 1px 2px rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    outline: none;
+  }
+
+  .form-control:focus::placeholder {
+    color: rgba(255, 255, 255, 0.3) !important;
+  }
+
+  textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  #id_instructions {
+    min-height: 200px;
+  }
+
+  /* Ingredient and Instruction Rows */
+  .ingredient-form-row,
+  .instruction-form-row {
+    background: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease;
+  }
+
+  .ingredient-form-row:hover,
+  .instruction-form-row:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Spiciness Buttons with Colors */
+  .spiciness-btn {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    border-width: 2px !important;
+    font-weight: 600;
+    opacity: 0.85;
+    border-radius: 0.75rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  .spiciness-btn:hover {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.1);
+  }
+
+  .spiciness-btn.active {
+    opacity: 1;
+    transform: scale(1.08);
+    box-shadow:
+      0 0 0 3px rgba(255, 255, 255, 0.5),
+      0 6px 20px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.15);
+  }
+
+  /* Cancel Button - Red/Danger */
+  .cancel-btn {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    opacity: 0.9;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+  }
+
+  .cancel-btn:hover {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.5);
+    background: linear-gradient(135deg, #e74c3c 0%, #dc3545 100%) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+  }
+
+  .cancel-btn:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 10px rgba(220, 53, 69, 0.4);
+  }
+
+  /* Create Recipe Button - Green/Success */
+  .create-btn {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    opacity: 0.9;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  }
+
+  .create-btn:hover {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5);
+    background: linear-gradient(135deg, #34ce57 0%, #28a745 100%) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+  }
+
+  .create-btn:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 10px rgba(40, 167, 69, 0.4);
+  }
+
+  .btn-outline-success,
+  .btn-outline-primary,
+  .btn-outline-danger {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+  }
+
+  .btn-outline-success:hover,
+  .btn-outline-primary:hover,
+  .btn-outline-danger:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
+  }
+
+  /* Text Colors */
+  .text-white {
+    color: #ffffff !important;
+  }
+
+  .text-muted {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .form-text {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  /* Invalid Feedback */
+  .invalid-feedback {
+    color: #ff6b6b !important;
+  }
+
+  .is-invalid {
+    border-color: rgba(255, 107, 107, 0.5) !important;
+  }
+
+  /* Alert */
+  .alert-danger {
+    background: rgba(255, 107, 107, 0.2) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 107, 107, 0.3) !important;
+    color: #ffffff !important;
+  }
+
+  /* Vegetarian Toggle Switch */
+  .vegetarian-toggle {
+    width: 3rem;
+    height: 1.5rem;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  }
+
+  .vegetarian-toggle:checked {
+    background-color: rgba(40, 167, 69, 0.6) !important;
+    border-color: rgba(40, 167, 69, 0.8) !important;
+  }
+
+  .vegetarian-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+  }
+
+  /* Form Check Label */
+  .form-check-label {
+    color: #ffffff !important;
+  }
+
+  /* Select Options */
+  .form-select option {
+    background: #1a1a2e;
+    color: #ffffff;
+  }
+
+  @media (max-width: 768px) {
+    .glass-background-wrapper {
+      padding: 1rem 0;
+    }
+
+    .card {
+      margin-bottom: 1rem;
+    }
+  }
+</style>

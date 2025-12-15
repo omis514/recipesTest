@@ -40,9 +40,15 @@ class SignUpFormTestCase(TestCase):
         self.assertTrue(isinstance(password_confirmation_widget, forms.PasswordInput))
 
     def test_form_uses_model_validation(self):
-        self.form_input["username"] = "badusername"
+        self.form_input["username"] = "badusername!"
         form = SignUpForm(data=self.form_input)
         self.assertFalse(form.is_valid())
+
+    def test_form_adds_at_symbol_to_username(self):
+        self.form_input["username"] = "janedoe"
+        form = SignUpForm(data=self.form_input)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["username"], "@janedoe")
 
     def test_password_must_contain_uppercase_character(self):
         self.form_input["new_password"] = "password123"

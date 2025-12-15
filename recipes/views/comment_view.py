@@ -110,6 +110,7 @@ def add_comment(request, recipe_pk):
                     comment.author.get_full_name()
                     or comment.author.username.lstrip("@")
                 ),
+                "author_gravatar": comment.author.mini_gravatar(),
                 "content": content,
                 "created_at": int(
                     comment.created_at.timestamp()

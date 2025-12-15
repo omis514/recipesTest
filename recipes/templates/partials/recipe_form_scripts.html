@@ -1,0 +1,379 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // INGREDIENTS FORMSET LOGIC
+    const ingredientFormsetPrefix = '{{ ingredient_formset.prefix }}';
+    const ingredientTotalFormsInput = document.getElementById('id_' + ingredientFormsetPrefix + '-TOTAL_FORMS');
+    const ingredientMaxFormsInput = document.getElementById('id_' + ingredientFormsetPrefix + '-MAX_NUM_FORMS');
+    const ingredientAddButton = document.getElementById('add-ingredient');
+    const ingredientContainer = document.getElementById('ingredient-forms');
+
+    // Show remove buttons for existing forms (except the first one if it's empty)
+    function updateIngredientRemoveButtons() {
+      const forms = ingredientContainer.querySelectorAll('.ingredient-form-row');
+      forms.forEach((form, index) => {
+        const removeBtn = form.querySelector('.remove-ingredient');
+        const deleteInput = form.querySelector('input[name$="-DELETE"]');
+
+        if (forms.length > 1) {
+          if (removeBtn) removeBtn.style.display = 'block';
+        } else {
+          if (removeBtn) removeBtn.style.display = 'none';
+        }
+
+        // Hide if marked for deletion
+        if (deleteInput && deleteInput.checked) {
+          form.style.display = 'none';
+        }
+      });
+    }
+
+    // Initialize remove buttons
+    updateIngredientRemoveButtons();
+
+    // Add new ingredient form
+    ingredientAddButton.addEventListener('click', function () {
+      const totalForms = parseInt(ingredientTotalFormsInput.value);
+      const maxForms = ingredientMaxFormsInput ? parseInt(ingredientMaxFormsInput.value) : 1000;
+
+      if (totalForms >= maxForms) {
+        alert('Maximum number of ingredients reached.');
+        return;
+      }
+
+      const newFormHtml = `
+  <div class="ingredient-form-row mb-3 p-3 border rounded" data-form-index="${totalForms}">
+    <div class="row g-2 align-items-end">
+      <div class="col-12">
+        <label class="form-label small fw-bold text-white">Name <span class="text-danger">*</span></label>
+        <input type="text" name="${ingredientFormsetPrefix}-${totalForms}-name" class="form-control form-control-sm glass-input" placeholder="Ingredient name" maxlength="100" required>
+      </div>
+      <div class="col-5">
+        <label class="form-label small fw-bold text-white">Quantity</label>
+        <input type="number" name="${ingredientFormsetPrefix}-${totalForms}-quantity" class="form-control form-control-sm glass-input" placeholder="Amount" min="0" step="0.01">
+      </div>
+      <div class="col-5">
+        <label class="form-label small fw-bold text-white">Unit</label>
+        <select name="${ingredientFormsetPrefix}-${totalForms}-unit" class="form-select form-select-sm glass-input">
+          <option value="">Select unit</option>
+          <option value="tsp">tsp</option>
+          <option value="tbsp">tbsp</option>
+          <option value="cup">cup</option>
+          <option value="cups">cups</option>
+          <option value="ml">ml</option>
+          <option value="l">l</option>
+          <option value="g">g</option>
+          <option value="kg">kg</option>
+          <option value="oz">oz</option>
+          <option value="lb">lb</option>
+          <option value="lbs">lbs</option>
+          <option value="piece">piece</option>
+          <option value="pieces">pieces</option>
+          <option value="pinch">pinch</option>
+          <option value="dash">dash</option>
+          <option value="clove">clove</option>
+        </select>
+      </div>
+      <div class="col-2 d-flex justify-content-end">
+        <div style="display: none;">
+          <input type="checkbox" name="${ingredientFormsetPrefix}-${totalForms}-DELETE" id="id_${ingredientFormsetPrefix}-${totalForms}-DELETE">
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-danger remove-ingredient">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+`;
+
+      ingredientContainer.insertAdjacentHTML('beforeend', newFormHtml);
+      ingredientTotalFormsInput.value = totalForms + 1;
+      updateIngredientRemoveButtons();
+    });
+
+    // Remove ingredient form
+    ingredientContainer.addEventListener('click', function (e) {
+      if (e.target.closest('.remove-ingredient')) {
+        const formRow = e.target.closest('.ingredient-form-row');
+        const deleteInput = formRow.querySelector('input[name$="-DELETE"]');
+
+        if (deleteInput) {
+          // Mark for deletion instead of removing immediately
+          deleteInput.checked = true;
+          formRow.style.display = 'none';
+        } else {
+          // For dynamically added forms, remove immediately
+          formRow.remove();
+          const currentTotal = parseInt(ingredientTotalFormsInput.value);
+          ingredientTotalFormsInput.value = currentTotal - 1;
+        }
+
+        updateIngredientRemoveButtons();
+      }
+    });
+
+
+    // INSTRUCTIONS FORMSET LOGIC
+    const instructionFormsetPrefix = '{{ instruction_formset.prefix }}';
+    const instructionTotalFormsInput = document.getElementById('id_' + instructionFormsetPrefix + '-TOTAL_FORMS');
+    const instructionMaxFormsInput = document.getElementById('id_' + instructionFormsetPrefix + '-MAX_NUM_FORMS');
+    const instructionAddButton = document.getElementById('add-instruction');
+    const instructionContainer = document.getElementById('instruction-forms');
+
+    function renumberInstructionSteps() {
+      const forms = instructionContainer.querySelectorAll('.instruction-form-row');
+      let currentStep = 0;
+      forms.forEach((form) => {
+        const deleteInput = form.querySelector('input[name$="-DELETE"]');
+        // Skip rows that are marked for deletion
+        if (deleteInput && deleteInput.checked) {
+          return;
+        }
+
+        currentStep += 1;
+        const displayNumber = form.querySelector('.instruction-step-number');
+        const stepInput = form.querySelector('.instruction-step-input');
+        if (displayNumber) {
+          displayNumber.textContent = currentStep;
+        }
+        if (stepInput) {
+          stepInput.value = currentStep;
+        }
+      });
+    }
+
+    function updateInstructionRemoveButtons() {
+      const forms = instructionContainer.querySelectorAll('.instruction-form-row');
+      forms.forEach((form) => {
+        const removeBtn = form.querySelector('.remove-instruction');
+        const deleteInput = form.querySelector('input[name$="-DELETE"]');
+
+        if (forms.length > 1) {
+          if (removeBtn) removeBtn.style.display = 'block';
+        } else {
+          if (removeBtn) removeBtn.style.display = 'none';
+        }
+
+        if (deleteInput && deleteInput.checked) {
+          form.style.display = 'none';
+        }
+      });
+    }
+
+    // Initialize existing instruction rows
+    renumberInstructionSteps();
+    updateInstructionRemoveButtons();
+
+    instructionAddButton.addEventListener('click', function () {
+      const totalForms = parseInt(instructionTotalFormsInput.value);
+      const maxForms = instructionMaxFormsInput ? parseInt(instructionMaxFormsInput.value) : 1000;
+
+      if (totalForms >= maxForms) {
+        alert('Maximum number of instructions reached.');
+        return;
+      }
+
+      const activeForms = Array.from(
+        instructionContainer.querySelectorAll('.instruction-form-row')
+      ).filter((form) => {
+        const deleteInput = form.querySelector('input[name$="-DELETE"]');
+        return !(deleteInput && deleteInput.checked);
+      }).length;
+      const nextStepNumber = activeForms + 1;
+
+      const newFormHtml = `
+  <div class="instruction-form-row mb-3 p-3 border rounded" data-form-index="${totalForms}">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="fw-bold text-white">
+        Step <span class="instruction-step-number">${nextStepNumber}</span>
+      </div>
+      <div>
+        <div style="display: none;">
+          <input type="checkbox" name="${instructionFormsetPrefix}-${totalForms}-DELETE" id="id_${instructionFormsetPrefix}-${totalForms}-DELETE">
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-danger remove-instruction">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+    <div class="mb-2">
+      <input type="hidden" name="${instructionFormsetPrefix}-${totalForms}-step" class="instruction-step-input" value="${nextStepNumber}">
+    </div>
+    <div class="mb-2">
+      <label class="form-label small fw-bold text-white">Description <span class="text-danger">*</span></label>
+      <textarea name="${instructionFormsetPrefix}-${totalForms}-description" rows="3" class="form-control instruction-description-input glass-input" placeholder="Describe this step..." required></textarea>
+    </div>
+    <div class="mb-2">
+      <label class="form-label small fw-bold text-white">Step Image (optional)</label>
+      <input type="file" name="${instructionFormsetPrefix}-${totalForms}-image" class="form-control form-control-sm glass-input" accept="image/*">
+    </div>
+  </div>
+  `;
+
+      instructionContainer.insertAdjacentHTML('beforeend', newFormHtml);
+      instructionTotalFormsInput.value = totalForms + 1;
+      renumberInstructionSteps();
+      updateInstructionRemoveButtons();
+    });
+
+    instructionContainer.addEventListener('click', function (e) {
+      if (e.target.closest('.remove-instruction')) {
+        const formRow = e.target.closest('.instruction-form-row');
+        const deleteInput = formRow.querySelector('input[name$="-DELETE"]');
+
+        if (deleteInput) {
+          deleteInput.checked = true;
+          formRow.style.display = 'none';
+        } else {
+          formRow.remove();
+          const currentTotal = parseInt(instructionTotalFormsInput.value);
+          instructionTotalFormsInput.value = currentTotal - 1;
+        }
+
+        renumberInstructionSteps();
+        updateInstructionRemoveButtons();
+      }
+    });
+
+    // Before submit, validate and aggregate instruction descriptions into the hidden instructions field
+    const formElement = document.querySelector('form');
+    if (formElement) {
+      formElement.addEventListener('submit', function (e) {
+        // Check if all fields are blank
+        const titleInput = document.getElementById('id_title');
+        const titleValue = titleInput ? titleInput.value.trim() : '';
+
+        // Check ingredients
+        const ingredientRows = ingredientContainer.querySelectorAll('.ingredient-form-row');
+        let hasValidIngredient = false;
+        ingredientRows.forEach((row) => {
+          const deleteInput = row.querySelector('input[name$="-DELETE"]');
+          if (deleteInput && deleteInput.checked) {
+            return;
+          }
+          const nameInput = row.querySelector('input[name$="-name"]');
+          if (nameInput && nameInput.value.trim()) {
+            hasValidIngredient = true;
+          }
+        });
+
+        // Check instructions
+        const instructionRows = instructionContainer.querySelectorAll('.instruction-form-row');
+        const steps = [];
+        let hasEmptyInstruction = false;
+
+        instructionRows.forEach((row) => {
+          const deleteInput = row.querySelector('input[name$="-DELETE"]');
+          if (deleteInput && deleteInput.checked) {
+            return;
+          }
+          const descriptionInput = row.querySelector('.instruction-description-input');
+          if (descriptionInput) {
+            const text = descriptionInput.value.trim();
+            if (text) {
+              steps.push(text);
+            } else {
+              hasEmptyInstruction = true;
+            }
+          }
+        });
+
+        // Check if all fields are blank
+        if (!titleValue && !hasValidIngredient && steps.length === 0) {
+          e.preventDefault();
+          alert('Please fill in at least the recipe title, one ingredient, and one instruction before submitting.');
+          return false;
+        }
+
+        // Check if title is blank
+        if (!titleValue) {
+          e.preventDefault();
+          alert('Please provide a recipe title.');
+          return false;
+        }
+
+        // Check if there are no ingredients at all
+        if (!hasValidIngredient) {
+          e.preventDefault();
+          alert('Please provide at least one ingredient with a name.');
+          return false;
+        }
+
+        // Check if there are no instructions at all
+        if (steps.length === 0) {
+          e.preventDefault();
+          alert('Please provide at least one instruction step with a description.');
+          return false;
+        }
+
+        // Check if any instruction is empty
+        if (hasEmptyInstruction) {
+          e.preventDefault();
+          alert('Please fill in all instruction descriptions. Empty instruction steps are not allowed.');
+          return false;
+        }
+
+        // Aggregate instruction descriptions into the hidden instructions field
+        const instructionsField = document.getElementById('id_instructions');
+        if (instructionsField) {
+          const combinedText = steps.map((text, index) => `${index + 1}. ${text}`).join('\\n');
+          instructionsField.value = combinedText;
+        }
+      });
+    }
+
+    // RECIPE SPICINESS BUTTONS LOGIC
+    const spicinessContainer = document.querySelector('.spiciness-buttons');
+    if (spicinessContainer) {
+      const spicinessInput = document.getElementById('id_spiciness');
+
+      spicinessContainer.addEventListener('click', function (e) {
+        if (e.target.closest('.spiciness-btn')) {
+          const btn = e.target.closest('.spiciness-btn');
+          const level = btn.getAttribute('data-level');
+
+          // Update hidden input
+          if (spicinessInput) {
+            spicinessInput.value = level;
+          }
+
+          // Remove active state from all buttons
+          spicinessContainer.querySelectorAll('.spiciness-btn').forEach(function (b) {
+            b.classList.remove('active');
+            b.style.opacity = '0.6';
+            b.style.boxShadow = '';
+          });
+
+          // Add active state to clicked button
+          btn.classList.add('active');
+          btn.style.opacity = '1';
+          btn.style.boxShadow = '0 0 0 0.2rem rgba(0, 123, 255, 0.25)';
+        }
+      });
+
+      // Set initial active state for existing spiciness value
+      if (spicinessInput && spicinessInput.value) {
+        const level = spicinessInput.value;
+        const btn = spicinessContainer.querySelector(`.spiciness-btn[data-level="${level}"]`);
+        if (btn) {
+          btn.classList.add('active');
+          btn.style.opacity = '1';
+          btn.style.boxShadow = '0 0 0 0.2rem rgba(0, 123, 255, 0.25)';
+        }
+      }
+    }
+
+    // VEGETARIAN TOGGLE SWITCH LOGIC
+    const vegetarianToggle = document.getElementById('id_vegetarian');
+    const vegetarianLabel = document.getElementById('vegetarian-label');
+
+    if (vegetarianToggle && vegetarianLabel) {
+      // Set initial label text based on checkbox state
+      vegetarianLabel.textContent = vegetarianToggle.checked ? 'Yes' : 'No';
+
+      vegetarianToggle.addEventListener('change', function () {
+        const isChecked = this.checked;
+        vegetarianLabel.textContent = isChecked ? 'Yes' : 'No';
+      });
+    }
+  });
+</script>

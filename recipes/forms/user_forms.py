@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
+
 from recipes.models import User
 
 
@@ -180,6 +181,23 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
 
         model = User
         fields = ["first_name", "last_name", "username", "email"]
+
+    remember_me = forms.BooleanField(label="Remember me", required=False)
+
+    def clean_username(self):
+        """
+        Ensure the username starts with '@' symbol.
+
+        If the username doesn't start with '@', it will be automatically
+        prepended to maintain the required format.
+
+        Returns:
+            str: The cleaned username with '@' prefix.
+        """
+        username = self.cleaned_data.get("username")
+        if username and not username.startswith("@"):
+            username = "@" + username
+        return username
 
     def save(self):
         """

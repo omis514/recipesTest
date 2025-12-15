@@ -282,8 +282,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
 }
 
 .glass-alert-scaling {
@@ -298,8 +305,15 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .quick-scale-buttons {
@@ -522,18 +536,18 @@
   align-items: center;
 }
 
-.comment-input-container .input-group > .glass-btn-primary {
+.comment-input-container .input-group>.glass-btn-primary {
   border-radius: 999px !important;
   margin-left: 6px;
 }
 
-.comment-input-container .input-group > .form-control {
+.comment-input-container .input-group>.form-control {
   flex: 1 1 auto;
   margin-right: 1.5rem;
   max-width: calc(100% - 110px);
 }
 
-.comment-input-container .input-group > .glass-btn-primary {
+.comment-input-container .input-group>.glass-btn-primary {
   margin-left: auto;
 }
 
@@ -562,6 +576,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -578,6 +593,7 @@
   0% {
     background: rgba(255, 243, 205, 0.25) !important;
   }
+
   100% {
     background: rgba(255, 255, 255, 0.06) !important;
   }
@@ -746,8 +762,113 @@
   color: #ffffff !important;
 }
 
-/*Responsive Styles*/
+.alert {
+  background: rgba(40, 167, 69, 0.2) !important;
+  backdrop-filter: blur(15px) !important;
+  -webkit-backdrop-filter: blur(15px) !important;
+  border: 2px solid rgba(40, 167, 69, 0.4) !important;
+  border-radius: 12px !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  margin-bottom: 1.5rem !important;
+  padding: 1rem 1.5rem !important;
+}
 
+.alert-success {
+  background: rgba(40, 167, 69, 0.2) !important;
+  border-color: rgba(40, 167, 69, 0.4) !important;
+  color: #ffffff !important;
+}
+
+.alert-info {
+  background: rgba(70, 130, 180, 0.2) !important;
+  border-color: rgba(70, 130, 180, 0.4) !important;
+  color: #ffffff !important;
+}
+
+.alert-warning {
+  background: rgba(255, 193, 7, 0.2) !important;
+  border-color: rgba(255, 193, 7, 0.4) !important;
+  color: #ffffff !important;
+}
+
+.alert-danger {
+  background: rgba(220, 53, 69, 0.2) !important;
+  border-color: rgba(220, 53, 69, 0.4) !important;
+  color: #ffffff !important;
+}
+
+.alert .btn-close {
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+}
+
+.alert .btn-close:hover {
+  opacity: 1;
+}
+
+/* Pagination Styles */
+.glass-pagination {
+  gap: 0.5rem;
+}
+
+.glass-page-link {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.glass-page-link:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+.glass-page-link.active {
+  background: rgba(70, 130, 180, 0.6) !important;
+  border-color: rgba(70, 130, 180, 0.8) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(70, 130, 180, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  font-weight: 600;
+}
+
+.glass-page-link:focus {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  outline: none;
+}
+
+.page-item.disabled .glass-page-link {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.page-item.disabled .glass-page-link:hover {
+  transform: none;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/*Responsive Styles*/
 @media (max-width: 768px) {
   .glass-background-wrapper {
     padding: 1rem 0;

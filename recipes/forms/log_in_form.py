@@ -18,6 +18,22 @@ class LogInForm(forms.Form):
 
     username = forms.CharField(label="Username")
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
+    remember_me = forms.BooleanField(label="Remember me", required=False)
+
+    def clean_username(self):
+        """
+        Ensure the username starts with '@' symbol.
+
+        If the username doesn't start with '@', it will be automatically
+        prepended to maintain the required format.
+
+        Returns:
+            str: The cleaned username with '@' prefix.
+        """
+        username = self.cleaned_data.get("username")
+        if username and not username.startswith("@"):
+            username = "@" + username
+        return username
 
     def get_user(self):
         """

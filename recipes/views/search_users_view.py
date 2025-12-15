@@ -3,15 +3,26 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Q
 from recipes.models import User, Follow
 
 
 @login_required
 def search_users(request):
-    """Display all users in a paginated table (50 per page)."""
+    """Display all users in a paginated table (25 per page) with search."""
 
-    # Get all users
-    users = User.objects.all()
+    # Get the search term from the query string
+    search_term = request.GET.get("search", "").strip()
+
+    # Get all users except the current user, filtering by search term if provided
+    users = User.objects.exclude(id=request.user.id)
+
+    if search_term:
+        users = users.filter(
+            Q(username__icontains=search_term)
+            | Q(first_name__icontains=search_term)
+            | Q(last_name__icontains=search_term)
+        )
 
     # Pagination — 25 users per page
     paginator = Paginator(users, 25)
@@ -36,6 +47,7 @@ def search_users(request):
     # Send paginated users to template
     context = {
         "page_obj": page_obj,
+        "search_term": search_term,
     }
 
     return render(request, "search_users.html", context)

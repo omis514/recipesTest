@@ -1,0 +1,172 @@
+{% load static %}
+
+<div class="recipe-card glass-card">
+
+  <div class="recipe-clickable"
+       onclick="window.location.href='{% url 'recipe_detail' recipe.pk %}'">
+
+    <div class="recipe-image-wrapper">
+
+      {% if recipe.image %}
+        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-image">
+
+        {% else %}
+            <div class="recipe-placeholder">
+              <i class="bi bi-image display-1 text-white" style="opacity:0.3;"></i>
+            </div>
+
+      {% endif %}
+
+      {# ---- Left Badges ---- #}
+      <div class="placeholder-badges-left">
+
+        {% if recipe.visibility == 1 %}
+          <span class="visibility-badge badge-private">
+            <i class="bi bi-lock-fill"></i> Private
+          </span>
+        {% endif %}
+
+        <span class="spiciness-badge"
+          style="
+            {% if recipe.spiciness == 0 %}background:#b3d77f;color:#000;
+            {% elif recipe.spiciness == 1 %}background:#88b54a;color:#fff;
+            {% elif recipe.spiciness == 2 %}background:#ffeaa7;color:#545252;
+            {% elif recipe.spiciness == 3 %}background:#ff7675;color:#2b2c2c;
+            {% elif recipe.spiciness == 4 %}background:#b21b1b;color:#fff;
+            {% elif recipe.spiciness == 5 %}background:#000;color:#fff;
+            {% endif %}">
+          {{ recipe.get_spiciness_display }}
+        </span>
+
+        <span class="difficulty-badge
+          {% if recipe.difficulty == 1 %}badge-easy
+          {% elif recipe.difficulty == 2 %}badge-medium
+          {% else %}badge-hard{% endif %}">
+          {{ recipe.get_difficulty_display }}
+        </span>
+      </div>
+
+      <div class="placeholder-badges-right">
+        {% if recipe.vegetarian %}
+          <span class="vegetarian-badge">🌱 Vegetarian</span>
+        {% endif %}
+        <span class="time-badge">
+          <i class="bi bi-clock"></i> {{ recipe.get_time }}
+        </span>
+        <span class="cuisine-badge">
+          {{ recipe.get_cuisine_display }}
+        </span>
+      </div>
+
+      {% if user.is_authenticated %}
+        <div class="favorite-badge-wrapper">
+          <form action="{% url 'toggle_favorite' recipe.pk %}"
+                method="post"
+                onsubmit="event.stopPropagation();"
+                style="position: absolute; bottom: -10px; right: -10px; z-index: 20;">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit"
+                    class="favorite-btn {% if user in recipe.favorites.all %}favorited{% endif %}"
+                    onclick="event.stopPropagation();"
+                    title="{% if user in recipe.favorites.all %}Unfavorite{% else %}Favorite{% endif %}">
+              <i class="bi bi-heart{% if user in recipe.favorites.all %}-fill{% endif %}"></i>
+            </button>
+          </form>
+        </div>
+      {% endif %}
+
+    </div>
+
+    <div class="recipe-content">
+
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="recipe-title mb-0">{{ recipe.title }}</h5>
+
+        {# Rating Display #}
+        <div class="flex-shrink-0 ms-2">
+          <span class="recipe-rating-badge {% if not recipe.rating_count %}no-rating{% endif %}"
+                data-average-rating="{{ recipe.average_rating|default:0 }}"
+                data-rating-count="{{ recipe.rating_count|default:0 }}"
+                title="{% if recipe.rating_count %}{{ recipe.rating_count }} ratings{% else %}No ratings yet{% endif %}">
+            <span class="recipe-stars"></span>
+            <span class="rating-count">
+              {% if recipe.rating_count %}({{ recipe.rating_count }}){% else %}(0){% endif %}
+            </span>
+          </span>
+        </div>
+
+      </div>
+
+      {% if recipe.description %}
+        <p class="recipe-description">{{ recipe.description|truncatewords:15 }}</p>
+      {% else %}
+        <p class="recipe-description text-white fst-italic" style="opacity:0.5;">
+          No description available
+        </p>
+      {% endif %}
+
+      <div class="recipe-meta">
+        <div class="d-flex justify-content-between align-items-center">
+          <small class="text-white d-flex align-items-center" style="opacity:0.8;">
+            <img src="{{ recipe.author.mini_gravatar }}"
+                 alt="{{ recipe.author.username }}"
+                 class="author-avatar me-2"
+                 style="width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.3);">
+            {{ recipe.author.get_full_name|default:recipe.author.username }}
+          </small>
+          <small class="text-white" style="opacity:0.8;">
+            {{ recipe.created_at|date:"d M Y" }}
+          </small>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="recipe-comments">
+    <div class="comment-stats">
+      <span class="stats-item">
+        <i class="bi bi-chat-dots"></i>
+        <strong>{{ recipe.total_comments }}</strong>
+        comment{{ recipe.total_comments|pluralize }}
+      </span>
+      <span class="stats-item">
+        <i class="bi bi-bar-chart"></i>
+        <strong>{{ recipe.ingredients.count }}</strong> ingredients
+      </span>
+      <span class="stats-item">
+        <i class="bi bi-list-ol"></i>
+        <strong>{{ recipe.instructions.count }}</strong> steps
+      </span>
+    </div>
+
+    {% if recipe.top_comment %}
+      <div class="top-comment">
+        <div class="comment-header">
+          <span class="comment-badge">
+            <i class="bi bi-star-fill text-warning"></i> Top Comment
+          </span>
+          <span class="comment-likes">
+            <i class="bi bi-heart-fill text-danger"></i>
+            {{ recipe.top_comment.like_count }}
+          </span>
+        </div>
+        <div class="comment-content">
+          <strong class="comment-author">
+            {{ recipe.top_comment.author.username }}:
+          </strong>
+          <span class="comment-text">
+            {{ recipe.top_comment.get_display_content }}
+          </span>
+        </div>
+      </div>
+    {% else %}
+      <div class="no-comments">
+        <i class="bi bi-chat"></i>
+        <span>Be the first to comment!</span>
+      </div>
+    {% endif %}
+  </div>
+
+</div>

@@ -1,0 +1,402 @@
+{% load widget_tweaks %}
+{# Shared recipe form partial - used by both create and edit templates #}
+{# Required context variables: #}
+{#   - form: the recipe form #}
+{#   - ingredient_formset: formset for ingredients #}
+{#   - instruction_formset: formset for instructions #}
+{#   - form_action: URL for form submission #}
+{#   - cancel_url: URL for cancel button #}
+{#   - submit_text: text for submit button #}
+{#   - is_edit: boolean, true if editing existing recipe #}
+{#   - object: the recipe object (only needed for edit mode) #}
+
+<form action="{{ form_action }}" method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  <div class="row mb-4">
+    <!-- Basic Information Card -->
+    <div class="col-md-6 mb-3 mb-md-0">
+      <div class="card h-100 glass-card shadow-sm">
+        <div class="card-header glass-subheader">
+          <h5 class="mb-0 text-white">
+            <i class="bi bi-info-circle me-2"></i>Basic Information
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <!-- Title Field -->
+            <label for="{{ form.title.id_for_label }}" class="form-label fw-bold text-white">
+              Recipe Title <span class="text-danger">*</span>
+            </label>
+            {% if form.title.errors %}
+            {% render_field form.title class="form-control is-invalid" %}
+            <div class="invalid-feedback">
+              {{ form.title.errors }}
+            </div>
+            {% else %}
+            {% render_field form.title class="form-control" %}
+            {% endif %}
+            {% if form.title.help_text %}
+            <small class="form-text text-muted">{{ form.title.help_text }}</small>
+            {% endif %}
+          </div>
+          <!-- Description Field -->
+          <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold text-white">
+              Description
+            </label>
+            {% if form.description.errors %}
+            {% render_field form.description class="form-control is-invalid" %}
+            <div class="invalid-feedback">
+              {{ form.description.errors }}
+            </div>
+            {% else %}
+            {% render_field form.description class="form-control" %}
+            {% endif %}
+            {% if form.description.help_text %}
+            <small class="form-text text-muted">{{ form.description.help_text }}</small>
+            {% endif %}
+          </div>
+          <!-- Difficulty Field -->
+          <div class="mb-3">
+            <label for="{{ form.difficulty.id_for_label }}" class="form-label fw-bold text-white">
+              Difficulty Level <span class="text-danger">*</span>
+            </label>
+            {% if form.difficulty.errors %}
+            {% render_field form.difficulty class="form-select is-invalid" %}
+            <div class="invalid-feedback">
+              {{ form.difficulty.errors }}
+            </div>
+            {% else %}
+            {% render_field form.difficulty class="form-select" %}
+            {% endif %}
+            {% if form.difficulty.help_text %}
+            <small class="form-text text-muted">{{ form.difficulty.help_text }}</small>
+            {% endif %}
+          </div>
+          <!-- Time Field -->
+          <div class="mb-3">
+            <label for="{{ form.time.id_for_label }}" class="form-label fw-bold text-white">
+              Time (minutes) <span class="text-danger">*</span>
+            </label>
+            {% if form.time.errors %}
+            {% render_field form.time class="form-control is-invalid" %}
+            <div class="invalid-feedback">
+              {{ form.time.errors }}
+            </div>
+            {% else %}
+            {% render_field form.time class="form-control" type="number" min="1" %}
+            {% endif %}
+            {% if form.time.help_text %}
+            <small class="form-text text-muted">{{ form.time.help_text }}</small>
+            {% endif %}
+          </div>
+          <!-- Spiciness Field -->
+          <div class="mb-3">
+            <label class="form-label fw-bold text-white">
+              Spiciness Level <span class="text-danger">*</span>
+            </label>
+            <div class="spiciness-buttons d-flex gap-2 flex-wrap">
+              <input type="hidden" name="spiciness" id="id_spiciness" class="spiciness-input"
+                value="{% if form.spiciness.value %}{{ form.spiciness.value }}{% endif %}">
+              <button type="button" class="btn btn-sm spiciness-btn" data-level="0"
+                style="background-color: #b3d77f; border-color: #d7eaaf; color: #000000;">
+                Not Spicy
+              </button>
+              <button type="button" class="btn btn-sm spiciness-btn" data-level="1"
+                style="background-color: #88b54a; border-color: #bee2c0; color: #ffffff;">
+                Mild
+              </button>
+              <button type="button" class="btn btn-sm spiciness-btn" data-level="2"
+                style="background-color: #ffeaa7; border-color: #fdcb6e; color: #545252;">
+                Medium
+              </button>
+              <button type="button" class="btn btn-sm spiciness-btn" data-level="3"
+                style="background-color: #ff7675; border-color: #e17055; color: #2b2c2c;">
+                Hot
+              </button>
+              <button type="button" class="btn btn-sm spiciness-btn" data-level="4"
+                style="background-color: #b21b1b; border-color: #7b1111; color: #fff;">
+                Very Hot
+              </button>
+              <button type="button" class="btn btn-sm spiciness-btn" data-level="5"
+                style="background-color: #000000; border-color: #c41a1a; color: #fff;">
+                ULTRA Hot
+              </button>
+            </div>
+            {% if form.spiciness.errors %}
+            <div class="invalid-feedback d-block">
+              {{ form.spiciness.errors }}
+            </div>
+            {% endif %}
+          </div>
+          <!-- Vegetarian Field -->
+          <div class="mb-3">
+            <label class="form-label fw-bold text-white">
+              Vegetarian
+            </label>
+            <div class="d-flex align-items-center mt-2">
+              <div class="form-check form-switch">
+                {% if form.vegetarian.errors %}
+                {% render_field form.vegetarian class="form-check-input vegetarian-toggle" id="id_vegetarian" %}
+                <div class="invalid-feedback d-block">
+                  {{ form.vegetarian.errors }}
+                </div>
+                {% else %}
+                {% render_field form.vegetarian class="form-check-input vegetarian-toggle" id="id_vegetarian" %}
+                {% endif %}
+                <label class="form-check-label ms-2" for="id_vegetarian">
+                  <span id="vegetarian-label">{% if form.vegetarian.value %}Yes{% else %}No{% endif %}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          {% if is_edit %}
+          <!-- Visibility Field -->
+          <div class="mb-3">
+            <label for="{{ form.visibility.id_for_label }}" class="form-label fw-bold text-white">
+              Visibility <span class="text-danger">*</span>
+            </label>
+            {% if form.visibility.errors %}
+            {% render_field form.visibility class="form-select is-invalid" %}
+            <div class="invalid-feedback">
+              {{ form.visibility.errors }}
+            </div>
+            {% else %}
+            {% render_field form.visibility class="form-select" %}
+            {% endif %}
+            {% if form.visibility.help_text %}
+            <small class="form-text text-muted">{{ form.visibility.help_text }}</small>
+            {% endif %}
+          </div>
+          {% else %}
+          <input type="hidden" name="visibility" value="0">
+          {% endif %}
+          <!-- Cuisine Field -->
+          <div class="mb-3">
+            <label class="form-label fw-bold text-white">
+              Cuisine <span class="text-danger">*</span>
+            </label>
+            {% if form.cuisine.errors %}
+            {% render_field form.cuisine class="form-select is-invalid" %}
+            <div class="invalid-feedback">
+              {{ form.cuisine.errors }}
+            </div>
+            {% else %}
+            {% render_field form.cuisine class="form-select" %}
+            {% endif %}
+            {% if form.cuisine.help_text %}
+            <small class="form-text text-muted">{{ form.cuisine.help_text }}</small>
+            {% endif %}
+          </div>
+          <!-- Image Field -->
+          <div class="mb-3">
+            <label for="{{ form.image.id_for_label }}" class="form-label fw-bold text-white">
+              Recipe Image
+            </label>
+            {% if is_edit and object.image %}
+            <div class="mb-2">
+              <img src="{{ object.image.url }}" alt="Current recipe image" class="img-thumbnail"
+                style="max-height: 150px;">
+              <small class="form-text text-muted d-block">Current image. Upload a new one to replace it.</small>
+            </div>
+            {% endif %}
+            {% if form.image.errors %}
+            {% render_field form.image class="form-control is-invalid" %}
+            <div class="invalid-feedback">
+              {{ form.image.errors }}
+            </div>
+            {% else %}
+            {% render_field form.image class="form-control" accept="image/*" %}
+            {% endif %}
+            {% if form.image.help_text %}
+            <small class="form-text text-muted">{{ form.image.help_text }}</small>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Ingredients Card -->
+    <div class="col-md-6">
+      <div class="card h-100 glass-card shadow-sm">
+        <div class="card-header glass-subheader">
+          <h5 class="mb-0 text-white">
+            <i class="bi bi-list-ul me-2"></i>Ingredients <span class="text-danger">*</span>
+          </h5>
+        </div>
+        <div class="card-body">
+          {{ ingredient_formset.management_form }}
+          <div id="ingredient-forms">
+            {% for ingredient_form in ingredient_formset %}
+            <div class="ingredient-form-row mb-3 p-3 border rounded" data-form-index="{{ forloop.counter0 }}">
+              <div class="row g-2 align-items-end">
+                <div class="col-12">
+                  <label class="form-label small fw-bold text-white">Name <span class="text-danger">*</span></label>
+                  {% if ingredient_form.name.errors %}
+                  {% render_field ingredient_form.name class="form-control form-control-sm is-invalid" %}
+                  <div class="invalid-feedback small">
+                    {{ ingredient_form.name.errors }}
+                  </div>
+                  {% else %}
+                  {% render_field ingredient_form.name class="form-control form-control-sm" %}
+                  {% endif %}
+                </div>
+                <div class="col-5">
+                  <label class="form-label small fw-bold text-white">Quantity</label>
+                  {% if ingredient_form.quantity.errors %}
+                  {% render_field ingredient_form.quantity class="form-control form-control-sm is-invalid" %}
+                  <div class="invalid-feedback small">
+                    {{ ingredient_form.quantity.errors }}
+                  </div>
+                  {% else %}
+                  {% render_field ingredient_form.quantity class="form-control form-control-sm" %}
+                  {% endif %}
+                </div>
+                <div class="col-5">
+                  <label class="form-label small fw-bold text-white">Unit</label>
+                  {% if ingredient_form.unit.errors %}
+                  {% render_field ingredient_form.unit class="form-select form-select-sm is-invalid" %}
+                  <div class="invalid-feedback small">
+                    {{ ingredient_form.unit.errors }}
+                  </div>
+                  {% else %}
+                  {% render_field ingredient_form.unit class="form-select form-select-sm" %}
+                  {% endif %}
+                </div>
+                <div class="col-2 d-flex justify-content-end">
+                  {% if ingredient_form.DELETE %}
+                  <div style="display: none;">
+                    {{ ingredient_form.DELETE }}
+                  </div>
+                  {% endif %}
+                  {% if ingredient_form.id %}
+                  {{ ingredient_form.id }}
+                  {% endif %}
+                  <button type="button" class="btn btn-sm btn-outline-danger remove-ingredient"
+                    style="display: none; border-radius: 0.33rem;">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-success mt-2" id="add-ingredient"
+            style="border-radius: 1rem;">
+            <i class="bi bi-plus-circle me-1"></i>Add Ingredient
+          </button>
+          {% if ingredient_formset.non_form_errors %}
+          <div class="alert alert-danger mt-2 small">
+            {{ ingredient_formset.non_form_errors }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Instructions Card -->
+  <div class="card shadow-sm mb-4 glass-card">
+    <div class="card-header glass-subheader">
+      <h5 class="mb-0 text-white">
+        <i class="bi bi-list-ol me-2"></i>Instructions
+      </h5>
+    </div>
+    <div class="card-body">
+      <!-- Hidden field that will be populated from individual steps -->
+      <div style="display: none;">
+        {% if form.instructions.errors %}
+        {% render_field form.instructions class="form-control is-invalid" %}
+        {% else %}
+        {% render_field form.instructions class="form-control" %}
+        {% endif %}
+      </div>
+
+      {{ instruction_formset.management_form }}
+      <div id="instruction-forms">
+        {% for instruction_form in instruction_formset %}
+        <div class="instruction-form-row mb-3 p-3 border rounded" data-form-index="{{ forloop.counter0 }}">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="fw-bold text-white">
+              Step <span class="instruction-step-number">{{ forloop.counter }}</span>
+            </div>
+            <div>
+              {% if instruction_form.DELETE %}
+              <div style="display: none;">
+                {{ instruction_form.DELETE }}
+              </div>
+              {% endif %}
+              {% if instruction_form.id %}
+              {{ instruction_form.id }}
+              {% endif %}
+              <button type="button" class="btn btn-sm btn-outline-danger remove-instruction" style="display: none;">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+          <div class="mb-2">
+            <!-- Step field (hidden, managed by JS) -->
+            {% render_field instruction_form.step type="hidden" class="instruction-step-input" %}
+          </div>
+          <div class="mb-2">
+            <label class="form-label small fw-bold text-white">Description <span class="text-danger">*</span></label>
+            {% if instruction_form.description %}
+            {% if instruction_form.description.errors %}
+            {% render_field instruction_form.description class="form-control is-invalid instruction-description-input glass-input" %}
+            <div class="invalid-feedback small">
+              {{ instruction_form.description.errors }}
+            </div>
+            {% else %}
+            {% render_field instruction_form.description class="form-control instruction-description-input glass-input" %}
+            {% endif %}
+            {% else %}
+            <textarea name="{{ instruction_formset.prefix }}-{{ forloop.counter0 }}-description" rows="3"
+              class="form-control instruction-description-input glass-input"
+              placeholder="Describe this step...">{% if instruction_form.description.value %}{{ instruction_form.description.value }}{% endif %}</textarea>
+            {% endif %}
+          </div>
+          <div class="mb-2">
+            <label class="form-label small fw-bold text-white">Step Image (optional)</label>
+            {% if instruction_form.image %}
+            {% if instruction_form.image.errors %}
+            {% render_field instruction_form.image class="form-control form-control-sm is-invalid" %}
+            <div class="invalid-feedback small">
+              {{ instruction_form.image.errors }}
+            </div>
+            {% else %}
+            {% render_field instruction_form.image class="form-control form-control-sm" %}
+            {% endif %}
+            {% if instruction_form.image.help_text %}
+            <small class="form-text text-muted">{{ instruction_form.image.help_text }}</small>
+            {% endif %}
+            {% else %}
+            <input type="file" name="{{ instruction_formset.prefix }}-{{ forloop.counter0 }}-image"
+              class="form-control form-control-sm" accept="image/*">
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-instruction"
+        style="border-radius: 0.33rem;">
+        <i class="bi bi-plus-circle me-1"></i>Add Instruction
+      </button>
+      {% if instruction_formset.non_form_errors %}
+      <div class="alert alert-danger mt-2 small">
+        {{ instruction_formset.non_form_errors }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger" role="alert">
+    {{ form.non_field_errors }}
+  </div>
+  {% endif %}
+  <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+    <a href="{{ cancel_url }}" class="btn me-md-2 text-white cancel-btn">
+      <i class="bi bi-x-circle me-2"></i>Cancel
+    </a>
+    <button type="submit" class="btn text-white create-btn">
+      <i class="bi bi-check-circle me-2"></i>{{ submit_text }}
+    </button>
+  </div>
+</form>

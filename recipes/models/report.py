@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import MaxLengthValidator
 from .recipe import Recipe
 
 
@@ -20,6 +21,7 @@ class Report(models.Model):
     )
     summary = models.TextField(
         max_length=1000,
+        validators=[MaxLengthValidator(1000)],
         help_text="Summary or notes about why this recipe is being reported",
     )
     created_at = models.DateTimeField(

@@ -3,6 +3,7 @@
 from django.contrib.auth.hashers import check_password
 from django.test import TestCase
 from django.urls import reverse
+
 from recipes.forms import SignUpForm
 from recipes.models import User
 from recipes.tests.helpers import LogInTester
@@ -46,7 +47,7 @@ class SignUpViewTestCase(TestCase, LogInTester):
         self.assertTemplateUsed(response, "dashboard.html")
 
     def test_unsuccesful_sign_up(self):
-        self.form_input["username"] = "BAD_USERNAME"
+        self.form_input["username"] = "2C"  # under three characters
         before_count = User.objects.count()
         response = self.client.post(self.url, self.form_input)
         after_count = User.objects.count()
@@ -87,3 +88,15 @@ class SignUpViewTestCase(TestCase, LogInTester):
             response, redirect_url, status_code=302, target_status_code=200
         )
         self.assertTemplateUsed(response, "dashboard.html")
+
+    def test_sign_up_with_remember_me(self):
+        self.form_input["remember_me"] = True
+        self.client.post(self.url, self.form_input, follow=True)
+        self.assertTrue(self._is_logged_in())
+        self.assertEqual(self.client.session.get_expiry_age(), 60 * 60 * 24 * 14)
+
+    def test_sign_up_without_remember_me(self):
+        self.form_input["remember_me"] = False
+        self.client.post(self.url, self.form_input, follow=True)
+        self.assertTrue(self._is_logged_in())
+        self.assertTrue(self.client.session.get_expire_at_browser_close())

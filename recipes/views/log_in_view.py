@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.shortcuts import redirect, render
 from django.views import View
+
 from recipes.forms import LogInForm
 from recipes.views.decorators import LoginProhibitedMixin
 
@@ -41,6 +42,12 @@ class LogInView(LoginProhibitedMixin, View):
         user = form.get_user()
         if user is not None:
             login(request, user)
+            if form.cleaned_data.get("remember_me"):
+                # Set session to expire in 2 weeks
+                request.session.set_expiry(60 * 60 * 24 * 14)
+            else:
+                # Set session to expire on browser close
+                request.session.set_expiry(0)
             return redirect(self.next)
         messages.add_message(
             request, messages.ERROR, "The credentials provided were invalid!"

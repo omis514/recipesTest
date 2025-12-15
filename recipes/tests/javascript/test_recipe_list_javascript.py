@@ -603,3 +603,50 @@ class RecipeListFilterTest(TestCase):
         # Should show all recipes
         recipes = response_reset.context["recipes"]
         self.assertEqual(recipes.count(), 3)
+
+
+class RecipeListAuthorProfileTest(TestCase):
+    """Tests for author profile picture display on recipe cards."""
+
+    def setUp(self):
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            username="@testauthor",
+            email="author@example.com",
+            password="testpass123",
+            first_name="Test",
+            last_name="Author",
+        )
+
+        self.recipe = Recipe.objects.create(
+            title="Test Recipe",
+            description="Test description",
+            author=self.user,
+            difficulty=1,
+            time=30,
+            spiciness=0,
+            vegetarian=True,
+            servings=4,
+        )
+
+        self.client = Client()
+        self.client.login(username="@testauthor", password="testpass123")
+
+    def test_recipe_card_displays_author_profile_picture(self):
+        """Test that recipe cards display the author's profile picture (gravatar)."""
+        url = reverse("recipe_list")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        # Check for author avatar image with gravatar
+        self.assertContains(response, "author-avatar")
+        self.assertContains(response, "gravatar")
+
+    def test_recipe_card_displays_author_name(self):
+        """Test that recipe cards display the author's name."""
+        url = reverse("recipe_list")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        # Check for author name display
+        self.assertContains(response, "Test Author")

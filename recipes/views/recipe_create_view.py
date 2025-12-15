@@ -60,6 +60,13 @@ class RecipeCreateView(LoginRequiredMixin, FormView):
         else:
             context["ingredient_formset"] = IngredientFormSet(instance=None)
             context["instruction_formset"] = InstructionFormSet(instance=None)
+
+        # Context for shared form partial
+        context["form_action"] = reverse("recipe_create")
+        context["cancel_url"] = reverse("dashboard")
+        context["submit_text"] = "Create Recipe"
+        context["is_edit"] = False
+
         return context
 
     def form_valid(self, form):

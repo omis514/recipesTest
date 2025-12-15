@@ -9,7 +9,7 @@ Run with: python manage.py test recipes.tests.test_recipe_detail
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from recipes.models import Recipe, Ingredient, Instruction, Comment
+from recipes.models import Recipe, Ingredient, Instruction, Comment, Follow
 
 User = get_user_model()
 
@@ -523,3 +523,99 @@ class RecipeDetailPerformanceTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertGreaterEqual(self.recipe.comments.count(), 100)
+
+
+class RecipeDetailAuthorProfileTest(TestCase):
+    """Tests for author profile link and follow button on recipe detail."""
+
+    def setUp(self):
+        """Set up test data."""
+        self.author = User.objects.create_user(
+            username="@recipeauthor",
+            email="author@example.com",
+            password="testpass123",
+            first_name="Recipe",
+            last_name="Author",
+        )
+
+        self.viewer = User.objects.create_user(
+            username="@viewer",
+            email="viewer@example.com",
+            password="testpass123",
+            first_name="Recipe",
+            last_name="Viewer",
+        )
+
+        self.recipe = Recipe.objects.create(
+            title="Author's Recipe",
+            description="A recipe by the author",
+            author=self.author,
+            difficulty=1,
+            time=30,
+            spiciness=0,
+            vegetarian=True,
+            servings=4,
+        )
+
+        self.client = Client()
+
+    def test_recipe_detail_displays_author_profile_picture(self):
+        """Test that recipe detail shows the author's profile picture."""
+        self.client.login(username="@viewer", password="testpass123")
+        url = reverse("recipe_detail", args=[self.recipe.pk])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        # Check for author avatar image with gravatar
+        self.assertContains(response, "author-avatar-lg")
+        self.assertContains(response, "gravatar")
+
+    def test_recipe_detail_has_author_profile_link(self):
+        """Test that recipe detail has a link to the author's profile."""
+        self.client.login(username="@viewer", password="testpass123")
+        url = reverse("recipe_detail", args=[self.recipe.pk])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        # Check for link to author's profile
+        expected_profile_url = reverse(
+            "observe_profile", kwargs={"username": "@recipeauthor"}
+        )
+        self.assertContains(response, expected_profile_url)
+
+    def test_recipe_detail_shows_follow_button_for_other_users(self):
+        """Test that viewing another user's recipe shows a follow button."""
+        self.client.login(username="@viewer", password="testpass123")
+        url = reverse("recipe_detail", args=[self.recipe.pk])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        # Check for follow button
+        self.assertContains(response, "glass-follow-btn")
+        self.assertContains(response, "Follow")
+
+    def test_recipe_detail_shows_following_button_when_already_following(self):
+        """Test that following button shows 'Following' when user already follows author."""
+        # Create follow relationship
+        Follow.objects.create(follower=self.viewer, following=self.author)
+
+        self.client.login(username="@viewer", password="testpass123")
+        url = reverse("recipe_detail", args=[self.recipe.pk])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        # Check for "Following" text
+        self.assertContains(response, "Following")
+
+    def test_recipe_detail_hides_follow_button_for_own_recipe(self):
+        """Test that viewing your own recipe doesn't show a follow button."""
+        self.client.login(username="@recipeauthor", password="testpass123")
+        url = reverse("recipe_detail", args=[self.recipe.pk])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        # Should NOT contain follow/unfollow form action for own recipe
+        follow_url = reverse("follow_user", kwargs={"username": "@recipeauthor"})
+        unfollow_url = reverse("unfollow_user", kwargs={"username": "@recipeauthor"})
+        self.assertNotContains(response, f'action="{follow_url}"')
+        self.assertNotContains(response, f'action="{unfollow_url}"')

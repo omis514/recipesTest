@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.contrib.auth import login
-from django.views.generic.edit import FormView
 from django.urls import reverse
+from django.views.generic.edit import FormView
+
 from recipes.forms import SignUpForm
 from recipes.views.decorators import LoginProhibitedMixin
 
@@ -30,6 +31,12 @@ class SignUpView(LoginProhibitedMixin, FormView):
         """
         self.object = form.save()
         login(self.request, self.object)
+        if form.cleaned_data.get("remember_me"):
+            # Set session to expire in 2 weeks
+            self.request.session.set_expiry(60 * 60 * 24 * 14)
+        else:
+            # Set session to expire on browser close
+            self.request.session.set_expiry(0)
         return super().form_valid(form)
 
     def get_success_url(self):

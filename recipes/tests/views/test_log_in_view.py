@@ -3,6 +3,7 @@
 from django.contrib import messages
 from django.test import TestCase
 from django.urls import reverse
+
 from recipes.forms import LogInForm
 from recipes.models import User
 from recipes.tests.helpers import LogInTester, MenuTesterMixin, reverse_with_next
@@ -159,3 +160,25 @@ class LogInViewTestCase(TestCase, LogInTester, MenuTesterMixin):
         messages_list = list(response.context["messages"])
         self.assertEqual(len(messages_list), 1)
         self.assertEqual(messages_list[0].level, messages.ERROR)
+
+    def test_log_in_with_remember_me(self):
+        form_input = {
+            "username": "@johndoe",
+            "password": "Password123",
+            "remember_me": True,
+        }
+        self.client.post(self.url, form_input, follow=True)
+        self.assertTrue(self._is_logged_in())
+        # Check session expiry (2 weeks = 1209600 seconds)
+        self.assertEqual(self.client.session.get_expiry_age(), 60 * 60 * 24 * 14)
+
+    def test_log_in_without_remember_me(self):
+        form_input = {
+            "username": "@johndoe",
+            "password": "Password123",
+            "remember_me": False,
+        }
+        self.client.post(self.url, form_input, follow=True)
+        self.assertTrue(self._is_logged_in())
+        # Check session expires at browser close
+        self.assertTrue(self.client.session.get_expire_at_browser_close())

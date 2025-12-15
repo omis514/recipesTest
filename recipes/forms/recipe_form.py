@@ -18,4 +18,5 @@ class RecipeForm(forms.ModelForm):
             "cuisine",
             "image",
             "time",
+            "visibility",
         ]

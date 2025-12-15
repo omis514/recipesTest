@@ -39,4 +39,7 @@ class UserProfileView(LoginRequiredMixin, UpdateView):
             "follower"
         ).all()
 
+        # Add user's own recipes
+        context["user_recipes"] = user.recipes.all()
+
         return context

@@ -2,6 +2,7 @@
 
 from django import forms
 from django.test import TestCase
+
 from recipes.forms import RecipeForm
 from recipes.models import Recipe, User
 
@@ -20,6 +21,7 @@ class RecipeFormTestCase(TestCase):
             "spiciness": Recipe.Spiciness.NOT_SPICY,
             "cuisine": Recipe.Cuisine.World,
             "time": 45,
+            "visibility": Recipe.Visibility.PUBLIC,
         }
 
     def test_form_has_necessary_fields(self):

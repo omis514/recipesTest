@@ -1,19 +1,19 @@
 {% if request.user != user %}
-    {% if user.is_followed %}
-        <!-- UNFOLLOW BUTTON -->
-        <form method="post" action="{% url 'unfollow_user' user.username %}">
-            {% csrf_token %}
-            <button class="btn btn-sm btn-outline-danger">
-                <i class="bi bi-person-dash-fill me-1"></i> Unfollow
-            </button>
-        </form>
-    {% else %}
-        <!-- FOLLOW BUTTON -->
-        <form method="post" action="{% url 'follow_user' user.username %}">
-            {% csrf_token %}
-            <button class="btn btn-sm btn-success">
-                <i class="bi bi-person-plus-fill me-1"></i> Follow
-            </button>
-        </form>
-    {% endif %}
+{% if user.is_followed %}
+<!-- UNFOLLOW BUTTON -->
+<form method="post" action="{% url 'unfollow_user' user.username %}">
+    {% csrf_token %}
+    <button class="btn btn-sm btn-outline-danger glass-filter-btn">
+        <i class="bi bi-person-dash-fill me-1"></i> Unfollow
+    </button>
+</form>
+{% else %}
+<!-- FOLLOW BUTTON -->
+<form method="post" action="{% url 'follow_user' user.username %}">
+    {% csrf_token %}
+    <button class="btn btn-sm btn-success glass-filter-btn">
+        <i class="bi bi-person-plus-fill me-1"></i> Follow
+    </button>
+</form>
+{% endif %}
 {% endif %}

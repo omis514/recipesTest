@@ -51,7 +51,7 @@ class ToggleFavoriteViewTestCase(TestCase, LogInTester):
         self.assertEqual(self.recipe.favorites.count(), 1)
         self.assertTrue(self.user in self.recipe.favorites.all())
 
-        detail_url = reverse("recipe_detail", kwargs={"pk": self.recipe.pk})
+        detail_url = reverse("recipe_list")
         self.assertRedirects(
             response, detail_url, status_code=302, target_status_code=200
         )
@@ -67,7 +67,7 @@ class ToggleFavoriteViewTestCase(TestCase, LogInTester):
         self.assertEqual(self.recipe.favorites.count(), 0)
         self.assertFalse(self.user in self.recipe.favorites.all())
 
-        detail_url = reverse("recipe_detail", kwargs={"pk": self.recipe.pk})
+        detail_url = reverse("recipe_list")
         self.assertRedirects(
             response, detail_url, status_code=302, target_status_code=200
         )

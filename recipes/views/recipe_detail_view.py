@@ -1,13 +1,11 @@
 # recipes/views/recipe_detail_view.py
 
-from django.shortcuts import render, get_object_or_404
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.contrib.auth.decorators import login_required
-from recipes.models import Recipe
-from django.shortcuts import render
-from django.core.paginator import Paginator
-from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Prefetch, Q, Avg
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render
+
 from recipes.models import Recipe, Comment, Rating
 
 
@@ -78,16 +76,20 @@ def recipe_list(request):
 
 
 def recipe_detail_view(request, pk):
-    from recipes.models import Instruction
+    from recipes.models import Instruction, Follow
 
     recipe = get_object_or_404(
         Recipe.objects.prefetch_related(
             "ingredients",
             Prefetch("instructions", queryset=Instruction.objects.order_by("step")),
             "ratings",
-        ),
+        ).select_related("author"),
         pk=pk,
     )
+
+    if recipe.visibility == Recipe.Visibility.PRIVATE:
+        if not request.user.is_authenticated or request.user != recipe.author:
+            raise PermissionDenied("You do not have permission to view this recipe.")
 
     ratings_list = recipe.ratings.all()
     if ratings_list.exists():
@@ -112,15 +114,21 @@ def recipe_detail_view(request, pk):
     else:
         comments = comments.order_by("-created_at")
 
-    user_rating = 0
+    user_rating_score = 0
+    is_following_author = False
     if request.user.is_authenticated:
         user_rating = Rating.objects.filter(recipe=recipe, user=request.user).first()
         user_rating_score = user_rating.rating if user_rating else 0
+        # Check if the current user follows the recipe author
+        is_following_author = Follow.objects.filter(
+            follower=request.user, following=recipe.author
+        ).exists()
 
     context = {
         "recipe": recipe,
         "comments": comments,
         "sort": sort,
         "user_rating_score": user_rating_score,
+        "is_following_author": is_following_author,
     }
     return render(request, "recipe_detail.html", context)

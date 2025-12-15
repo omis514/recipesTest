@@ -66,11 +66,15 @@ def recipe_reports_detail(request, recipe_id):
         .order_by("-created_at")
     )
 
+    paginator = Paginator(reports, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
     return render(
         request,
         "recipe_reports_detail.html",
         {
             "recipe": recipe,
-            "reports": reports,
+            "page_obj": page_obj,
         },
     )

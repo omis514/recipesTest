@@ -1,15 +1,237 @@
 {% extends 'base_content.html' %}
+{% load widget_tweaks %}
+
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-12">
-      <h1>Sign up</h1>
-      <form action="{% url 'sign_up' %}" method="post">
-        {% csrf_token %}
-        {% include 'partials/bootstrap_form.html' with form=form %}
-        <input type="submit" value="Sign up" class="btn btn-primary">
-      </form>
+  <div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+
+        <div class="card glass-card shadow-lg border-0">
+
+          <div class="card-header glass-header text-center pb-0 border-0">
+            <div class="mb-2">
+              <i class="bi bi-person-plus-fill display-4 text-white opacity-75"></i>
+            </div>
+            <h2 class="mb-0 text-white fw-bold">
+              Create Account
+            </h2>
+            <p class="text-white-50 small">Join our community of food lovers</p>
+          </div>
+
+          <div class="card-body p-4 pt-2">
+            <form action="{% url 'sign_up' %}" method="post">
+              {% csrf_token %}
+
+              <div class="row">
+                {# First name field #}
+                <div class="col-md-6 mb-4">
+                  <label for="{{ form.first_name.id_for_label }}"
+                         class="form-label text-white-50 fw-semibold small text-uppercase">First Name</label>
+                  {% if form.is_bound %}
+                    {% if form.first_name.errors %}
+                      {% render_field form.first_name class="form-control glass-input is-invalid" placeholder="Jane" %}
+                    {% else %}
+                      {% render_field form.first_name class="form-control glass-input is-valid" placeholder="Jane" %}
+                    {% endif %}
+                  {% else %}
+                    {% render_field form.first_name class="form-control glass-input" placeholder="Jane" %}
+                  {% endif %}
+                  {% if form.first_name.errors %}
+                    <div class="invalid-feedback d-block small mt-1">{{ form.first_name.errors.0 }}</div>
+                  {% endif %}
+                </div>
+
+                {# Last name field #}
+                <div class="col-md-6 mb-4">
+                  <label for="{{ form.last_name.id_for_label }}"
+                         class="form-label text-white-50 fw-semibold small text-uppercase">Last Name</label>
+                  {% if form.is_bound %}
+                    {% if form.last_name.errors %}
+                      {% render_field form.last_name class="form-control glass-input is-invalid" placeholder="Doe" %}
+                    {% else %}
+                      {% render_field form.last_name class="form-control glass-input is-valid" placeholder="Doe" %}
+                    {% endif %}
+                  {% else %}
+                    {% render_field form.last_name class="form-control glass-input" placeholder="Doe" %}
+                  {% endif %}
+                  {% if form.last_name.errors %}
+                    <div class="invalid-feedback d-block small mt-1">{{ form.last_name.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              {# Username field #}
+              <div class="mb-4">
+                <label for="{{ form.username.id_for_label }}"
+                       class="form-label text-white-50 fw-semibold small text-uppercase">Username</label>
+                <div class="input-group">
+                  <span class="input-group-text glass-input-group-text">
+                    <i class="bi bi-at"></i>
+                  </span>
+                  {% if form.is_bound %}
+                    {% if form.username.errors %}
+                      {% render_field form.username class="form-control glass-input glass-input-with-icon is-invalid" placeholder="username" %}
+                    {% else %}
+                      {% render_field form.username class="form-control glass-input glass-input-with-icon is-valid" placeholder="username" %}
+                    {% endif %}
+                  {% else %}
+                    {% render_field form.username class="form-control glass-input glass-input-with-icon" placeholder="username" %}
+                  {% endif %}
+                </div>
+                {% if form.username.errors %}
+                  <div class="invalid-feedback d-block small mt-1">{{ form.username.errors.0 }}</div>
+                {% endif %}
+              </div>
+
+              {# Email field #}
+              <div class="mb-4">
+                <label for="{{ form.email.id_for_label }}"
+                       class="form-label text-white-50 fw-semibold small text-uppercase">Email Address</label>
+                <div class="input-group">
+                  <span class="input-group-text glass-input-group-text">
+                    <i class="bi bi-envelope-fill"></i>
+                  </span>
+                  {% if form.is_bound %}
+                    {% if form.email.errors %}
+                      {% render_field form.email class="form-control glass-input glass-input-with-icon is-invalid" placeholder="name@example.com" %}
+                    {% else %}
+                      {% render_field form.email class="form-control glass-input glass-input-with-icon is-valid" placeholder="name@example.com" %}
+                    {% endif %}
+                  {% else %}
+                    {% render_field form.email class="form-control glass-input glass-input-with-icon" placeholder="name@example.com" %}
+                  {% endif %}
+                </div>
+                {% if form.email.errors %}
+                  <div class="invalid-feedback d-block small mt-1">{{ form.email.errors.0 }}</div>
+                {% endif %}
+              </div>
+
+              {# Password field #}
+              <div class="mb-4">
+                <label for="{{ form.new_password.id_for_label }}"
+                       class="form-label text-white-50 fw-semibold small text-uppercase">Password</label>
+                <div class="input-group">
+                  <span class="input-group-text glass-input-group-text">
+                    <i class="bi bi-lock-fill"></i>
+                  </span>
+                  {% if form.is_bound %}
+                    {% if form.new_password.errors %}
+                      {% render_field form.new_password class="form-control glass-input glass-input-with-icon is-invalid" placeholder="••••••••" %}
+                    {% else %}
+                      {% render_field form.new_password class="form-control glass-input glass-input-with-icon is-valid" placeholder="••••••••" %}
+                    {% endif %}
+                  {% else %}
+                    {% render_field form.new_password class="form-control glass-input glass-input-with-icon" placeholder="••••••••" %}
+                  {% endif %}
+                </div>
+                {% if form.new_password.errors %}
+                  <div class="invalid-feedback d-block small mt-1">{{ form.new_password.errors.0 }}</div>
+                {% endif %}
+                <div class="form-text text-white-50 small mt-1">
+                  {{ form.new_password.help_text }}
+                </div>
+              </div>
+
+              {# Password confirmation field #}
+              <div class="mb-4">
+                <label for="{{ form.password_confirmation.id_for_label }}"
+                       class="form-label text-white-50 fw-semibold small text-uppercase">Confirm Password</label>
+                <div class="input-group">
+                  <span class="input-group-text glass-input-group-text">
+                    <i class="bi bi-shield-lock-fill"></i>
+                  </span>
+                  {% if form.is_bound %}
+                    {% if form.password_confirmation.errors %}
+                      {% render_field form.password_confirmation class="form-control glass-input glass-input-with-icon is-invalid" placeholder="••••••••" %}
+                    {% else %}
+                      {% render_field form.password_confirmation class="form-control glass-input glass-input-with-icon is-valid" placeholder="••••••••" %}
+                    {% endif %}
+                  {% else %}
+                    {% render_field form.password_confirmation class="form-control glass-input glass-input-with-icon" placeholder="••••••••" %}
+                  {% endif %}
+                </div>
+                {% if form.password_confirmation.errors %}
+                  <div class="invalid-feedback d-block small mt-1">{{ form.password_confirmation.errors.0 }}</div>
+                {% endif %}
+              </div>
+
+              {# Remember Me Checkbox #}
+              <div class="mb-4 d-flex justify-content-between align-items-center">
+                <div class="form-check">
+                  {% render_field form.remember_me class="form-check-input glass-checkbox" id="rememberMe" %}
+                  <label class="form-check-label text-white-50 small" for="rememberMe">
+                    Remember me
+                  </label>
+                </div>
+              </div>
+
+              {# Sign up button #}
+              <div class="d-grid gap-2 mt-5">
+                <button type="submit" class="btn glass-btn-primary btn-lg shadow-sm">
+                  Sign Up <i class="bi bi-arrow-right-short ms-1"></i>
+                </button>
+              </div>
+
+              <div class="text-center mt-3">
+                <span class="text-white-50 small">Already have an account? </span>
+                <a href="{% url 'log_in' %}" class="text-white fw-bold text-decoration-none hover-underline">Log
+                  in</a>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+
+  <style>
+    .glass-background-wrapper {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+      align-items: center;
+    }
+
+    .glass-background-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 10%;
+      left: 20%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(40px);
+      z-index: 0;
+    }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7) !important;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      border-radius: 24px !important;
+      overflow: hidden;
+    }
+
+    .glass-card:hover {
+      background: rgba(30, 41, 59, 0.7) !important;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+      transform: initial;
+    }
+
+    .glass-header {
+      background: transparent !important;
+      padding-top: 2rem !important;
+    }
+
+    .glass-input-group-text {
+      background-color: rgba(0, 0, 0, 0.2) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-right: none;
+      color: rgba(255, 255, 255, 0.7);
+      border-radius: 12px 0 0 12px !important;
+      min-width: 45px;
+      justify-content: center;
+    }
+  </style>
 {% endblock %}
