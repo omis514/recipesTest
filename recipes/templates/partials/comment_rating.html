@@ -1,0 +1,15 @@
+{% with author_rating=obj.get_author_rating %}
+    {% if author_rating and author_rating > 0 %}
+      <span class="user-rating-badge text-warning ms-1 small" data-username="{{ comment.author.username }}">
+      {% for i in "12345"|make_list %}
+        {% with i_val=i|add:0 %}
+          {% if author_rating >= i_val %}
+            <i class="bi bi-star-fill"></i>
+          {% else %}
+            <i class="bi bi-star"></i>
+          {% endif %}
+        {% endwith %}
+      {% endfor %}
+      </span>
+    {% endif %}
+{% endwith %}

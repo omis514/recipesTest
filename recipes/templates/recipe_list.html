@@ -1,7 +1,7 @@
 {% extends "base_content.html" %}
 {% load static %}
 
-{% block extra_css %}
+{% block scripts %}
 <script src="{% static 'scripts.js' %}" defer></script>
 {% endblock %}
 
@@ -128,10 +128,27 @@
             {% include 'partials/recipe_card.html' with recipe=recipe %}
           {% endfor %}
         </div>
-        {% endif %}
 
-        {# Pagination #}
-        {% include "partials/pagination.html" %}
+          {% if page_obj.has_other_pages %}
+            {% include "partials/pagination.html" %}
+          {% endif %}
+
+        {% else %}
+        {# Empty State #}
+        <div class="card glass-card shadow-sm mb-4">
+          <div class="card-body text-center py-5">
+            <i class="bi bi-journal-x display-1 text-white" style="opacity: 0.5;"></i>
+            <h3 class="mt-3 text-white">No Recipes Found</h3>
+            <p class="text-white" style="opacity: 0.7;">
+              {% if search_term %}
+              No recipes match your search "{{ search_term }}".
+              {% else %}
+              No recipes have been created yet. Be the first to share your culinary creation!
+              {% endif %}
+            </p>
+          </div>
+        </div>
+        {% endif %}
       </div>
     </div>
   </div>

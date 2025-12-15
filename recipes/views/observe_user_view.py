@@ -26,8 +26,8 @@ def observeProfile(request, username):
     top_comment_prefetch = Prefetch(
         "comments",
         queryset=Comment.objects.select_related("author")
-                 .annotate(likes_count=Count("likes"))
-                 .order_by("-likes_count", "-created_at")[:1],
+        .annotate(likes_count=Count("likes"))
+        .order_by("-likes_count", "-created_at")[:1],
         to_attr="top_comment_list",
     )
 

@@ -1,4 +1,9 @@
 {% extends 'base_content.html' %}
+{% load static %}
+
+{% block scripts %}
+<script src="{% static 'scripts.js' %}" defer></script>
+{% endblock %}
 
 {% block content %}
   <div class="container-fluid mt-4">
@@ -125,26 +130,4 @@
       </div>
     </div>
   </div>
-
-<script>
-  function renderRecipeStars(container, rating, count) {
-    let html = '';
-    for (let i = 1; i <= 5; i++) {
-      if (rating >= i) {
-        html += '<i class="bi bi-star-fill"></i> ';
-      } else if (rating >= i - 0.5) {
-        html += '<i class="bi bi-star-half"></i> ';
-      } else {
-        html += '<i class="bi bi-star"></i> ';
-      }
-    }
-    container.innerHTML = html;
-  }
-
-  document.querySelectorAll('.recipe-rating-badge').forEach(badge => {
-    const avg = parseFloat(badge.dataset.averageRating) || 0;
-    const starsContainer = badge.querySelector('.recipe-stars');
-    renderRecipeStars(starsContainer, avg);
-  });
-</script>
 {% endblock %}

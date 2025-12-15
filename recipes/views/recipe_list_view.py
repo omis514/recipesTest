@@ -64,13 +64,13 @@ def recipe_list(request):
     # Sorting options
     sort_by = request.GET.get("sort", "newest")
     if sort_by == "popular":
-        recipes = recipes.order_by("-total_comments", "-created_at")
+        recipes = recipes.order_by("-total_comments", "-created_at", "-id")
     elif sort_by == "rating":
-        recipes = recipes.order_by("-average_rating", "-rating_count")
+        recipes = recipes.order_by("-average_rating", "-rating_count", "-id")
     elif sort_by == "oldest":
-        recipes = recipes.order_by("created_at")
+        recipes = recipes.order_by("created_at", "id")
     else:  # newest (default)
-        recipes = recipes.order_by("-created_at")
+        recipes = recipes.order_by("-created_at", "-id")
 
     # Pagination - 12 recipes per page
     paginator = Paginator(recipes, 12)

@@ -355,6 +355,7 @@ h3.profile-title {
   padding: 10px;
   position: relative;
   animation: fadeIn 0.3s ease;
+  overflow: hidden;
 }
 
 .recipe-card-feed .comment-header {
@@ -1766,6 +1767,7 @@ h3.profile-title {
   padding: 10px;
   position: relative;
   animation: fadeInTC 0.3s ease;
+  overflow: hidden;
 }
 
 @keyframes fadeInTC {
@@ -1805,6 +1807,8 @@ h3.profile-title {
   font-size: 0.9rem;
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.9);
+  min-wdith: 0;
+  overflow: hidden
 }
 
 .comment-author {
@@ -1815,6 +1819,18 @@ h3.profile-title {
 
 .comment-text {
   color: rgba(255, 255, 255, 0.85);
+}
+
+.comment-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .no-comments {

@@ -107,12 +107,12 @@ def recipe_detail_view(request, pk):
 
     if sort == "top":
         comments = comments.annotate(num_likes=Count("likes")).order_by(
-            "-num_likes", "-created_at"
+            "-num_likes", "-created_at", "-id"
         )
     elif sort == "oldest":
-        comments = comments.order_by("created_at")
+        comments = comments.order_by("created_at", "id")
     else:
-        comments = comments.order_by("-created_at")
+        comments = comments.order_by("-created_at", "-id")
 
     user_rating_score = 0
     is_following_author = False

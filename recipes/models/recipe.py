@@ -41,8 +41,10 @@ class Recipe(models.Model):
         Middle_Eastern = 19, "Middle Eastern"
         Turkish = 20, "Turkish"
         Caucasian = 21, "Caucasian️"
-        South_American = 22, "South American",
-
+        South_American = (
+            22,
+            "South American",
+        )
 
     class Visibility(models.IntegerChoices):
         PUBLIC = 0, "Public"

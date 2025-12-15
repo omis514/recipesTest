@@ -155,7 +155,7 @@
             {% if user_recipes %}
             <div class="recipe-grid">
               {% for recipe in user_recipes %}
-                {% include 'partials/recipe_card.html' with recipe=recipe profile="True" card_style="profile"%}
+                {% include 'partials/recipe_card.html' with recipe=recipe %}
               {% endfor %}
             </div>
             {% else %}
