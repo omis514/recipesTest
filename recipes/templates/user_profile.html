@@ -5,7 +5,7 @@
 <style>
 
   /* Table Styles */
-  .glass-table {
+ glass-table {
     background: transparent !important;
     border: none !important;
     border-collapse: separate;
@@ -101,34 +101,9 @@
     font-weight: 600;
     margin-bottom: 1rem;
   }
-  
-</style>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    function renderRecipeStars(container, rating) {
-      let html = '';
-      for (let i = 1; i <= 5; i++) {
-        if (rating >= i) {
-          html += '<i class="bi bi-star-fill"></i> ';
-        } else if (rating >= i - 0.5) {
-          html += '<i class="bi bi-star-half"></i> ';
-        } else {
-          html += '<i class="bi bi-star"></i> ';
-        }
-      }
-      container.innerHTML = html;
-    }
 
-    const badges = document.querySelectorAll('.recipe-rating-badge');
-    badges.forEach(badge => {
-      const avg = parseFloat(badge.dataset.averageRating) || 0;
-      const starsContainer = badge.querySelector('.recipe-stars');
-      if (starsContainer) {
-        renderRecipeStars(starsContainer, avg);
-      }
-    });
-  });
-</script>
+</style>
+<script src="{% static 'scripts.js' %}" defer></script>
 {% endblock %}
 
 {% block content %}
@@ -288,134 +263,7 @@
             {% if user_recipes %}
             <div class="recipe-grid">
               {% for recipe in user_recipes %}
-              <div class="recipe-card glass-card">
-                {# Clickable recipe area #}
-                <div class="recipe-clickable" onclick="window.location.href='{% url 'recipe_detail' recipe.pk %}'">
-                  {# Recipe Image Section #}
-                  <div class="recipe-image-wrapper">
-                    {% if recipe.image %}
-                    <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe-image">
-                    <div class="placeholder-badges-left">
-                      {# Spiciness badge #}
-                      <span class="spiciness-badge"
-                        style="{% if recipe.spiciness == 0 %}background-color: #b3d77f; color: #000;{% elif recipe.spiciness == 1 %}background-color: #88b54a; color: #fff;{% elif recipe.spiciness == 2 %}background-color: #ffeaa7; color: #545252;{% elif recipe.spiciness == 3 %}background-color: #ff7675; color: #2b2c2c;{% elif recipe.spiciness == 4 %}background-color: #b21b1b; color: #fff;{% elif recipe.spiciness == 5 %}background-color: #000000; color: #fff;{% endif %}">
-                        {{ recipe.get_spiciness_display }}
-                      </span>
-
-                      {# Difficulty Badge #}
-                      <span class="difficulty-badge
-                        {% if recipe.difficulty == 1 %}badge-easy
-                        {% elif recipe.difficulty == 2 %}badge-medium
-                        {% else %}badge-hard{% endif %}">
-                        {{ recipe.get_difficulty_display }}
-                      </span>
-                    </div>
-                    <div class="placeholder-badges-right">
-                      {% if recipe.vegetarian %}
-                      <span class="vegetarian-badge">
-                        🌱 Vegetarian
-                      </span>
-                      {% endif %}
-
-                      <span class="time-badge">
-                        <i class="bi bi-clock"></i> {{ recipe.get_time }}
-                      </span>
-
-                      <span class="cuisine-badge">
-                        {{ recipe.get_cuisine_display }}
-                      </span>
-                    </div>
-                    {% else %}
-                    <div class="recipe-placeholder">
-                      <div class="placeholder-badges-left">
-                        <span class="spiciness-badge"
-                          style="{% if recipe.spiciness == 0 %}background-color: #b3d77f; color: #000;{% elif recipe.spiciness == 1 %}background-color: #88b54a; color: #fff;{% elif recipe.spiciness == 2 %}background-color: #ffeaa7; color: #545252;{% elif recipe.spiciness == 3 %}background-color: #ff7675; color: #2b2c2c;{% elif recipe.spiciness == 4 %}background-color: #b21b1b; color: #fff;{% elif recipe.spiciness == 5 %}background-color: #000000; color: #fff;{% endif %}">
-                          {{ recipe.get_spiciness_display }}
-                        </span>
-
-                        <span class="difficulty-badge
-                          {% if recipe.difficulty == 1 %}badge-easy
-                          {% elif recipe.difficulty == 2 %}badge-medium
-                          {% else %}badge-hard{% endif %}">
-                          {{ recipe.get_difficulty_display }}
-                        </span>
-                      </div>
-                      <div class="placeholder-badges-right">
-                        {% if recipe.vegetarian %}
-                        <span class="vegetarian-badge">
-                          🌱 Vegetarian
-                        </span>
-                        {% endif %}
-
-                        <span class="time-badge">
-                          <i class="bi bi-clock"></i> {{ recipe.get_time }}
-                        </span>
-
-                        <span class="cuisine-badge">
-                          {{ recipe.get_cuisine_display }}
-                        </span>
-                      </div>
-                      <i class="bi bi-image display-1 text-white" style="opacity: 0.3;"></i>
-                    </div>
-                    {% endif %}
-                  </div>
-
-                  {# Recipe Content Section #}
-                  <div class="recipe-content">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                      <h5 class="recipe-title mb-0">{{ recipe.title }}</h5>
-                      {# Rating Display #}
-                      {% if recipe.average_rating %}
-                      <div class="flex-shrink-0 ms-2">
-                        <span class="badge bg-warning text-dark recipe-rating-badge"
-                          data-average-rating="{{ recipe.average_rating }}"
-                          data-rating-count="{{ recipe.rating_count }}"
-                          title="{% if recipe.rating_count %}{{ recipe.rating_count }} ratings{% else %}No ratings yet{% endif %}">
-                          <span class="recipe-stars"></span>
-                        </span>
-                      </div>
-                      {% endif %}
-                    </div>
-                    {% if recipe.description %}
-                    <p class="recipe-description">{{ recipe.description|truncatewords:15 }}</p>
-                    {% else %}
-                    <p class="recipe-description text-white fst-italic" style="opacity: 0.5;">No description available
-                    </p>
-                    {% endif %}
-
-                    {# Meta Information #}
-                    <div class="recipe-meta">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-white" style="opacity: 0.8;">
-                          <i class="bi bi-clock"></i> {{ recipe.created_at|date:"d M Y" }}
-                        </small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {# Action Buttons Section #}
-                <div class="recipe-comments">
-                  <div class="d-flex justify-content-center gap-2 flex-wrap">
-                    <a href="{% url 'recipe_detail' recipe.pk %}"
-                      class="btn btn-sm glass-btn-primary d-flex align-items-center">
-                      <i class="bi bi-eye-fill me-1"></i> View
-                    </a>
-                    <a href="{% url 'edit_recipe' recipe.pk %}"
-                      class="btn btn-sm glass-btn-warning d-flex align-items-center">
-                      <i class="bi bi-pencil-fill me-1"></i> Edit
-                    </a>
-                    <form method="post" action="{% url 'delete_recipe' recipe.pk %}"
-                      onsubmit="return confirm('Are you sure you want to delete this recipe?');"
-                      style="display: inline;">
-                      {% csrf_token %}
-                      <button class="btn btn-sm glass-btn-danger d-flex align-items-center">
-                        <i class="bi bi-trash-fill me-1"></i> Delete
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
+                {% include 'partials/recipe_card.html' with recipe=recipe profile="True" card_style="profile" %}
               {% endfor %}
             </div>
             {% else %}

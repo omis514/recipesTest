@@ -226,11 +226,11 @@
               <form action="{% url 'toggle_favorite' recipe.pk %}" method="post" class="d-inline">
                 {% csrf_token %}
                 {% if user in recipe.favorites.all %}
-                <button type="submit" class="btn btn-danger">
+                <button type="submit" class="btn btn-danger fav-btn">
                   <i class="bi bi-heart-fill"></i>
                 </button>
                 {% else %}
-                <button type="submit" class="btn btn-outline-danger">
+                <button type="submit" class="btn btn-outline-danger fav-btn">
                   <i class="bi bi-heart"></i>
                 </button>
                 {% endif %}
@@ -336,7 +336,7 @@
 
             {# Comments List #}
             <div id="comments-container" class="comments-scroll">
-                    <div id="comments-list">
+              <div id="comments-list">
                 {% for comment in recipe.comments.all %}
                   {% if not comment.parent_comment %}
                   <div class="comment-item mb-3"
@@ -354,9 +354,9 @@
                             {{ comment.author.get_full_name|default:comment.author.username }}
                           </strong>
                             {# Display Author's Rating next to Comment #}
-                            <span class="user-rating-badge text-warning ms-2 small" data-username="{{ comment.author.username }}">
                               {% with author_rating=comment.get_author_rating %}
                                 {% if author_rating and author_rating > 0 %}
+                                  <span class="user-rating-badge text-warning ms-1 small" data-username="{{ comment.author.username }}">
                                   {% for i in "12345"|make_list %}
                                     {% with i_val=i|add:0 %}
                                       {% if author_rating >= i_val %}
@@ -373,7 +373,7 @@
                             {{ comment.created_at|timesince }} ago
                           </span>
                           {% if comment.author == user or user.is_staff %}
-                          <button class="btn btn-sm btn-link text-danger float-end delete-comment"
+                          <button class="btn btn-sm text-danger float-end delete-comment"
                                   data-comment-id="{{ comment.pk }}">
                             <i class="bi bi-trash"></i>
                           </button>
@@ -382,22 +382,22 @@
 
                         <div class="comment-body">
                           {% if comment.reply_to %}
-                          <span class="mention-tag">@{{ comment.reply_to.username }}</span>
+                          <span class="mention-tag">{{ comment.reply_to.username }}</span>
                           {% endif %}
-                          <span class="text-white" style="opacity: 0.9; white-space: pre-line;">
+                          <span class="text-white" style="opacity: 0.9;">
                             {{ comment.content }}
                           </span>
                         </div>
 
                         <div class="comment-actions mt-2">
                           <button
-                            class="btn btn-sm btn-link glass-btn-like like-btn {% if user in comment.likes.all %}liked{% endif %}"
+                            class="btn btn-sm glass-btn-like like-btn {% if user in comment.likes.all %}liked{% endif %}"
                             data-comment-id="{{ comment.pk }}">
                             <i class="bi {% if user in comment.likes.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
                             <span class="like-count">{{ comment.like_count }}</span>
                           </button>
                           {% if user.is_authenticated %}
-                          <button class="btn btn-sm btn-link glass-btn-reply reply-btn"
+                          <button class="btn btn-sm glass-btn-reply reply-btn"
                                   data-comment-id="{{ comment.pk }}"
                                   data-comment-author="{{ comment.author.username }}">
                             <i class="bi bi-reply"></i> Reply
@@ -462,15 +462,15 @@
                                   <div class="reply-header">
                                     <strong class="reply-author text-white"
                                             data-username="{{ reply.author.username }}">
-                                      {{ reply.author.username }}
+                                      {{ reply.author.get_full_name|default:reply.author.username }}
                                     </strong>
-                                    <span class="text-white small ms-1"
+                                    <span class="text-white small ms-2"
                                           style="opacity: 0.6;">
                                       {{ reply.created_at|timesince }} ago
                                     </span>
                                     {% if reply.author == user or user.is_staff %}
                                     <button
-                                      class="btn btn-sm btn-link text-danger float-end delete-reply"
+                                      class="btn btn-sm text-danger float-end delete-reply"
                                       data-reply-id="{{ reply.pk }}">
                                       <i class="bi bi-trash"></i>
                                     </button>
@@ -478,7 +478,7 @@
                                   </div>
                                   <div class="reply-content">
                                     {% if reply.reply_to %}
-                                    <span class="mention-tag">@{{ reply.reply_to.username }}</span>
+                                    <span class="mention-tag">{{ reply.reply_to.username }}</span>
                                     {% endif %}
                                     <span class="text-white" style="opacity: 0.9; white-space: pre-line;">
                                       {{ reply.content }}
@@ -486,14 +486,14 @@
                                   </div>
                                   <div class="reply-actions mt-1">
                                     <button
-                                      class="btn btn-sm btn-link glass-btn-like like-reply-btn {% if user in reply.likes.all %}liked{% endif %}"
+                                      class="btn btn-sm glass-btn-like like-reply-btn {% if user in reply.likes.all %}liked{% endif %}"
                                       data-reply-id="{{ reply.pk }}">
                                       <i class="bi {% if user in reply.likes.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
                                       <span class="reply-like-count">{{ reply.like_count }}</span>
                                     </button>
                                     {% if user.is_authenticated %}
                                     <button
-                                      class="btn btn-sm btn-link glass-btn-reply reply-to-reply-btn"
+                                      class="btn btn-sm glass-btn-reply reply-to-reply-btn"
                                       data-parent-comment-id="{{ comment.pk }}"
                                       data-reply-author="{{ reply.author.username }}">
                                       <i class="bi bi-reply"></i> Reply
@@ -1134,29 +1134,29 @@
         <div class="flex-grow-1">
           <div class="comment-header">
             <strong class="comment-author text-white" data-username="${commentData.author}">
-              @${commentData.author_display || commentData.author}
+              ${commentData.author_display || commentData.author}
             </strong>
             <span class="text-white small ms-2" style="opacity: 0.6;">just now</span>
             ${commentData.can_delete ? `
-              <button class="btn btn-sm btn-link text-danger float-end delete-comment"
+              <button class="btn btn-sm text-danger float-end delete-comment"
                       data-comment-id="${commentData.id}">
                 <i class="bi bi-trash"></i>
               </button>
             ` : ''}
           </div>
           <div class="comment-body">
-            ${commentData.reply_to ? `<span class="mention-tag">@${commentData.reply_to}</span>` : ''}
+            ${commentData.reply_to ? `<span class="mention-tag">${commentData.reply_to}</span>` : ''}
             <span class="text-white" style="opacity: 0.9; white-space: pre-line;">
               ${escapeHtml(commentData.content)}
             </span>
           </div>
           <div class="comment-actions mt-2">
-            <button class="btn btn-sm btn-link glass-btn-like like-btn"
+            <button class="btn btn-sm glass-btn-like like-btn"
                     data-comment-id="${commentData.id}">
               <i class="bi bi-heart"></i>
               <span class="like-count">0</span>
             </button>
-            <button class="btn btn-sm btn-link glass-btn-reply reply-btn"
+            <button class="btn btn-sm glass-btn-reply reply-btn"
                     data-comment-id="${commentData.id}"
                     data-comment-author="${commentData.author}">
               <i class="bi bi-reply"></i> Reply
@@ -1289,29 +1289,29 @@
         <div class="flex-grow-1">
           <div class="reply-header">
             <strong class="reply-author text-white" data-username="${replyData.author}">
-              @${replyData.author}
+              ${replyData.author}
             </strong>
             <span class="text-white small ms-1" style="opacity: 0.6;">just now</span>
             ${replyData.can_delete ? `
-              <button class="btn btn-sm btn-link text-danger float-end delete-reply"
+              <button class="btn btn-sm text-danger float-end delete-reply"
                       data-reply-id="${replyData.id}">
                 <i class="bi bi-trash"></i>
               </button>
             ` : ''}
           </div>
           <div class="reply-content">
-            ${replyData.reply_to ? `<span class="mention-tag">@${replyData.reply_to}</span>` : ''}
+            ${replyData.reply_to ? `<span class="mention-tag">${replyData.reply_to}</span>` : ''}
             <span class="text-white" style="opacity: 0.9; white-space: pre-line;">
               ${escapeHtml(replyData.content)}
             </span>
           </div>
           <div class="reply-actions mt-1">
-            <button class="btn btn-sm btn-link glass-btn-like like-reply-btn"
+            <button class="btn btn-sm glass-btn-like like-reply-btn"
                     data-reply-id="${replyData.id}">
               <i class="bi bi-heart"></i>
               <span class="reply-like-count">0</span>
             </button>
-            <button class="btn btn-sm btn-link glass-btn-reply reply-to-reply-btn"
+            <button class="btn btn-sm glass-btn-reply reply-to-reply-btn"
                     data-parent-comment-id="${replyData.parent_comment_id}"
                     data-reply-author="${replyData.author}">
               <i class="bi bi-reply"></i> Reply

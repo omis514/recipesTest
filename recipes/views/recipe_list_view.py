@@ -10,7 +10,6 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import UpdateView
-
 from recipes.forms import RecipeForm, IngredientForm, InstructionForm
 from recipes.models import Recipe, Comment, Ingredient, Instruction
 

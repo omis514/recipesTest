@@ -2,12 +2,11 @@
     <ul class="pagination justify-content-center glass-pagination">
         {% if page_obj.has_previous %}
         <li class="page-item">
-            <a class="page-link glass-page-link" href="?page=1&search={{ search_term }}">First</a>
-        </li>
+            <a class="page-link glass-page-link"
+               href="?page=1{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}">First</a>        </li>
         <li class="page-item">
             <a class="page-link glass-page-link"
-                href="?page={{ page_obj.previous_page_number }}&search={{ search_term }}">Previous</a>
-        </li>
+               href="?page={{ page_obj.previous_page_number }}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}">Previous</a>             </li>
         {% else %}
         <li class="page-item disabled"><span class="page-link glass-page-link">First</span></li>
         <li class="page-item disabled"><span class="page-link glass-page-link">Previous</span></li>
@@ -22,12 +21,10 @@
         {% if page_obj.has_next %}
         <li class="page-item">
             <a class="page-link glass-page-link"
-                href="?page={{ page_obj.next_page_number }}&search={{ search_term }}">Next</a>
-        </li>
+                href="?page={{ page_obj.next_page_number }}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}">Next</a>         </li>
         <li class="page-item">
             <a class="page-link glass-page-link"
-                href="?page={{ page_obj.paginator.num_pages }}&search={{ search_term }}">Last</a>
-        </li>
+                href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}&search={{ search_term }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if selected_difficulty %}&difficulty={{ selected_difficulty }}{% endif %}{% if selected_spiciness %}&spiciness={{ selected_spiciness }}{% endif %}{% if selected_cuisine %}&cuisine={{ selected_cuisine }}{% endif %}">Last</a>        </li>
         {% else %}
         <li class="page-item disabled"><span class="page-link glass-page-link">Next</span></li>
         <li class="page-item disabled"><span class="page-link glass-page-link">Last</span></li>
